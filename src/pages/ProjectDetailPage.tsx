@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router";
 
 export default function ProjectDetailPage() {
-  const { id } = useParams<"id">();
+  const { id } = useParams();
 
   return (
     <main className="container py-5">
