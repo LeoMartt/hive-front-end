@@ -132,7 +132,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
         <Modal.Title as="h6">Novo projeto</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-3" controlId="npName">
           <Form.Label>Nome do projeto</Form.Label>
           <Form.Control
             type="text"
@@ -142,7 +142,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-3" controlId="npDescription">
           <Form.Label>
             Descrição <span className="text-body-secondary fw-normal">(opcional)</span>
           </Form.Label>
@@ -157,12 +157,13 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
           />
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-3" controlId="npMode">
           <Form.Label className="d-block">Modo</Form.Label>
           <div className="btn-group w-100" role="group">
             <Button
               type="button"
               variant={state.mode === "uat" ? "primary" : "outline-secondary"}
+              aria-pressed={state.mode === "uat"}
               onClick={() => handleModeChange("uat")}
             >
               UAT
@@ -170,6 +171,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
             <Button
               type="button"
               variant={state.mode === "cutover" ? "primary" : "outline-secondary"}
+              aria-pressed={state.mode === "cutover"}
               onClick={() => handleModeChange("cutover")}
             >
               Cutover
@@ -178,7 +180,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
           <Form.Text>O modo não pode ser alterado após a criação do projeto.</Form.Text>
         </Form.Group>
 
-        <Form.Group className="mb-3">
+        <Form.Group className="mb-3" controlId="npLevels">
           <Form.Label>Nomes dos níveis hierárquicos</Form.Label>
           {state.levelNames.map((levelName, index) => (
             <div className="d-flex align-items-center gap-2 mb-2" key={index}>
@@ -196,7 +198,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
           </div>
         </Form.Group>
 
-        <Form.Group className="mb-2">
+        <Form.Group className="mb-2" controlId="npUserSearch">
           <Form.Label>Usuários do projeto</Form.Label>
           <div className="d-flex gap-2 mb-2">
             <Form.Control
@@ -224,6 +226,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
               type="button"
               variant="outline-secondary"
               disabled={!state.selectedUser}
+              aria-label="Adicionar usuário"
               onClick={handleAddUser}
             >
               +
@@ -269,6 +272,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
                     type="button"
                     variant="outline-secondary"
                     size="sm"
+                    aria-label={`Remover ${member.name}`}
                     onClick={() => handleRemoveUser(index)}
                   >
                     ✕
@@ -286,7 +290,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
         <Button variant="outline-secondary" onClick={resetAndHide}>
           Cancelar
         </Button>
-        <Button variant="primary" disabled={!canConfirm} onClick={handleConfirm}>
+        <Button variant="primary" type="button" disabled={!canConfirm} onClick={handleConfirm}>
           Criar projeto
         </Button>
       </Modal.Footer>
