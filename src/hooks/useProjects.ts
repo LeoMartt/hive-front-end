@@ -18,7 +18,7 @@ const INITIAL_PROJECTS: Project[] = [
     mode: "cutover",
     activityCount: 32,
     completedCount: 25,
-    hierarchyLevels: ["Módulo", "Processo"],
+    hierarchyLevels: ["Módulo"],
     progressPercent: 78,
     spi: 0.62,
     team: [
@@ -94,7 +94,7 @@ const INITIAL_PROJECTS: Project[] = [
     mode: "cutover",
     activityCount: 21,
     completedCount: 21,
-    hierarchyLevels: ["Módulo", "Processo"],
+    hierarchyLevels: ["Módulo"],
     progressPercent: 100,
     spi: 1.0,
     team: [
