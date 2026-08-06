@@ -1,75 +1,177 @@
-# React + TypeScript + Vite
+# Nome do Projeto
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Projeto frontend desenvolvido com React, Vite e TypeScript.
 
-Currently, two official plugins are available:
+## Tecnologias utilizadas
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+* React
+* Vite
+* TypeScript
+* Bootstrap
+* React Router
+* Zod
+* Axios
+* SCSS
 
-## React Compiler
+## Pré-requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Antes de iniciar, é necessário ter instalado:
 
-## Expanding the ESLint configuration
+* Git
+* Node.js
+* npm
+* Visual Studio Code, recomendado
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Para verificar as instalações, execute no PowerShell:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```powershell
+git --version
+node --version
+npm --version
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Clonar o projeto
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+No PowerShell, acesse a pasta onde deseja salvar o projeto:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```powershell
+cd C:\caminho\para\seus\projetos
 ```
+
+Clone o repositório:
+
+```powershell
+git clone https://github.com/SEU-USUARIO/NOME-DO-REPOSITORIO.git
+```
+
+Entre na pasta do projeto:
+
+```powershell
+cd NOME-DO-REPOSITORIO
+```
+
+Abra o projeto no Visual Studio Code:
+
+```powershell
+code .
+```
+
+## Instalar as dependências
+
+Na raiz do projeto, execute:
+
+```powershell
+npm install
+```
+
+Esse comando instala automaticamente todas as bibliotecas registradas no `package.json`, incluindo as dependências de desenvolvimento necessárias para executar o projeto.
+
+As bibliotecas serão instaladas na pasta:
+
+```text
+node_modules/
+```
+
+Essa pasta não deve ser enviada para o GitHub, pois cada pessoa pode recriá-la executando `npm install`.
+
+O arquivo `package-lock.json` deve ser mantido no repositório para que todos instalem versões compatíveis das dependências.
+
+## Executar o projeto
+
+Após instalar as dependências, execute:
+
+```powershell
+npm run dev
+```
+
+O terminal exibirá um endereço local semelhante a:
+
+```text
+http://localhost:5173
+```
+
+Abra esse endereço no navegador.
+
+## Gerar a versão de produção
+
+Para verificar os tipos e gerar a versão de produção:
+
+```powershell
+npm run build
+```
+
+Os arquivos gerados ficarão na pasta:
+
+```text
+dist/
+```
+
+## Visualizar a versão de produção
+
+Depois de executar o build, use:
+
+```powershell
+npm run preview
+```
+
+## Atualizar o projeto local
+
+Para baixar as alterações mais recentes do GitHub:
+
+```powershell
+git pull origin main
+```
+
+Depois, execute novamente:
+
+```powershell
+npm install
+```
+
+Isso é importante quando o `package.json` ou o `package-lock.json` tiver sido alterado por outro desenvolvedor.
+
+## Estrutura principal
+
+```text
+src/
+├── api/
+├── assets/
+├── components/
+├── config/
+├── hooks/
+├── layouts/
+├── pages/
+├── routes/
+├── styles/
+├── types/
+├── utils/
+└── validations/
+```
+
+### Responsabilidade das pastas
+
+* `api/`: caminhos e endpoints da API.
+* `assets/`: imagens, ícones, fontes e arquivos estáticos.
+* `components/`: componentes visuais reutilizáveis.
+* `config/`: configurações globais e bibliotecas.
+* `hooks/`: hooks, chamadas da API e lógicas reutilizáveis.
+* `layouts/`: estruturas compartilhadas entre páginas.
+* `pages/`: páginas completas da aplicação.
+* `routes/`: configuração das rotas com React Router.
+* `styles/`: arquivos SCSS, personalizações do Bootstrap e cores.
+* `types/`: tipos e interfaces TypeScript.
+* `utils/`: funções auxiliares genéricas.
+* `validations/`: schemas e validações com Zod.
+
+## Padrões do projeto
+
+* Utilizar Bootstrap como primeira opção para todo o design.
+* Não utilizar CSS comum ou estilos inline.
+* Utilizar SCSS quando o Bootstrap não atender à necessidade.
+* Centralizar cores personalizadas em um arquivo de cores.
+* Utilizar React Router para navegação.
+* Utilizar Zod para validação de dados e formulários.
+* Manter os endpoints da API na pasta `api/`.
+* Manter chamadas da API e lógicas reutilizáveis na pasta `hooks/`.
+* Manter todos os tipos TypeScript na pasta `types/`.
+* Utilizar `export default function` em páginas e componentes React.
