@@ -61,9 +61,9 @@ export default function ProjectsPage() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         counts={{
-          all: projects.length,
-          uat: projects.filter((p) => p.mode === "uat").length,
-          cutover: projects.filter((p) => p.mode === "cutover").length,
+          all: stats.total,
+          uat: stats.uatCount,
+          cutover: stats.cutoverCount,
         }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
