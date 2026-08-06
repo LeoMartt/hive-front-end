@@ -118,7 +118,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
       name: state.name,
       description: state.description,
       mode: state.mode,
-      hierarchyLevels: state.levelNames.map((level) => level.trim()).filter(Boolean),
+      hierarchyLevels: state.levelNames.map((level, index) => level.trim() || `Nível ${index + 1}`),
       team: state.members,
     });
     resetAndHide();
@@ -180,13 +180,15 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
           <Form.Text>O modo não pode ser alterado após a criação do projeto.</Form.Text>
         </Form.Group>
 
-        <Form.Group className="mb-3" controlId="npLevels">
-          <Form.Label>Nomes dos níveis hierárquicos</Form.Label>
+        <Form.Group className="mb-3">
+          <Form.Label id="npLevelsLabel">Nomes dos níveis hierárquicos</Form.Label>
           {state.levelNames.map((levelName, index) => (
             <div className="d-flex align-items-center gap-2 mb-2" key={index}>
               <span className="text-body-secondary small level-index">{index + 1}</span>
               <Form.Control
                 type="text"
+                id={`npLevel-${index}`}
+                aria-label={`Nível ${index + 1}`}
                 value={levelName}
                 onChange={(event) => handleLevelNameChange(index, event.target.value)}
               />
@@ -198,11 +200,13 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
           </div>
         </Form.Group>
 
-        <Form.Group className="mb-2" controlId="npUserSearch">
+        <Form.Group className="mb-2">
           <Form.Label>Usuários do projeto</Form.Label>
           <div className="d-flex gap-2 mb-2">
             <Form.Control
               type="text"
+              id="npUserSearchInput"
+              aria-label="Pesquisar usuário"
               placeholder="Pesquisar usuário…"
               value={state.userSearch}
               onChange={(event) =>
@@ -211,6 +215,8 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
             />
             <Form.Select
               className="role-select"
+              id="npUserRole"
+              aria-label="Papel do usuário"
               value={state.selectedRole}
               onChange={(event) =>
                 setState((prev) => ({ ...prev, selectedRole: event.target.value as UserRole }))
