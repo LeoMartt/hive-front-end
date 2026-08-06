@@ -14,7 +14,7 @@ Esta spec cobre a implementação real (React) da tela de listagem de projetos (
 
 ## Decisões de escopo
 
-- **Fidelidade visual ao mockup:** não é o objetivo. A tela será reconstruída com componentes Bootstrap padrão (via `react-bootstrap`): cards, table, badge, modal, nav, progress bar, form. Paleta de cores customizada é preservada via SCSS; elementos puramente decorativos do mockup (fundo de favo de mel, tipografia customizada) não são replicados.
+- **Fidelidade visual ao mockup:** Bootstrap é usado ao máximo (via `react-bootstrap`) para tudo que ele resolve bem: cards, table, badge, modal, nav, progress bar, form. Paleta de cores customizada é preservada via SCSS. Peças que o Bootstrap padrão não reproduz — como a barra flutuante em formato de pílula (marca + usuário, `.footer-widget` do mockup) — ganham um SCSS específico próprio (ex. `styles/_footer-widget.scss`), mantendo o visual daquele elemento. Elementos puramente decorativos e não estruturais do mockup (fundo de favo de mel) não são replicados.
 - **Origem dos dados:** mock local tipado em TypeScript, acessado por um hook (`useProjects`) com uma interface já pronta para ser trocada por chamadas Axios reais futuramente, sem alterar os componentes consumidores.
 - **Simulador de persona:** removido. A tela assume um usuário fixo mockado (Gestor de Projetos, com projetos), sem seletor de simulação. A lógica de estado vazio "sem projetos" permanece coberta (ver Casos-limite), mas o estado "sem cargo" não é implementado agora — entra junto com o épico de Auth.
 - **Navegação ao clicar numa linha:** navega para uma rota placeholder `/projetos/:id` ("Em construção"), preparando o React Router para quando a tela de projeto específico (outro épico, fora de escopo aqui) for implementada.
@@ -39,6 +39,7 @@ src/
 │       ├── TeamAvatars.tsx          # avatares + "+N", abre TeamModal
 │       ├── TeamModal.tsx
 │       ├── NewProjectModal.tsx
+│       ├── FooterWidget.tsx         # marca HIVE + usuário logado, barra flutuante em pílula
 │       └── EmptyState.tsx
 ├── pages/
 │   ├── ProjectsPage.tsx      # composição da tela
@@ -46,7 +47,8 @@ src/
 ├── routes/
 │   └── AppRoutes.tsx         # configuração do React Router
 └── styles/
-    └── _colors.scss          # paleta customizada (accent colors, SPI, etc.)
+    ├── _colors.scss          # paleta customizada (accent colors, SPI, etc.)
+    └── _footer-widget.scss   # estilo próprio da barra flutuante (Bootstrap não reproduz)
 ```
 
 Cada componente recebe dados via props e não contém lógica de negócio — cálculos e estado de dados ficam no hook; estado de UI (aba ativa, texto de busca) fica na página.
@@ -104,6 +106,7 @@ A assinatura de retorno do hook é pensada para, no futuro, ser satisfeita por u
   - inputs de nomes de nível, gerados dinamicamente conforme o modo: UAT → 2 inputs configuráveis + "Atividade" fixa (3 níveis); Cutover → 1 input configurável + "Atividade" fixa (2 níveis)
   - busca e adição de usuário (lista mockada fixa) com seleção de papel; mesmo usuário pode ser adicionado novamente com papel diferente
   - ao confirmar, chama `createProject` do hook e fecha o modal
+- **`FooterWidget`**: barra flutuante fixa (marca HIVE + usuário logado mockado), usando `styles/_footer-widget.scss` para o formato de pílula/flutuante que o Bootstrap padrão não produz.
 
 ## Roteamento
 
@@ -118,6 +121,8 @@ Usa `react-router` (v8, já presente no `package.json`):
 ## Estilo
 
 Paleta customizada centralizada em `src/styles/_colors.scss` (variáveis SCSS, incluindo sobrescrita de `$theme-colors` do Bootstrap onde aplicável, para as cores de SPI e das barras de destaque). Sem CSS inline (`style={{}}`) e sem CSS solto fora de SCSS, conforme convenção do README.
+
+Regra geral: usar componentes/classes Bootstrap sempre que resolvem o layout/elemento. Só cai pra SCSS próprio (arquivo dedicado em `styles/`, um por elemento) quando o Bootstrap puro não reproduz a peça visual do mockup — caso do rodapé flutuante em pílula (`styles/_footer-widget.scss`, usado pelo componente que reproduz o `.footer-widget` do mockup: marca HIVE + usuário logado).
 
 ## Casos-limite e tratamento de erros
 
