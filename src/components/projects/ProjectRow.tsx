@@ -18,7 +18,17 @@ export default function ProjectRow({ project, onOpenTeam }: ProjectRowProps) {
   const hierarchyLabel = [...project.hierarchyLevels, "Atividade"].join(" > ");
 
   return (
-    <tr role="button" onClick={() => navigate(`/projetos/${project.id}`)}>
+    <tr
+      role="button"
+      tabIndex={0}
+      onClick={() => navigate(`/projetos/${project.id}`)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          navigate(`/projetos/${project.id}`);
+        }
+      }}
+    >
       <td>
         <div className="d-flex gap-2">
           <span className={`accent-bar accent-bar-${statusVariant}`} />

@@ -15,9 +15,17 @@ export default function TeamAvatars({ team, onOpenTeam }: TeamAvatarsProps) {
     <div
       className="avatar-stack"
       role="button"
+      tabIndex={0}
       onClick={(event) => {
         event.stopPropagation();
         onOpenTeam();
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          onOpenTeam();
+        }
       }}
     >
       {visible.map((member) => (
