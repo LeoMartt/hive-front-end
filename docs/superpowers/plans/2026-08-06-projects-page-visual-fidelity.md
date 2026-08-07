@@ -580,8 +580,8 @@ git commit -m "style: add honeycomb background and global body typography partia
   font-size: 13px;
   border-bottom-color: c.$border;
 }
-.table-hover tbody tr:hover {
-  background-color: c.$bg-alt;
+.table-hover {
+  --bs-table-hover-bg: #{c.$bg-alt};
 }
 
 // Badges (mode tags: UAT / Cutover)
