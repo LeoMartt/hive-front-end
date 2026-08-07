@@ -1,0 +1,72 @@
+@use "colors" as c;
+
+.accent-bar {
+  width: 4px;
+  border-radius: 3px;
+  align-self: stretch;
+  flex-shrink: 0;
+}
+.accent-bar-success { background-color: c.$color-success; }
+.accent-bar-danger { background-color: c.$color-danger; }
+.accent-bar-info { background-color: c.$color-info; }
+
+.spi-value {
+  font-family: var(--bs-font-monospace);
+  font-weight: 700;
+}
+.spi-value-good { color: c.$color-success; }
+.spi-value-warn { color: c.$color-warning; }
+.spi-value-bad { color: c.$color-danger; }
+
+.avatar-stack {
+  display: flex;
+  align-items: center;
+}
+.avatar-circle {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: var(--bs-secondary-bg);
+  border: 2px solid var(--bs-body-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  margin-left: -8px;
+  flex-shrink: 0;
+}
+.avatar-circle:first-child {
+  margin-left: 0;
+}
+
+.project-search-input {
+  max-width: 260px;
+}
+
+.empty-state-description {
+  max-width: 320px;
+}
+
+.level-index {
+  width: 16px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.role-select {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+.progress-cell {
+  min-width: 170px;
+}
+
+.col-project-name {
+  width: 30%;
+}
+
+.projects-page {
+  padding-top: 6rem;
+}
