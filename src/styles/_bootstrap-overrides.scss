@@ -1,5 +1,13 @@
 @use "colors" as c;
 
+// Utilitários do Bootstrap que precisam de !important
+// (Bootstrap define .bg-*, .font-monospace etc. como utilities com !important
+// na própria folha de estilo compilada — só vencemos especificidade normal
+// não é suficiente aqui, por isso os !important acima e este também.)
+.font-monospace {
+  font-family: c.$font-mono !important;
+}
+
 // Botões
 .btn {
   border-radius: 8px;
@@ -100,12 +108,12 @@
   border-radius: 5px;
 }
 .badge.bg-info {
-  background-color: c.$blue-soft;
-  color: c.$blue;
+  background-color: c.$blue-soft !important;
+  color: c.$blue !important;
 }
 .badge.bg-warning {
-  background-color: c.$yellow-soft;
-  color: c.$yellow-deep;
+  background-color: c.$yellow-soft !important;
+  color: c.$yellow-deep !important;
 }
 
 // Barra de progresso
@@ -118,13 +126,13 @@
   border-radius: 4px;
 }
 .progress-bar.bg-info {
-  background-color: c.$blue;
+  background-color: c.$blue !important;
 }
 .progress-bar.bg-danger {
-  background-color: c.$red;
+  background-color: c.$red !important;
 }
 .progress-bar.bg-success {
-  background-color: c.$green;
+  background-color: c.$green !important;
 }
 
 // Modais
