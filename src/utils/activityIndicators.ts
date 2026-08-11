@@ -18,8 +18,13 @@ export const ACTIVITY_STATUS_BADGE_CLASS: Record<ActivityStatus, string> = {
   cancelado: "activity-badge-cancelado",
 };
 
+export function toLocalIsoString(date: Date): string {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
 export function isOverdue(activity: Activity): boolean {
   if (activity.status === "concluido" || activity.status === "cancelado") return false;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalIsoString(new Date()).slice(0, 10);
   return activity.plannedEnd.slice(0, 10) < today;
 }
