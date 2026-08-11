@@ -1056,6 +1056,10 @@ interface MultiSelectFilterProps {
   searchable?: boolean;
 }
 
+function toSafeIdPart(value: string): string {
+  return value.replace(/\s+/g, "-").toLowerCase();
+}
+
 export default function MultiSelectFilter({
   idPrefix,
   label,
