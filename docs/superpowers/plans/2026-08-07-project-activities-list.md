@@ -186,12 +186,19 @@ export const ACTIVITY_STATUS_BADGE_CLASS: Record<ActivityStatus, string> = {
   cancelado: "activity-badge-cancelado",
 };
 
+export function toLocalIsoString(date: Date): string {
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
 export function isOverdue(activity: Activity): boolean {
   if (activity.status === "concluido" || activity.status === "cancelado") return false;
-  const today = new Date().toISOString().slice(0, 10);
+  const today = toLocalIsoString(new Date()).slice(0, 10);
   return activity.plannedEnd.slice(0, 10) < today;
 }
 ```
+
+**Why `toLocalIsoString` instead of `date.toISOString()`:** `toISOString()` always converts to UTC, which shifts the calendar day for any negative-UTC-offset timezone (including Brazil) during a multi-hour window around local midnight — an activity due "today" (local) could get flagged overdue hours early. `toLocalIsoString` builds the string from the `Date` object's local getters (`getFullYear`/`getMonth`/`getDate`/`getHours`/etc.) instead, so the date portion always reflects the viewer's actual local calendar day. It's exported because `useActivities.ts` (Task 3) needs the same local-calendar convention for the seed data's `plannedStart`/`plannedEnd`/`actualStart`/`actualEnd` values — using `toISOString()` there and `toLocalIsoString` here would just move the mismatch instead of fixing it.
 
 - [ ] **Step 2: Create the filter function**
 
@@ -338,12 +345,12 @@ This is Task 2 of 21. These are pure functions with no React/UI dependency, buil
 ```ts
 import { useMemo, useState } from "react";
 import type { Activity, ActivityStats } from "../types/activity";
-import { isOverdue } from "../utils/activityIndicators";
+import { isOverdue, toLocalIsoString } from "../utils/activityIndicators";
 
 function isoDaysFromNow(days: number): string {
   const date = new Date();
   date.setDate(date.getDate() + days);
-  return date.toISOString();
+  return toLocalIsoString(date);
 }
 
 const INITIAL_ACTIVITIES: Activity[] = [
@@ -682,7 +689,7 @@ git commit -m "feat: add useActivities hook with typed mock data and stats"
 
 ## Context
 
-This is Task 3 of 21. `useActivities` follows the exact shape/philosophy of the existing `useProjects` hook (`src/hooks/useProjects.ts`, already in the codebase) — plain state holding a typed array, derived stats via `useMemo`. The `projectId` parameter is intentionally unused right now — `void projectId;` satisfies the project's ESLint config (verified directly: a leading-underscore name like `_projectId` is NOT exempted by this repo's `@typescript-eslint/no-unused-vars` setup and fails `npm run lint` with an error, whereas explicitly `void`-ing the parameter passes cleanly) — it exists so the call site (`useActivities(projectId)`, wired up in Task 19) already has the right shape for when this becomes a real API call scoped by project. 18 seed activities cover all 6 statuses (5 concluído, 4 em execução, 3 bloqueado, 3 aguardando, 2 liberado, 1 cancelado), 2 modules ("Faturamento", "Cadastro de Clientes") with 2 processes each, retest counts spanning 0/1/2/3 (all 4 filter buckets have at least one match), issue counts spanning 0-3, and several `predecessors` references to other seed IDs so that column has real content to render. Dates use `isoDaysFromNow` (mirroring the `minutesAgo` helper pattern in `useProjects.ts`) so "atrasado" (overdue) activities stay overdue no matter when this runs — ATV-1003, ATV-1009, ATV-1014, and ATV-1015 all have a `plannedEnd` in the past while not being `concluido`/`cancelado`, so they'll always show up under the "Atrasado" stat.
+This is Task 3 of 21. `useActivities` follows the exact shape/philosophy of the existing `useProjects` hook (`src/hooks/useProjects.ts`, already in the codebase) — plain state holding a typed array, derived stats via `useMemo`. The `projectId` parameter is intentionally unused right now — `void projectId;` satisfies the project's ESLint config (verified directly: a leading-underscore name like `_projectId` is NOT exempted by this repo's `@typescript-eslint/no-unused-vars` setup and fails `npm run lint` with an error, whereas explicitly `void`-ing the parameter passes cleanly) — it exists so the call site (`useActivities(projectId)`, wired up in Task 19) already has the right shape for when this becomes a real API call scoped by project. 18 seed activities cover all 6 statuses (5 concluído, 4 em execução, 3 bloqueado, 3 aguardando, 2 liberado, 1 cancelado), 2 modules ("Faturamento", "Cadastro de Clientes") with 2 processes each, retest counts spanning 0/1/2/3 (all 4 filter buckets have at least one match), issue counts spanning 0-3, and several `predecessors` references to other seed IDs so that column has real content to render. Dates use `isoDaysFromNow` (mirroring the `minutesAgo` helper pattern in `useProjects.ts`, but built on `toLocalIsoString` from Task 2 instead of `date.toISOString()` — Task 2's code review caught that `toISOString()`'s UTC conversion shifts the calendar day near local midnight for negative-UTC-offset timezones like Brazil's, so both the seed data here and the `isOverdue`/date-range comparisons in Task 2 consistently use local-calendar-day semantics) so "atrasado" (overdue) activities stay overdue no matter when this runs — ATV-1003, ATV-1009, ATV-1014, and ATV-1015 all have a `plannedEnd` in the past while not being `concluido`/`cancelado`, so they'll always show up under the "Atrasado" stat.
 
 ---
 
