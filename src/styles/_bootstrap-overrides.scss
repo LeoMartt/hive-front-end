@@ -1,0 +1,173 @@
+@use "colors" as c;
+
+// Utilitários do Bootstrap que precisam de !important
+// (Bootstrap define .bg-*, .font-monospace etc. como utilities com !important
+// na própria folha de estilo compilada — só vencemos especificidade normal
+// não é suficiente aqui, por isso os !important acima e este também.)
+.font-monospace {
+  font-family: c.$font-mono !important;
+}
+
+// Botões
+.btn {
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.btn-primary {
+  background-color: c.$yellow;
+  border-color: c.$yellow;
+  color: c.$text;
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: c.$yellow-strong;
+  border-color: c.$yellow-strong;
+  color: c.$text;
+}
+.btn-outline-secondary {
+  border-color: c.$border-strong;
+  color: c.$text;
+}
+.btn-outline-secondary:hover {
+  border-color: c.$text-dim;
+  background-color: c.$bg-alt;
+  color: c.$text;
+}
+
+// Cards
+.card {
+  background-color: c.$surface;
+  border: 1px solid c.$border;
+  border-radius: c.$radius;
+}
+
+// Abas (Nav pills)
+.nav-pills {
+  background-color: c.$surface-2;
+  padding: 3px;
+  border-radius: 9px;
+  border: 1px solid c.$border;
+}
+.nav-pills .nav-link {
+  border-radius: 7px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: c.$text-dim;
+  background-color: transparent;
+}
+.nav-pills .nav-link.active {
+  background-color: c.$surface;
+  color: c.$text;
+  box-shadow: 0 1px 2px rgba(31, 32, 36, 0.08);
+}
+
+// Inputs e selects
+.form-control,
+.form-select {
+  background-color: c.$bg-alt;
+  border: 1px solid c.$border-strong;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: c.$text;
+}
+.form-control:focus,
+.form-select:focus {
+  background-color: c.$surface;
+  border-color: c.$text-dim;
+  box-shadow: none;
+}
+
+// Tabela
+.table thead th {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: c.$text-faint;
+  background-color: c.$bg-alt;
+  border-bottom: 1px solid c.$border;
+  font-weight: 700;
+}
+.table tbody td {
+  font-size: 13px;
+  border-bottom-color: c.$border;
+}
+.table-hover {
+  --bs-table-hover-bg: #{c.$bg-alt};
+}
+
+// Badges (mode tags: UAT / Cutover)
+.badge {
+  font-family: c.$font-mono;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 4px 7px;
+  border-radius: 5px;
+}
+.badge.bg-info {
+  background-color: c.$blue-soft !important;
+  color: c.$blue !important;
+}
+.badge.bg-warning {
+  background-color: c.$yellow-soft !important;
+  color: c.$yellow-deep !important;
+}
+
+// Barra de progresso
+.progress {
+  height: 6px;
+  border-radius: 4px;
+  background-color: c.$surface-2;
+}
+.progress-bar {
+  border-radius: 4px;
+}
+.progress-bar.bg-info {
+  background-color: c.$blue !important;
+}
+.progress-bar.bg-danger {
+  background-color: c.$red !important;
+}
+.progress-bar.bg-success {
+  background-color: c.$green !important;
+}
+
+// Modais
+.modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 24px 60px rgba(31, 32, 36, 0.28);
+}
+.modal-header,
+.modal-footer {
+  border-color: c.$border;
+}
+
+// Toggle de modo (UAT / Cutover) no modal "Novo projeto".
+// Depende da ordem fixa dos botões no JSX (UAT é sempre o primeiro,
+// Cutover é sempre o segundo, dentro do único .btn-group daquele modal) —
+// não há classe própria por modo nos componentes, então usamos
+// :first-child/:last-child para diferenciar a cor de cada um quando
+// selecionado (variant="primary"), como o mockup faz.
+.modal-content .btn-group[role="group"] .btn {
+  border-radius: 8px;
+  font-weight: 700;
+}
+.modal-content .btn-group[role="group"] .btn:first-child.btn-primary {
+  background-color: c.$blue-soft;
+  border-color: c.$blue;
+  color: c.$blue;
+}
+.modal-content .btn-group[role="group"] .btn:last-child.btn-primary {
+  background-color: c.$yellow-soft;
+  border-color: c.$yellow-deep;
+  color: c.$yellow-deep;
+}
+.modal-content .btn-group[role="group"] .btn-outline-secondary {
+  background-color: c.$surface;
+  border-color: c.$border-strong;
+  color: c.$text-dim;
+}
