@@ -1,0 +1,109 @@
+@use "colors" as c;
+
+// Badges de status de atividade
+.activity-badge {
+  font-family: c.$font-mono;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 5px;
+  display: inline-block;
+}
+.activity-badge-aguardando {
+  background-color: c.$surface-2;
+  color: c.$text-dim;
+}
+.activity-badge-liberado {
+  background-color: c.$yellow-soft;
+  color: c.$yellow-deep;
+}
+.activity-badge-execucao {
+  background-color: c.$blue-soft;
+  color: c.$blue;
+}
+.activity-badge-bloqueado {
+  background-color: c.$red-soft;
+  color: c.$red;
+}
+.activity-badge-concluido {
+  background-color: c.$green-soft;
+  color: c.$green;
+}
+.activity-badge-cancelado {
+  background-color: c.$surface-2;
+  color: c.$text-faint;
+  text-decoration: line-through;
+}
+
+// Chips de estatística clicáveis
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid c.$border;
+  background-color: c.$surface;
+  font-size: 12.5px;
+  color: c.$text-dim;
+}
+.stat-chip-active {
+  border-color: c.$text-dim;
+  background-color: c.$bg-alt;
+  color: c.$text;
+}
+.stat-chip-value {
+  font-weight: 700;
+}
+
+// Filtro multi-seleção genérico (Dropdown + checkboxes)
+.multi-select-toggle {
+  font-size: 12.5px;
+}
+.multi-select-menu {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 8px;
+}
+.multi-select-item {
+  padding: 2px 4px;
+}
+.multi-select-search {
+  width: calc(100% - 1rem);
+}
+
+// Filtro em árvore de Módulo/Processo
+.module-process-filter-children {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+// Filtro de intervalo de datas
+.date-range-input {
+  width: 140px;
+}
+
+// Busca por nome/ID
+.activity-search-input {
+  max-width: 220px;
+}
+
+// Linhas de agrupamento (Módulo, Processo, ou grupo plano por Tester/Status)
+.activity-group-row {
+  background-color: c.$bg-alt;
+  cursor: pointer;
+}
+.activity-group-row-process {
+  background-color: c.$surface;
+}
+.activity-group-toggle-icon {
+  display: inline-block;
+  width: 12px;
+  color: c.$text-faint;
+}
