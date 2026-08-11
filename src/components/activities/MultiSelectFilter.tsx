@@ -17,6 +17,10 @@ interface MultiSelectFilterProps {
   searchable?: boolean;
 }
 
+function toSafeIdPart(value: string): string {
+  return value.replace(/\s+/g, "-").toLowerCase();
+}
+
 export default function MultiSelectFilter({
   idPrefix,
   label,
@@ -63,7 +67,7 @@ export default function MultiSelectFilter({
           <Dropdown.ItemText key={option.value} className="multi-select-item">
             <Form.Check
               type="checkbox"
-              id={`${idPrefix}-${option.value}`}
+              id={`${idPrefix}-${toSafeIdPart(option.value)}`}
               label={`${option.label} (${option.count})`}
               checked={selected.includes(option.value)}
               onChange={() => toggle(option.value)}
