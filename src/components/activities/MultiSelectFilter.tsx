@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import Form from "react-bootstrap/Form";
+import { toSafeIdPart } from "../../utils/domId";
 
 export interface MultiSelectOption {
   value: string;
@@ -15,10 +16,6 @@ interface MultiSelectFilterProps {
   selected: string[];
   onChange: (selected: string[]) => void;
   searchable?: boolean;
-}
-
-function toSafeIdPart(value: string): string {
-  return value.replace(/\s+/g, "-").toLowerCase();
 }
 
 export default function MultiSelectFilter({

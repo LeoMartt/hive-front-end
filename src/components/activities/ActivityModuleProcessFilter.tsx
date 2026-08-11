@@ -1,6 +1,8 @@
 import Dropdown from "react-bootstrap/Dropdown";
 import Form from "react-bootstrap/Form";
 import type { Activity } from "../../types/activity";
+import { toSafeIdPart } from "../../utils/domId";
+import { groupByModuleProcess } from "../../utils/groupActivities";
 
 interface ActivityModuleProcessFilterProps {
   activities: Activity[];
@@ -17,24 +19,14 @@ interface ModuleOption {
 }
 
 function buildModuleOptions(activities: Activity[]): ModuleOption[] {
-  const order: string[] = [];
-  const map = new Map<string, Map<string, number>>();
-
-  for (const activity of activities) {
-    if (!map.has(activity.module)) {
-      map.set(activity.module, new Map());
-      order.push(activity.module);
-    }
-    const processMap = map.get(activity.module)!;
-    processMap.set(activity.process, (processMap.get(activity.process) ?? 0) + 1);
-  }
-
-  return order.map((moduleName) => {
-    const processMap = map.get(moduleName)!;
-    const processes = Array.from(processMap.entries()).map(([process, count]) => ({ process, count }));
-    const count = processes.reduce((sum, item) => sum + item.count, 0);
-    return { module: moduleName, count, processes };
-  });
+  return groupByModuleProcess(activities).map((group) => ({
+    module: group.module,
+    count: group.processes.reduce((sum, processGroup) => sum + processGroup.activities.length, 0),
+    processes: group.processes.map((processGroup) => ({
+      process: processGroup.process,
+      count: processGroup.activities.length,
+    })),
+  }));
 }
 
 export default function ActivityModuleProcessFilter({
@@ -74,7 +66,7 @@ export default function ActivityModuleProcessFilter({
           <Dropdown.ItemText key={moduleOption.module} className="multi-select-item">
             <Form.Check
               type="checkbox"
-              id={`module-filter-${moduleOption.module}`}
+              id={`module-filter-${toSafeIdPart(moduleOption.module)}`}
               label={`${moduleOption.module} (${moduleOption.count})`}
               checked={selectedModules.includes(moduleOption.module)}
               onChange={() => toggleModule(moduleOption.module)}
@@ -84,7 +76,7 @@ export default function ActivityModuleProcessFilter({
                 <Form.Check
                   key={processOption.process}
                   type="checkbox"
-                  id={`process-filter-${moduleOption.module}-${processOption.process}`}
+                  id={`process-filter-${toSafeIdPart(moduleOption.module)}-${toSafeIdPart(processOption.process)}`}
                   label={`${processOption.process} (${processOption.count})`}
                   checked={selectedProcesses.includes(processOption.process)}
                   onChange={() => toggleProcess(processOption.process)}
