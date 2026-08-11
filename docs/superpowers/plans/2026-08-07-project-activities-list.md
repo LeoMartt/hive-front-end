@@ -1031,15 +1031,28 @@ This is Task 7 of 21. `stats[chip.key]` type-checks because `ActivityStatChipKey
 ### Task 8: `MultiSelectFilter` component (generic)
 
 **Files:**
+- Create: `src/utils/domId.ts`
 - Create: `src/components/activities/MultiSelectFilter.tsx`
 
-- [ ] **Step 1: Create the component**
+- [ ] **Step 1: Create the shared DOM-id sanitizer**
+
+`src/utils/domId.ts`:
+```ts
+export function toSafeIdPart(value: string): string {
+  return value.replace(/\s+/g, "-").toLowerCase();
+}
+```
+
+This is a tiny shared utility (not specific to this component) because a later task (Task 9) needs the exact same sanitizer for a different component's DOM ids — keeping it in one file avoids the two implementations drifting apart.
+
+- [ ] **Step 2: Create the component**
 
 `src/components/activities/MultiSelectFilter.tsx`:
 ```tsx
 import { useState } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import Form from "react-bootstrap/Form";
+import { toSafeIdPart } from "../../utils/domId";
 
 export interface MultiSelectOption {
   value: string;
@@ -1054,10 +1067,6 @@ interface MultiSelectFilterProps {
   selected: string[];
   onChange: (selected: string[]) => void;
   searchable?: boolean;
-}
-
-function toSafeIdPart(value: string): string {
-  return value.replace(/\s+/g, "-").toLowerCase();
 }
 
 export default function MultiSelectFilter({
@@ -1106,7 +1115,7 @@ export default function MultiSelectFilter({
           <Dropdown.ItemText key={option.value} className="multi-select-item">
             <Form.Check
               type="checkbox"
-              id={`${idPrefix}-${option.value}`}
+              id={`${idPrefix}-${toSafeIdPart(option.value)}`}
               label={`${option.label} (${option.count})`}
               checked={selected.includes(option.value)}
               onChange={() => toggle(option.value)}
@@ -1119,21 +1128,21 @@ export default function MultiSelectFilter({
 }
 ```
 
-- [ ] **Step 2: Type-check**
+- [ ] **Step 3: Type-check**
 
 Run: `npx tsc -b`
 Expected: no errors.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
-git add src/components/activities/MultiSelectFilter.tsx
+git add src/utils/domId.ts src/components/activities/MultiSelectFilter.tsx
 git commit -m "feat: add generic MultiSelectFilter component"
 ```
 
 ## Context
 
-This is Task 8 of 21. This is the single most-reused piece of this feature — it'll back the Status, Tester, Dev, and Retestes filters (Task 11), each just passing a different `options`/`selected`/`onChange`/`searchable` combination rather than needing 4 near-duplicate components. `autoClose="outside"` (verified against the installed `react-bootstrap` package's `Dropdown.js`: the prop accepts `true | false | "inside" | "outside"`) keeps the dropdown open while checkboxes inside it are clicked, closing only on an outside click. `Dropdown.ItemText` (verified against `DropdownItemText.js`: renders a plain non-interactive `<span class="dropdown-item-text">`) is the correct wrapper for embedding a `Form.Check` — unlike `Dropdown.Item`, it doesn't carry item-selection/auto-close-on-click semantics that would fight with the checkbox's own click handling. `idPrefix` is required (not derived from `label`) so DOM `id`s stay unique and predictable even if two filters ever end up with option values that collide.
+This is Task 8 of 21. This is the single most-reused piece of this feature — it'll back the Status, Tester, Dev, and Retestes filters (Task 11), each just passing a different `options`/`selected`/`onChange`/`searchable` combination rather than needing 4 near-duplicate components. `autoClose="outside"` (verified against the installed `react-bootstrap` package's `Dropdown.js`: the prop accepts `true | false | "inside" | "outside"`) keeps the dropdown open while checkboxes inside it are clicked, closing only on an outside click. `Dropdown.ItemText` (verified against `DropdownItemText.js`: renders a plain non-interactive `<span class="dropdown-item-text">`) is the correct wrapper for embedding a `Form.Check` — unlike `Dropdown.Item`, it doesn't carry item-selection/auto-close-on-click semantics that would fight with the checkbox's own click handling. `idPrefix` is required (not derived from `label`) so DOM `id`s stay unique and predictable even if two filters ever end up with option values that collide. `option.value` itself is passed through `toSafeIdPart` (from `src/utils/domId.ts`) only when building the checkbox's DOM `id` — the raw value is still what's used for the actual selection logic (`toggle`, `selected.includes`) and passed to `onChange`, since values like tester/dev full names ("Rafael Souza") contain spaces, which are invalid in an HTML `id` attribute.
 
 ---
 
@@ -1149,6 +1158,8 @@ This is Task 8 of 21. This is the single most-reused piece of this feature — i
 import Dropdown from "react-bootstrap/Dropdown";
 import Form from "react-bootstrap/Form";
 import type { Activity } from "../../types/activity";
+import { toSafeIdPart } from "../../utils/domId";
+import { groupByModuleProcess } from "../../utils/groupActivities";
 
 interface ActivityModuleProcessFilterProps {
   activities: Activity[];
@@ -1165,24 +1176,14 @@ interface ModuleOption {
 }
 
 function buildModuleOptions(activities: Activity[]): ModuleOption[] {
-  const order: string[] = [];
-  const map = new Map<string, Map<string, number>>();
-
-  for (const activity of activities) {
-    if (!map.has(activity.module)) {
-      map.set(activity.module, new Map());
-      order.push(activity.module);
-    }
-    const processMap = map.get(activity.module)!;
-    processMap.set(activity.process, (processMap.get(activity.process) ?? 0) + 1);
-  }
-
-  return order.map((moduleName) => {
-    const processMap = map.get(moduleName)!;
-    const processes = Array.from(processMap.entries()).map(([process, count]) => ({ process, count }));
-    const count = processes.reduce((sum, item) => sum + item.count, 0);
-    return { module: moduleName, count, processes };
-  });
+  return groupByModuleProcess(activities).map((group) => ({
+    module: group.module,
+    count: group.processes.reduce((sum, processGroup) => sum + processGroup.activities.length, 0),
+    processes: group.processes.map((processGroup) => ({
+      process: processGroup.process,
+      count: processGroup.activities.length,
+    })),
+  }));
 }
 
 export default function ActivityModuleProcessFilter({
@@ -1222,7 +1223,7 @@ export default function ActivityModuleProcessFilter({
           <Dropdown.ItemText key={moduleOption.module} className="multi-select-item">
             <Form.Check
               type="checkbox"
-              id={`module-filter-${moduleOption.module}`}
+              id={`module-filter-${toSafeIdPart(moduleOption.module)}`}
               label={`${moduleOption.module} (${moduleOption.count})`}
               checked={selectedModules.includes(moduleOption.module)}
               onChange={() => toggleModule(moduleOption.module)}
@@ -1232,7 +1233,7 @@ export default function ActivityModuleProcessFilter({
                 <Form.Check
                   key={processOption.process}
                   type="checkbox"
-                  id={`process-filter-${moduleOption.module}-${processOption.process}`}
+                  id={`process-filter-${toSafeIdPart(moduleOption.module)}-${toSafeIdPart(processOption.process)}`}
                   label={`${processOption.process} (${processOption.count})`}
                   checked={selectedProcesses.includes(processOption.process)}
                   onChange={() => toggleProcess(processOption.process)}
@@ -1262,6 +1263,8 @@ git commit -m "feat: add ActivityModuleProcessFilter component"
 ## Context
 
 This is Task 9 of 21. Unlike `MultiSelectFilter` (Task 8), this filter has a genuinely nested shape (Módulo → Processo), so it's its own component rather than another `MultiSelectFilter` instance. Module and process are independent filter dimensions in `ActivityFiltersState` (Task 1) — checking a module doesn't auto-check its processes; both narrow the result set via AND, same as every other filter dimension (see `filterActivities` in Task 2). Counts are computed from whatever `activities` array is passed in (the page, Task 19, will pass the full unfiltered list — same convention as every option count elsewhere in this feature: computed from the full dataset, not progressively narrowed by other active filters).
+
+`buildModuleOptions` delegates to `groupByModuleProcess` (Task 2) instead of reimplementing the same module→process Map-based grouping a second time — the only thing this component needs beyond what that utility already returns is a count per level, which is just `.length` on the activity arrays it groups. DOM ids for both the module and process checkboxes go through `toSafeIdPart` (Task 8's `src/utils/domId.ts`) for the same reason `MultiSelectFilter` needed it: the actual seed data (`src/hooks/useActivities.ts`) has module/process names with spaces (e.g. "Cadastro de Clientes", "Emissão de NF-e"), which are invalid in a raw HTML `id` attribute — only the id string is sanitized, the actual `module`/`process` values used for selection logic (`toggleModule`, `toggleProcess`, `selectedModules.includes`, etc.) stay untouched.
 
 ---
 
