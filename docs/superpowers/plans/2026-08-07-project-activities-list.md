@@ -1706,7 +1706,18 @@ export default function ActivityTreeRows({
 
         return (
           <Fragment key={moduleGroup.module}>
-            <tr role="button" className="activity-group-row" onClick={() => onToggleModule(moduleGroup.module)}>
+            <tr
+              role="button"
+              tabIndex={0}
+              className="activity-group-row"
+              onClick={() => onToggleModule(moduleGroup.module)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onToggleModule(moduleGroup.module);
+                }
+              }}
+            >
               <td colSpan={9}>
                 <span className="activity-group-toggle-icon">{isExpanded ? "▾" : "▸"}</span>{" "}
                 <span className="fw-semibold">{moduleGroup.module}</span>{" "}
@@ -1788,6 +1799,8 @@ git commit -m "feat: add ActivityTreeRows and ActivityGroupRows components"
 ## Context
 
 This is Task 14 of 21. These two components render the `<tbody>` contents for the two table shapes (`ActivitiesTable`, Task 15, picks one based on the active group mode): `ActivityTreeRows` for the 2-level Módulo›Processo tree (module rows are collapsible via `expandedModules`/`onToggleModule`, owned by the page in Task 19; processes are always shown once their parent module is expanded — no separate per-process collapse, a deliberate simplification since the mock dataset's processes are small enough not to need it), and `ActivityGroupRows` for the flat single-level Tester/Status groupings (always fully expanded, no collapse — matches the spec's description of these two modes as "agrupamento único, não aninhado"). Both use `<Fragment key={...}>` (not the `<>` shorthand) because each iteration of `.map()` needs to return multiple sibling `<tr>` elements under one key, and only the full `Fragment` component (not the shorthand) accepts a `key` prop. `colSpan={9}` matches `ActivitiesTable`'s 9 header columns (Task 15).
+
+The module toggle row's `tabIndex={0}` + `onKeyDown` (Enter/Space triggers `onToggleModule`) matches the keyboard-accessibility convention already established elsewhere in this codebase for other clickable `role="button"` rows (`ActivityRow.tsx` in this same feature, and `ProjectRow.tsx`/`TeamAvatars.tsx` from an earlier feature) — a code review after this task was first built caught that the module row had been given `role="button"` without the matching keyboard support. The process-level header row directly below it is intentionally NOT interactive (no `role`, no `onClick`, no keyboard handler) since processes are always shown once their parent module is expanded, not independently toggled.
 
 ---
 
