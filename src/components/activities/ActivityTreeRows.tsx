@@ -27,7 +27,18 @@ export default function ActivityTreeRows({
 
         return (
           <Fragment key={moduleGroup.module}>
-            <tr role="button" className="activity-group-row" onClick={() => onToggleModule(moduleGroup.module)}>
+            <tr
+              role="button"
+              tabIndex={0}
+              className="activity-group-row"
+              onClick={() => onToggleModule(moduleGroup.module)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onToggleModule(moduleGroup.module);
+                }
+              }}
+            >
               <td colSpan={9}>
                 <span className="activity-group-toggle-icon">{isExpanded ? "▾" : "▸"}</span>{" "}
                 <span className="fw-semibold">{moduleGroup.module}</span>{" "}
