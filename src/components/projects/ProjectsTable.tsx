@@ -1,6 +1,6 @@
 import Table from "react-bootstrap/Table";
 import ProjectRow from "./ProjectRow";
-import EmptyState from "./EmptyState";
+import EmptyState from "../common/EmptyState";
 import type { Project } from "../../types/project";
 
 interface ProjectsTableProps {

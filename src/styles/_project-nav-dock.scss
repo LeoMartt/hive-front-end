@@ -1,0 +1,41 @@
+@use "colors" as c;
+
+.project-nav-dock {
+  position: fixed;
+  top: 18px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  z-index: 20;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  background-color: c.$surface;
+  border: 1px solid c.$border;
+  border-radius: 999px;
+  padding: 6px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 6px 20px rgba(31, 32, 36, 0.1);
+}
+
+.project-nav-dock-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: c.$text-dim;
+  background-color: c.$bg-alt;
+}
+
+.project-nav-dock-divider {
+  width: 1px;
+  height: 22px;
+  background-color: c.$border;
+}
+
+.project-layout-content {
+  padding-top: 6rem;
+}
