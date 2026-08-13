@@ -88,6 +88,7 @@ export default function ActivityFiltersBar({ activities, filters, onFiltersChang
       statuses: [],
       testers: [],
       devs: [],
+      dateRangeEnabled: false,
       plannedEndFrom: null,
       plannedEndTo: null,
       retestBuckets: [],
@@ -129,10 +130,10 @@ export default function ActivityFiltersBar({ activities, filters, onFiltersChang
         searchable
       />
       <ActivityDateRangeFilter
+        enabled={filters.dateRangeEnabled}
         from={filters.plannedEndFrom}
         to={filters.plannedEndTo}
-        onFromChange={(value) => onFiltersChange({ plannedEndFrom: value })}
-        onToChange={(value) => onFiltersChange({ plannedEndTo: value })}
+        onChange={onFiltersChange}
       />
       <MultiSelectFilter
         idPrefix="retest-filter"

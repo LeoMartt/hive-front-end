@@ -19,6 +19,7 @@ function createEmptyFilters(): ActivityFiltersState {
     statuses: [],
     testers: [],
     devs: [],
+    dateRangeEnabled: false,
     plannedEndFrom: null,
     plannedEndTo: null,
     retestBuckets: [],
