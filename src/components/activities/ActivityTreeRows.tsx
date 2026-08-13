@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import ActivityRow from "./ActivityRow";
-import type { ModuleGroup } from "../../types/activity";
+import type { Activity, ModuleGroup } from "../../types/activity";
 
 interface ActivityTreeRowsProps {
   groups: ModuleGroup[];
@@ -9,8 +9,29 @@ interface ActivityTreeRowsProps {
   onToggleModule: (moduleName: string) => void;
 }
 
-function countCompleted(activities: { status: string }[]): number {
+function countCompleted(activities: Activity[]): number {
   return activities.filter((activity) => activity.status === "concluido").length;
+}
+
+function completedPercent(activities: Activity[]): number {
+  if (activities.length === 0) return 0;
+  return Math.round((countCompleted(activities) / activities.length) * 100);
+}
+
+function RollupCell({ activities, label }: { activities: Activity[]; label: string }) {
+  return (
+    <td colSpan={12}>
+      <div className="group-rollup">
+        <span className="fw-semibold">{label}</span>
+        <span className="text-body-secondary small">
+          {countCompleted(activities)}/{activities.length} concluídas
+        </span>
+        <div className="mini-progress">
+          <div className="mini-progress-fill" style={{ width: `${completedPercent(activities)}%` }} />
+        </div>
+      </div>
+    </td>
+  );
 }
 
 export default function ActivityTreeRows({
@@ -39,27 +60,21 @@ export default function ActivityTreeRows({
                 }
               }}
             >
-              <td colSpan={9}>
-                <span className="activity-group-toggle-icon">{isExpanded ? "▾" : "▸"}</span>{" "}
-                <span className="fw-semibold">{moduleGroup.module}</span>{" "}
-                <span className="text-body-secondary small">
-                  {countCompleted(activitiesInModule)}/{activitiesInModule.length} concluídas
-                </span>
-              </td>
+              <td></td>
+              <RollupCell
+                activities={activitiesInModule}
+                label={`${isExpanded ? "▾" : "▸"} ${moduleGroup.module}`}
+              />
             </tr>
             {isExpanded &&
               moduleGroup.processes.map((processGroup) => (
                 <Fragment key={processGroup.process}>
                   <tr className="activity-group-row activity-group-row-process">
-                    <td colSpan={9}>
-                      <span className="fw-semibold small">{processGroup.process}</span>{" "}
-                      <span className="text-body-secondary small">
-                        {countCompleted(processGroup.activities)}/{processGroup.activities.length} concluídas
-                      </span>
-                    </td>
+                    <td></td>
+                    <RollupCell activities={processGroup.activities} label={processGroup.process} />
                   </tr>
                   {processGroup.activities.map((activity) => (
-                    <ActivityRow key={activity.id} activity={activity} projectId={projectId} />
+                    <ActivityRow key={activity.id} activity={activity} projectId={projectId} indent />
                   ))}
                 </Fragment>
               ))}
