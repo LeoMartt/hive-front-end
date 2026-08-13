@@ -6,6 +6,7 @@ import ActivityStatChips, { type ActivityStatChipKey } from "../components/activ
 import ActivityFiltersBar from "../components/activities/ActivityFiltersBar";
 import ActivityGroupToggle from "../components/activities/ActivityGroupToggle";
 import ActivitiesTable from "../components/activities/ActivitiesTable";
+import NavIcon from "../components/common/NavIcon";
 import { useActivities } from "../hooks/useActivities";
 import { filterActivities } from "../utils/filterActivities";
 import { groupByModuleProcess } from "../utils/groupActivities";
@@ -91,6 +92,21 @@ export default function ProjectActivitiesPage() {
             Mostrando {filteredActivities.length} de {activities.length} atividades
           </p>
         </div>
+        <div className="d-flex gap-2">
+          <Button variant="outline-secondary" size="sm">
+            <NavIcon className="me-1">
+              <path d="M12 3v12m0 0-4-4m4 4 4-4" />
+              <path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+            </NavIcon>
+            Exportar atividades
+          </Button>
+          <Button variant="outline-secondary" size="sm">
+            Importar em massa
+          </Button>
+          <Button variant="primary" size="sm">
+            + Nova atividade
+          </Button>
+        </div>
       </div>
 
       <ActivityStatChips stats={stats} activeChip={activeChip} onSelect={handleChipSelect} />
@@ -107,13 +123,15 @@ export default function ProjectActivitiesPage() {
               Abrir todos os módulos
             </Button>
           )}
-          <Form.Check
-            type="switch"
-            id="only-mine-toggle"
-            label="Minhas atividades"
-            checked={filters.onlyMine}
-            onChange={(event) => updateFilters({ onlyMine: event.target.checked })}
-          />
+          <label className={`toggle-pill${filters.onlyMine ? " toggle-pill-active" : ""}`} htmlFor="only-mine-toggle">
+            <Form.Check
+              type="switch"
+              id="only-mine-toggle"
+              checked={filters.onlyMine}
+              onChange={(event) => updateFilters({ onlyMine: event.target.checked })}
+            />
+            Minhas atividades
+          </label>
         </div>
       </div>
 

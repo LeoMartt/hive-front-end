@@ -303,3 +303,24 @@
   font-size: 10px;
   margin-left: 3px;
 }
+
+// Pílula de toggle ("Minhas atividades")
+.toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid c.$border-strong;
+  background-color: c.$surface;
+  font-size: 12px;
+  font-weight: 600;
+  color: c.$text-dim;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+.toggle-pill-active {
+  border-color: c.$yellow-deep;
+  background-color: c.$yellow-soft;
+  color: c.$text;
+}
