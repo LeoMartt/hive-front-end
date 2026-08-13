@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import MultiSelectFilter, { type MultiSelectOption } from "./MultiSelectFilter";
 import ActivityModuleProcessFilter from "./ActivityModuleProcessFilter";
@@ -150,9 +149,9 @@ export default function ActivityFiltersBar({ activities, filters, onFiltersChang
         onProcessesChange={(processes) => onFiltersChange({ processes })}
       />
       {hasActiveFilters && (
-        <Button variant="outline-secondary" size="sm" onClick={clearAll}>
+        <button type="button" className="filters-clear-all" onClick={clearAll}>
           Limpar todos
-        </Button>
+        </button>
       )}
     </div>
   );

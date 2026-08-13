@@ -138,6 +138,7 @@
 // Busca por nome/ID
 .activity-search-input {
   max-width: 220px;
+  border-radius: 8px;
 }
 
 // Linhas de agrupamento (Módulo, Processo, ou grupo plano por Tester/Status)
@@ -184,4 +185,17 @@
   margin-top: 9px;
   padding-top: 9px;
   border-top: 1px solid c.$border;
+}
+
+// "Limpar todos" — texto sublinhado, não botão
+.filters-clear-all {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 12px;
+  color: c.$text-dim;
+  text-decoration: underline;
+}
+.filters-clear-all:hover {
+  color: c.$red;
 }
