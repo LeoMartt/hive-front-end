@@ -524,7 +524,7 @@ export default function ActivityGroupToggle({ mode, onChange }: ActivityGroupTog
 
   return (
     <Dropdown>
-      <Dropdown.Toggle id="group-toggle" className="multi-select-toggle has-value">
+      <Dropdown.Toggle as="button" id="group-toggle" className="multi-select-toggle has-value">
         Agrupar: {activeLabel}
       </Dropdown.Toggle>
       <Dropdown.Menu className="multi-select-menu">
@@ -609,6 +609,7 @@ por:
   return (
     <Dropdown autoClose="outside">
       <Dropdown.Toggle
+        as="button"
         id={`${idPrefix}-toggle`}
         className={`multi-select-toggle${hasValue ? " has-value" : ""}`}
       >
@@ -616,7 +617,7 @@ por:
       </Dropdown.Toggle>
 ```
 
-(Remove os props `variant="outline-secondary" size="sm"` — o novo estilo pílula é definido inteiramente pela classe `.multi-select-toggle` no SCSS, não pelas variantes padrão do Bootstrap.)
+(Remove os props `variant="outline-secondary" size="sm"` e adiciona `as="button"`. O novo estilo pílula é definido inteiramente pela classe `.multi-select-toggle` no SCSS — mas `Dropdown.Toggle` renderiza como o `Button` do `react-bootstrap` por padrão quando `as` não é passado, e o próprio `Button` assume `variant = "primary"` quando a prop `variant` não é passada (não existe um "sem variante" implícito). Sem `as="button"`, o gatilho ficaria com as classes `btn btn-primary` coladas por baixo do `.multi-select-toggle`, herdando o anel de foco azul padrão do Bootstrap (`:focus-visible` de `.btn-primary`) por trás do visual amarelo pretendido. `as="button"` faz o `Dropdown.Toggle` renderizar um `<button>` nativo (mantendo `aria-expanded`, `onClick` e a classe `dropdown-toggle` que o próprio Dropdown já adiciona), sem passar pelo componente `Button` do `react-bootstrap` — mesma técnica já usada no gatilho do `ProjectNavDock`, Task 14.)
 
 - [ ] **Step 2: Mesmo tratamento no `ActivityModuleProcessFilter`**
 
@@ -645,6 +646,7 @@ E substituir:
 por:
 ```tsx
       <Dropdown.Toggle
+        as="button"
         id="module-process-filter-toggle"
         className={`multi-select-toggle${hasValue ? " has-value" : ""}`}
       >
@@ -709,6 +711,7 @@ import NavIcon from "../common/NavIcon";
 
 ```tsx
       <Dropdown.Toggle
+        as="button"
         id={`${idPrefix}-toggle`}
         className={`multi-select-toggle${hasValue ? " has-value" : ""}`}
       >
@@ -726,6 +729,7 @@ import NavIcon from "../common/NavIcon";
 
 ```tsx
       <Dropdown.Toggle
+        as="button"
         id="module-process-filter-toggle"
         className={`multi-select-toggle${hasValue ? " has-value" : ""}`}
       >
@@ -750,7 +754,7 @@ git commit -m "style: restyle filter dropdown triggers as pills with chevron and
 
 ## Context
 
-Task 5 de 16. `variant="outline-secondary" size="sm"` (props do `react-bootstrap`) são removidos dos dois `Dropdown.Toggle` porque o novo visual (forma pílula com borda/fundo próprios, chevron customizado) é inteiramente definido por `.multi-select-toggle`/`.has-value` no SCSS — misturar com as variantes padrão do Bootstrap geraria classes conflitantes (`.btn-outline-secondary` do `_bootstrap-overrides.scss` teria precedência de especificidade imprevisível sobre o que queremos aqui). `.multi-select-toggle::after { display: none }` esconde o *caret* automático que o `Dropdown.Toggle` do `react-bootstrap` desenha via `::after` — o mockup usa um ícone de chevron próprio (`NavIcon` com o path `m6 9 6 6 6-6`, Task 1) em vez do triângulo padrão do Bootstrap. Este mesmo padrão (`.multi-select-toggle` + `.has-value` + chevron) é reaproveitado pela Task 4 (`ActivityGroupToggle`, que já usa a classe com `has-value` fixo) e pela Task 6 (`ActivityDateRangeFilter`, que vai precisar do mesmo gatilho).
+Task 5 de 16. `variant="outline-secondary" size="sm"` (props do `react-bootstrap`) são removidos dos dois `Dropdown.Toggle`, e `as="button"` é adicionado no lugar — o novo visual (forma pílula com borda/fundo próprios, chevron customizado) é inteiramente definido por `.multi-select-toggle`/`.has-value` no SCSS, mas `Dropdown.Toggle` renderiza como o `Button` do `react-bootstrap` por padrão quando `as` não é passado, e `Button` assume `variant = "primary"` quando `variant` não é passado — não existe um "sem variante" implícito. Sem `as="button"`, o gatilho ficaria com `btn btn-primary` por baixo do `.multi-select-toggle`, herdando o anel de foco azul padrão do Bootstrap. `as="button"` faz o `Dropdown.Toggle` renderizar um `<button>` nativo (mantendo `aria-expanded`/`onClick`/a classe `dropdown-toggle` que o próprio `Dropdown` já adiciona), sem passar pelo componente `Button` — mesma técnica já usada no gatilho do `ProjectNavDock`, Task 14. `.multi-select-toggle::after { display: none }` esconde o *caret* automático que `.dropdown-toggle` desenha via `::after` — o mockup usa um ícone de chevron próprio (`NavIcon` com o path `m6 9 6 6 6-6`, Task 1) em vez do triângulo padrão do Bootstrap. Este mesmo padrão (`.multi-select-toggle` + `.has-value` + chevron + `as="button"`) é reaproveitado pela Task 4 (`ActivityGroupToggle`, que já usa a classe com `has-value` fixo) e pela Task 6 (`ActivityDateRangeFilter`, que vai precisar do mesmo gatilho).
 
 ---
 
@@ -868,7 +872,7 @@ export default function ActivityDateRangeFilter({ enabled, from, to, onChange }:
 
   return (
     <Dropdown autoClose="outside">
-      <Dropdown.Toggle id="date-range-filter-toggle" className={`multi-select-toggle${enabled ? " has-value" : ""}`}>
+      <Dropdown.Toggle as="button" id="date-range-filter-toggle" className={`multi-select-toggle${enabled ? " has-value" : ""}`}>
         Período
         <NavIcon className="multi-select-toggle-chevron">
           <path d="m6 9 6 6 6-6" />
