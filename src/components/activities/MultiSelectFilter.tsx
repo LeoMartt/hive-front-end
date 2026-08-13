@@ -47,6 +47,7 @@ export default function MultiSelectFilter({
   return (
     <Dropdown autoClose="outside">
       <Dropdown.Toggle
+        as="button"
         id={`${idPrefix}-toggle`}
         className={`multi-select-toggle${hasValue ? " has-value" : ""}`}
       >

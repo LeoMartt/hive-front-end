@@ -18,7 +18,7 @@ export default function ActivityGroupToggle({ mode, onChange }: ActivityGroupTog
 
   return (
     <Dropdown>
-      <Dropdown.Toggle id="group-toggle" className="multi-select-toggle has-value">
+      <Dropdown.Toggle as="button" id="group-toggle" className="multi-select-toggle has-value">
         Agrupar: {activeLabel}
       </Dropdown.Toggle>
       <Dropdown.Menu className="multi-select-menu">

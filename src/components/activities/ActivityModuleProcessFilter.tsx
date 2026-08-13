@@ -61,6 +61,7 @@ export default function ActivityModuleProcessFilter({
   return (
     <Dropdown autoClose="outside">
       <Dropdown.Toggle
+        as="button"
         id="module-process-filter-toggle"
         className={`multi-select-toggle${hasValue ? " has-value" : ""}`}
       >
