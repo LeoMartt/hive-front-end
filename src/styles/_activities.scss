@@ -40,22 +40,43 @@
 // Chips de estatística clicáveis
 .stat-chip {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 13px;
   border-radius: 8px;
   border: 1px solid c.$border;
   background-color: c.$surface;
-  font-size: 12.5px;
-  color: c.$text-dim;
+  cursor: pointer;
+  min-width: 78px;
+  text-align: left;
+}
+.stat-chip:hover {
+  border-color: c.$text-dim;
 }
 .stat-chip-active {
-  border-color: c.$text-dim;
-  background-color: c.$bg-alt;
-  color: c.$text;
+  border-color: c.$yellow-deep;
+  background-color: c.$yellow-soft;
 }
 .stat-chip-value {
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+}
+.stat-chip-value-g {
+  color: c.$green;
+}
+.stat-chip-value-y {
+  color: c.$yellow-deep;
+}
+.stat-chip-value-r {
+  color: c.$red;
+}
+.stat-chip-label {
+  font-size: 9.5px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 600;
 }
 
 // Filtro multi-seleção genérico (Dropdown + checkboxes)
