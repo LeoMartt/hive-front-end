@@ -33,6 +33,7 @@ export default function ActivityDateRangeFilter({ enabled, from, to, onChange }:
           <Form.Check
             type="switch"
             id="date-range-enabled"
+            aria-label="Usar período customizado"
             checked={enabled}
             onChange={(event) => handleEnabledChange(event.target.checked)}
           />
