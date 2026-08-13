@@ -98,7 +98,6 @@ export default function ProjectActivitiesPage() {
 
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
         <div className="d-flex align-items-center gap-2">
-          <span className="text-body-secondary small">Agrupar por:</span>
           <ActivityGroupToggle mode={groupMode} onChange={setGroupMode} />
         </div>
         <div className="d-flex align-items-center gap-3">
