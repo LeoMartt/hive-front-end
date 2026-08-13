@@ -7,9 +7,18 @@
   font-weight: 700;
   letter-spacing: 0.3px;
   text-transform: uppercase;
-  padding: 3px 8px;
-  border-radius: 5px;
-  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.activity-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  flex: none;
 }
 .activity-badge-aguardando {
   background-color: c.$surface-2;
@@ -198,4 +207,99 @@
 }
 .filters-clear-all:hover {
   color: c.$red;
+}
+
+// Avatar pequeno nas colunas Tester/Dev
+.avatar-mini {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: c.$surface-2;
+  border: 1px solid c.$border-strong;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: c.$font-mono;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: c.$text-dim;
+  margin-right: 5px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+// Pílula de contagem de reteste
+.retest-pill {
+  font-family: c.$font-mono;
+  font-size: 10px;
+  color: c.$text-dim;
+  background-color: c.$surface-2;
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+.retest-pill-warn {
+  background-color: c.$yellow-soft;
+  color: c.$yellow-deep;
+}
+.retest-pill-danger {
+  background-color: c.$red-soft;
+  color: c.$red;
+  font-weight: 700;
+}
+
+// Atraso
+.activity-row-overdue {
+  box-shadow: inset 3px 0 0 c.$red;
+}
+.date-overdue {
+  color: c.$red;
+  font-weight: 700;
+}
+.overdue-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: c.$red;
+  background-color: c.$red-soft;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+// Rollup de grupo (Módulo/Processo) — mini barra de progresso
+.group-rollup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mini-progress {
+  flex: 1;
+  max-width: 220px;
+  height: 6px;
+  border-radius: 4px;
+  background-color: c.$surface-2;
+  overflow: hidden;
+  display: flex;
+}
+.mini-progress-fill {
+  background-color: c.$green;
+  height: 100%;
+}
+
+// Migalha de Módulo/Processo nos agrupamentos planos (Tester/Status)
+.flat-breadcrumb {
+  font-size: 10.5px;
+  color: c.$text-faint;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+// Coluna de seleção e ícone de ordenação (elementos decorativos, sem função nesta passada)
+.sort-icon {
+  opacity: 0.55;
+  font-size: 10px;
+  margin-left: 3px;
 }

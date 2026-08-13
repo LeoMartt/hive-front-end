@@ -8,6 +8,7 @@ interface ActivityStatusBadgeProps {
 export default function ActivityStatusBadge({ status }: ActivityStatusBadgeProps) {
   return (
     <span className={`activity-badge ${ACTIVITY_STATUS_BADGE_CLASS[status]}`}>
+      <span className="activity-badge-dot" />
       {ACTIVITY_STATUS_LABELS[status]}
     </span>
   );
