@@ -49,6 +49,7 @@ export default function ActivityRow({ activity, projectId, indent = false, showB
           type="checkbox"
           aria-label={`Selecionar ${activity.name}`}
           onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
         />
       </td>
       <td style={indent ? { paddingLeft: 34 } : undefined}>
