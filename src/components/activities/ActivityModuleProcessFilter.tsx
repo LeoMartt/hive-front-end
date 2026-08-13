@@ -3,6 +3,7 @@ import Form from "react-bootstrap/Form";
 import type { Activity } from "../../types/activity";
 import { toSafeIdPart } from "../../utils/domId";
 import { groupByModuleProcess } from "../../utils/groupActivities";
+import NavIcon from "../common/NavIcon";
 
 interface ActivityModuleProcessFilterProps {
   activities: Activity[];
@@ -39,6 +40,7 @@ export default function ActivityModuleProcessFilter({
   const moduleOptions = buildModuleOptions(activities);
   const selectedCount = selectedModules.length + selectedProcesses.length;
   const toggleLabel = selectedCount === 0 ? "Módulo/Processo" : `Módulo/Processo (${selectedCount})`;
+  const hasValue = selectedCount > 0;
 
   function toggleModule(moduleName: string) {
     onModulesChange(
@@ -58,8 +60,14 @@ export default function ActivityModuleProcessFilter({
 
   return (
     <Dropdown autoClose="outside">
-      <Dropdown.Toggle id="module-process-filter-toggle" variant="outline-secondary" size="sm" className="multi-select-toggle">
+      <Dropdown.Toggle
+        id="module-process-filter-toggle"
+        className={`multi-select-toggle${hasValue ? " has-value" : ""}`}
+      >
         {toggleLabel}
+        <NavIcon className="multi-select-toggle-chevron">
+          <path d="m6 9 6 6 6-6" />
+        </NavIcon>
       </Dropdown.Toggle>
       <Dropdown.Menu className="multi-select-menu">
         {moduleOptions.map((moduleOption) => (
