@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { NavLink, useParams } from "react-router";
 import Dropdown from "react-bootstrap/Dropdown";
 import FooterWidgetContent from "../common/FooterWidgetContent";
@@ -73,9 +74,14 @@ export default function ProjectNavDock() {
   const { projects } = useProjects();
   const currentProject = projects.find((project) => project.id === id);
   const projectLabel = currentProject?.name ?? id ?? "";
+  const [open, setOpen] = useState(false);
+
+  function closePanel() {
+    setOpen(false);
+  }
 
   return (
-    <Dropdown className="nav-dock">
+    <Dropdown className="nav-dock" show={open} onToggle={setOpen}>
       <Dropdown.Toggle as="button" type="button" id="nav-dock-toggle" className="footer-widget nav-dock-toggle">
         <FooterWidgetContent userName={CURRENT_USER_NAME} userRole={CURRENT_USER_ROLE} />
       </Dropdown.Toggle>
@@ -87,6 +93,7 @@ export default function ProjectNavDock() {
               key={item.to}
               to={`/projetos/${id}/${item.to}`}
               className={({ isActive }) => `nav-dock-item${isActive ? " active" : ""}`}
+              onClick={closePanel}
             >
               <NavIcon>{item.icon}</NavIcon>
               {item.label}
@@ -99,11 +106,17 @@ export default function ProjectNavDock() {
           <NavLink
             to={`/projetos/${id}/config`}
             className={({ isActive }) => `nav-dock-item${isActive ? " active" : ""}`}
+            onClick={closePanel}
           >
             <NavIcon>{CONFIG_ICON}</NavIcon>
             Papel &amp; Config
           </NavLink>
-          <NavLink to="/projetos" end className={({ isActive }) => `nav-dock-item${isActive ? " active" : ""}`}>
+          <NavLink
+            to="/projetos"
+            end
+            className={({ isActive }) => `nav-dock-item${isActive ? " active" : ""}`}
+            onClick={closePanel}
+          >
             <NavIcon>{BACK_ICON}</NavIcon>
             Meus Projetos
           </NavLink>
