@@ -76,7 +76,7 @@ export default function ProjectNavDock() {
 
   return (
     <Dropdown className="nav-dock">
-      <Dropdown.Toggle as="button" id="nav-dock-toggle" className="footer-widget nav-dock-toggle">
+      <Dropdown.Toggle as="button" type="button" id="nav-dock-toggle" className="footer-widget nav-dock-toggle">
         <FooterWidgetContent userName={CURRENT_USER_NAME} userRole={CURRENT_USER_ROLE} />
       </Dropdown.Toggle>
       <Dropdown.Menu className="nav-dock-panel">
@@ -103,7 +103,7 @@ export default function ProjectNavDock() {
             <NavIcon>{CONFIG_ICON}</NavIcon>
             Papel &amp; Config
           </NavLink>
-          <NavLink to="/projetos" className="nav-dock-item">
+          <NavLink to="/projetos" end className={({ isActive }) => `nav-dock-item${isActive ? " active" : ""}`}>
             <NavIcon>{BACK_ICON}</NavIcon>
             Meus Projetos
           </NavLink>
