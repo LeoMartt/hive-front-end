@@ -13,8 +13,13 @@
 }
 
 // Gatilho — reaproveita .footer-widget, só remove o caret automático do Dropdown.Toggle
+// Largura fixa explícita (não 100%): o botão herda position:fixed de .footer-widget, e um
+// ancestral position:fixed (.nav-dock) NÃO estabelece containing block para um descendente
+// fixed (só transform/filter/etc. fariam isso) — width:100% aqui resolveria contra o viewport
+// inteiro, não contra os 520px de .nav-dock, quebrando o pill centralizado.
 .nav-dock-toggle {
-  width: 100%;
+  width: 520px;
+  max-width: calc(100% - 32px);
 }
 .nav-dock-toggle::after {
   display: none;
