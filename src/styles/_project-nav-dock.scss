@@ -1,39 +1,118 @@
 @use "colors" as c;
 
-.project-nav-dock {
+// Contêiner fixo do dropdown (gatilho + painel)
+.nav-dock {
   position: fixed;
-  top: 18px;
   left: 0;
   right: 0;
+  top: 18px;
   margin: 0 auto;
   z-index: 20;
-  width: fit-content;
+  width: 520px;
   max-width: calc(100% - 32px);
+}
+
+// Gatilho — reaproveita .footer-widget, só remove o caret automático do Dropdown.Toggle
+.nav-dock-toggle {
+  width: 100%;
+}
+.nav-dock-toggle::after {
+  display: none;
+}
+
+// Painel
+.nav-dock-panel {
+  width: 100%;
+  margin-top: 6px;
   background-color: c.$surface;
   border: 1px solid c.$border;
-  border-radius: 999px;
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  box-shadow: 0 6px 20px rgba(31, 32, 36, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(31, 32, 36, 0.2);
+  padding: 14px;
 }
 
-.project-nav-dock-back {
+.nav-dock-group-label {
+  font-size: 10px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 12px 10px 6px;
+  font-weight: 700;
+}
+.nav-dock-group-label:first-child {
+  padding-top: 2px;
+}
+
+.nav-dock-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-dock-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
   color: c.$text-dim;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+.nav-dock-item:hover {
+  background-color: c.$bg-alt;
+  color: c.$text;
+}
+.nav-dock-item.active {
+  background-color: c.$yellow-soft;
+  color: c.$yellow-deep;
+  border-color: rgba(255, 227, 110, 0.45);
+}
+
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  opacity: 0.75;
+}
+.nav-dock-item.active .nav-icon {
+  opacity: 1;
+}
+
+.nav-dock-footer {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid c.$border;
+}
+
+.nav-dock-project-pill {
+  border: 1px solid c.$border;
+  border-radius: 8px;
+  padding: 9px 10px;
   background-color: c.$bg-alt;
 }
-
-.project-nav-dock-divider {
-  width: 1px;
-  height: 22px;
-  background-color: c.$border;
+.nav-dock-project-pill-label {
+  font-size: 9.5px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.nav-dock-project-pill-value {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: c.$text;
+}
+.nav-dock-project-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: c.$green;
+  flex: none;
 }
 
 .project-layout-content {
