@@ -2,6 +2,7 @@ import { useState } from "react";
 import Dropdown from "react-bootstrap/Dropdown";
 import Form from "react-bootstrap/Form";
 import { toSafeIdPart } from "../../utils/domId";
+import NavIcon from "../common/NavIcon";
 
 export interface MultiSelectOption {
   value: string;
@@ -41,11 +42,19 @@ export default function MultiSelectFilter({
   }
 
   const toggleLabel = selected.length === 0 ? label : `${label} (${selected.length})`;
+  const hasValue = selected.length > 0;
 
   return (
     <Dropdown autoClose="outside">
-      <Dropdown.Toggle id={`${idPrefix}-toggle`} variant="outline-secondary" size="sm" className="multi-select-toggle">
+      <Dropdown.Toggle
+        as="button"
+        id={`${idPrefix}-toggle`}
+        className={`multi-select-toggle${hasValue ? " has-value" : ""}`}
+      >
         {toggleLabel}
+        <NavIcon className="multi-select-toggle-chevron">
+          <path d="m6 9 6 6 6-6" />
+        </NavIcon>
       </Dropdown.Toggle>
       <Dropdown.Menu className="multi-select-menu">
         {searchable && (

@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import MultiSelectFilter, { type MultiSelectOption } from "./MultiSelectFilter";
 import ActivityModuleProcessFilter from "./ActivityModuleProcessFilter";
@@ -88,6 +87,7 @@ export default function ActivityFiltersBar({ activities, filters, onFiltersChang
       statuses: [],
       testers: [],
       devs: [],
+      dateRangeEnabled: false,
       plannedEndFrom: null,
       plannedEndTo: null,
       retestBuckets: [],
@@ -129,10 +129,10 @@ export default function ActivityFiltersBar({ activities, filters, onFiltersChang
         searchable
       />
       <ActivityDateRangeFilter
+        enabled={filters.dateRangeEnabled}
         from={filters.plannedEndFrom}
         to={filters.plannedEndTo}
-        onFromChange={(value) => onFiltersChange({ plannedEndFrom: value })}
-        onToChange={(value) => onFiltersChange({ plannedEndTo: value })}
+        onChange={onFiltersChange}
       />
       <MultiSelectFilter
         idPrefix="retest-filter"
@@ -149,9 +149,9 @@ export default function ActivityFiltersBar({ activities, filters, onFiltersChang
         onProcessesChange={(processes) => onFiltersChange({ processes })}
       />
       {hasActiveFilters && (
-        <Button variant="outline-secondary" size="sm" onClick={clearAll}>
+        <button type="button" className="filters-clear-all" onClick={clearAll}>
           Limpar todos
-        </Button>
+        </button>
       )}
     </div>
   );

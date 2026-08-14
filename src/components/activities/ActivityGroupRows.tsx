@@ -13,13 +13,14 @@ export default function ActivityGroupRows({ groups, projectId }: ActivityGroupRo
       {groups.map((group) => (
         <Fragment key={group.key}>
           <tr className="activity-group-row">
-            <td colSpan={9}>
+            <td></td>
+            <td colSpan={12}>
               <span className="fw-semibold">{group.label}</span>{" "}
               <span className="text-body-secondary small">{group.activities.length} atividades</span>
             </td>
           </tr>
           {group.activities.map((activity) => (
-            <ActivityRow key={activity.id} activity={activity} projectId={projectId} />
+            <ActivityRow key={activity.id} activity={activity} projectId={projectId} showBreadcrumb />
           ))}
         </Fragment>
       ))}

@@ -1,4 +1,5 @@
 import Table from "react-bootstrap/Table";
+import Form from "react-bootstrap/Form";
 import ActivityTreeRows from "./ActivityTreeRows";
 import ActivityGroupRows from "./ActivityGroupRows";
 import EmptyState from "../common/EmptyState";
@@ -33,14 +34,30 @@ export default function ActivitiesTable({
     <Table hover responsive className="align-middle mb-0">
       <thead>
         <tr>
-          <th>Nome</th>
-          <th>Status</th>
+          <th style={{ width: 26 }}>
+            <Form.Check type="checkbox" aria-label="Selecionar todas as atividades visíveis" />
+          </th>
+          <th>
+            Nome <span className="sort-icon">↕</span>
+          </th>
+          <th>ID</th>
+          <th>
+            Status <span className="sort-icon">↕</span>
+          </th>
           <th>Tester</th>
           <th>Dev</th>
-          <th>Planejado</th>
-          <th>Real</th>
-          <th>Predecessores</th>
-          <th className="text-center">Reteste</th>
+          <th>
+            Início plan. <span className="sort-icon">↕</span>
+          </th>
+          <th>
+            Conclusão plan. <span className="sort-icon">↕</span>
+          </th>
+          <th>Início real</th>
+          <th>Conclusão real</th>
+          <th>Predec.</th>
+          <th className="text-center">
+            Reteste <span className="sort-icon">↕</span>
+          </th>
           <th className="text-center">Issues</th>
         </tr>
       </thead>

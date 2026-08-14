@@ -39,6 +39,7 @@ export interface ActivityFiltersState {
   statuses: ActivityStatus[];
   testers: string[];
   devs: string[];
+  dateRangeEnabled: boolean;
   plannedEndFrom: string | null;
   plannedEndTo: string | null;
   retestBuckets: number[];
