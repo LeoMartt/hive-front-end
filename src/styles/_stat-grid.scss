@@ -29,6 +29,15 @@
   line-height: 1;
   color: c.$text;
 }
+.stat-value.g {
+  color: c.$green;
+}
+.stat-value.y {
+  color: c.$yellow-deep;
+}
+.stat-value.r {
+  color: c.$red;
+}
 .stat-sub {
   font-size: 12px;
   color: c.$text-dim;
