@@ -10,7 +10,7 @@ function Donut({ value, color, label }: DonutProps) {
   const percent = value ?? 0;
   return (
     <div className="donut-item">
-      <svg width="128" height="128" viewBox="0 0 42 42">
+      <svg width="128" height="128" viewBox="0 0 42 42" aria-hidden="true">
         <circle cx="21" cy="21" r="15.9" fill="none" stroke="#E4E5E1" strokeWidth={5} />
         <circle
           cx="21"
