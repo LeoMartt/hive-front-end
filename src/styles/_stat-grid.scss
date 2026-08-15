@@ -1,0 +1,41 @@
+@use "colors" as c;
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.stat-card {
+  background-color: c.$surface;
+  border: 1px solid c.$border;
+  border-radius: c.$radius;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.stat-label {
+  font-size: 11px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 700;
+}
+.stat-value {
+  font-family: c.$font-mono;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: c.$text;
+}
+.stat-sub {
+  font-size: 12px;
+  color: c.$text-dim;
+}
+
+@media (max-width: 640px) {
+  .stat-grid {
+    grid-template-columns: 1fr;
+  }
+}

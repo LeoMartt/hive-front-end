@@ -1,0 +1,638 @@
+@use "colors" as c;
+
+// Badges de status de atividade — texto normal (Em execução), não maiúsculo, igual ao mockup
+.activity-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.activity-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  flex: none;
+}
+.activity-badge-aguardando {
+  background-color: c.$surface-2;
+  color: c.$text-dim;
+}
+.activity-badge-liberado {
+  background-color: c.$yellow-soft;
+  color: c.$yellow-deep;
+}
+.activity-badge-execucao {
+  background-color: c.$blue-soft;
+  color: c.$blue;
+}
+.activity-badge-bloqueado {
+  background-color: c.$red-soft;
+  color: c.$red;
+}
+.activity-badge-concluido {
+  background-color: c.$green-soft;
+  color: c.$green;
+}
+.activity-badge-cancelado {
+  background-color: c.$surface-2;
+  color: c.$text-faint;
+  text-decoration: line-through;
+}
+
+// Chips de estatística clicáveis
+.stat-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 13px;
+  border-radius: 8px;
+  border: 1px solid c.$border;
+  background-color: c.$surface;
+  cursor: pointer;
+  min-width: 78px;
+  text-align: left;
+}
+.stat-chip:hover {
+  border-color: c.$text-dim;
+}
+.stat-chip-active {
+  border-color: c.$yellow-deep;
+  background-color: c.$yellow-soft;
+}
+.stat-chip-value {
+  font-family: c.$font-mono;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1;
+  color: c.$text;
+}
+.stat-chip-value-g {
+  color: c.$green;
+}
+.stat-chip-value-y {
+  color: c.$yellow-deep;
+}
+.stat-chip-value-r {
+  color: c.$red;
+}
+.stat-chip-label {
+  font-size: 9.5px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 600;
+}
+
+// Filtro multi-seleção genérico (Dropdown + checkboxes) — gatilho em pílula com chevron
+.multi-select-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid c.$border-strong;
+  background-color: c.$surface;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: c.$text-dim;
+}
+.multi-select-toggle:hover,
+.multi-select-toggle:focus {
+  border-color: c.$text-dim;
+  background-color: c.$surface;
+  color: c.$text-dim;
+}
+.multi-select-toggle.has-value {
+  border-color: c.$yellow-deep;
+  background-color: c.$yellow-soft;
+  color: c.$text;
+}
+.multi-select-toggle::after {
+  display: none;
+}
+.multi-select-toggle-chevron {
+  width: 11px;
+  height: 11px;
+  opacity: 0.55;
+  margin-left: 1px;
+}
+// Contador do gatilho: pílula amarela (não texto "(n)")
+.filter-count {
+  background-color: c.$yellow-deep;
+  color: #fff;
+  font-size: 9.5px;
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-family: c.$font-mono;
+}
+.multi-select-menu {
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 8px;
+}
+.multi-select-item {
+  padding: 1px 0;
+}
+.multi-select-item label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.multi-select-item label:hover {
+  background-color: c.$bg-alt;
+}
+.multi-select-empty {
+  padding: 8px 10px;
+  font-size: 11.5px;
+  color: c.$text-faint;
+}
+// Contagem de cada opção — alinhada à direita, discreta e monoespaçada
+.dd-opt-count {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: c.$text-faint;
+  font-family: c.$font-mono;
+}
+
+// Busca dentro de um dropdown (Tester/Dev): caixa com ícone de lupa
+.dd-search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: c.$bg-alt;
+  border: 1px solid c.$border;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin: 0 8px 8px;
+}
+.dd-search:focus-within {
+  border-color: c.$yellow-deep;
+}
+.dd-search svg {
+  width: 12px;
+  height: 12px;
+  color: c.$text-faint;
+  flex: none;
+}
+.dd-search input {
+  border: none;
+  background: none;
+  font-size: 12px;
+  width: 100%;
+  color: c.$text;
+}
+.dd-search input:focus {
+  outline: none;
+}
+
+// Rodapé do dropdown com o "Limpar" daquele filtro específico
+.dd-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 4px 8px 0;
+  padding-top: 9px;
+  border-top: 1px solid c.$border;
+}
+.dd-clear {
+  font-size: 11.5px;
+  color: c.$text-faint;
+  background: none;
+  border: none;
+}
+.dd-clear:hover {
+  color: c.$red;
+}
+
+// Filtro em árvore de Módulo/Processo
+.module-process-filter-children {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+.module-process-filter-children label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.module-process-filter-children label:hover {
+  background-color: c.$bg-alt;
+}
+
+// Busca por nome/ID — caixa com ícone de lupa
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: c.$surface;
+  border: 1px solid c.$border-strong;
+  border-radius: 8px;
+  padding: 7px 11px;
+  min-width: 210px;
+}
+.search-box svg {
+  width: 13px;
+  height: 13px;
+  color: c.$text-faint;
+  flex: none;
+}
+.search-box input {
+  border: none;
+  background: none;
+  font-size: 12.5px;
+  width: 100%;
+  color: c.$text;
+}
+.search-box input::placeholder {
+  color: c.$text-faint;
+}
+.search-box input:focus {
+  outline: none;
+}
+.search-box:focus-within {
+  border-color: c.$text-dim;
+}
+
+// Datas do filtro de período
+.filter-date-input {
+  border: 1px solid c.$border;
+  border-radius: 6px;
+  padding: 6px 7px;
+  font-size: 11.5px;
+  font-family: c.$font-mono;
+  background-color: c.$bg-alt;
+  color: c.$text;
+  width: 100%;
+}
+.filter-date-input:disabled {
+  opacity: 0.4;
+}
+
+// Alinhamento das linhas de filtro / toolbar de atividades
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.stat-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.activities-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.activities-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// Célula de nome (linhas de atividade, módulo e processo) — sem peso próprio;
+// só o nome do módulo é bold, via <b>, igual ao mockup.
+// max-width + ellipsis no texto pra nomes longos não esticarem a tabela (scroll lateral).
+.cell-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 260px;
+}
+.cell-name.cell-name-stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  max-width: 220px;
+}
+.cell-name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.cell-name b.cell-name-text {
+  display: inline-block;
+}
+
+// Tester/Dev: avatar fixo + nome truncado
+.cell-person {
+  display: flex;
+  align-items: center;
+  max-width: 130px;
+}
+.cell-person-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+// Prefixo "└" da linha de processo
+.lvl {
+  display: inline-flex;
+  opacity: 0.45;
+}
+.lvl svg {
+  width: 12px;
+  height: 12px;
+}
+
+// Barra de ações em massa (aparece quando há atividades selecionadas)
+.selection-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  background-color: c.$yellow-soft;
+  border: 1px solid rgba(255, 227, 110, 0.55);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+}
+.sel-count {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: c.$text;
+}
+.sel-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+// Switch (toggle "Minhas atividades")
+.switch {
+  position: relative;
+  width: 34px;
+  height: 19px;
+  flex: none;
+  display: inline-block;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.switch .track {
+  position: absolute;
+  inset: 0;
+  background-color: c.$border-strong;
+  border-radius: 20px;
+  transition: 0.15s;
+}
+.switch .track::before {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: 3px;
+  top: 2.5px;
+  background-color: #fff;
+  border-radius: 50%;
+  transition: 0.15s;
+}
+.switch input:checked + .track {
+  background-color: c.$yellow-deep;
+}
+.switch input:checked + .track::before {
+  transform: translateX(15px);
+}
+
+// Linhas de agrupamento (Módulo, Processo, ou grupo plano por Tester/Status)
+.activity-group-row {
+  background-color: c.$bg-alt;
+  cursor: pointer;
+}
+.activity-group-row-process {
+  background-color: c.$surface-2;
+}
+.activity-group-row:hover,
+.activity-group-row-process:hover {
+  background-color: c.$border;
+}
+// Continua uma <td> normal (não flex) para não sair do fluxo da tabela — só
+// centraliza o ícone SVG dentro dela.
+.activity-group-toggle-icon {
+  color: c.$text-faint;
+  text-align: center;
+  vertical-align: middle;
+}
+.activity-group-toggle-icon svg {
+  width: 12px;
+  height: 12px;
+  vertical-align: middle;
+}
+// Processo é um nível abaixo do módulo — a seta também recua, igual ao mockup
+.activity-group-toggle-icon.sub svg {
+  margin-left: 14px;
+}
+
+// Painel do filtro de Período
+.date-range-menu {
+  min-width: 250px;
+  padding: 12px;
+}
+.date-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.date-toggle-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: c.$text;
+}
+.date-range-fields {
+  display: flex;
+  gap: 8px;
+}
+.date-range-field {
+  flex: 1;
+}
+.date-range-field-label {
+  font-size: 9.5px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 4px;
+}
+.date-range-hint {
+  font-size: 11px;
+  color: c.$text-faint;
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid c.$border;
+}
+
+// "Limpar todos" — texto sublinhado, não botão
+.filters-clear-all {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 12px;
+  color: c.$text-dim;
+  text-decoration: underline;
+}
+.filters-clear-all:hover {
+  color: c.$red;
+}
+
+// Avatar pequeno nas colunas Tester/Dev
+.avatar-mini {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: c.$surface-2;
+  border: 1px solid c.$border-strong;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: c.$font-mono;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: c.$text-dim;
+  margin-right: 5px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+// Pílula de contagem de reteste
+.retest-pill {
+  font-family: c.$font-mono;
+  font-size: 10px;
+  color: c.$text-dim;
+  background-color: c.$surface-2;
+  padding: 2px 6px;
+  border-radius: 5px;
+}
+.retest-pill-warn {
+  background-color: c.$yellow-soft;
+  color: c.$yellow-deep;
+}
+.retest-pill-danger {
+  background-color: c.$red-soft;
+  color: c.$red;
+  font-weight: 700;
+}
+
+// Atraso
+.activity-row-overdue {
+  box-shadow: inset 3px 0 0 c.$red;
+}
+.date-overdue {
+  color: c.$red;
+  font-weight: 700;
+}
+.overdue-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: c.$red;
+  background-color: c.$red-soft;
+  padding: 1px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+// Rollup de grupo (Módulo/Processo/Tester/Status) — mini barra de progresso.
+// Vive numa célula própria (colspan=10), por isso nunca herda a indentação do nome.
+.group-rollup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.group-rollup .rc {
+  font-size: 11.5px;
+  color: c.$text-dim;
+  font-family: c.$font-mono;
+  white-space: nowrap;
+}
+.group-rollup .rc-late {
+  color: c.$red;
+  font-weight: 700;
+}
+.mini-progress {
+  flex: 1;
+  max-width: 220px;
+  height: 6px;
+  border-radius: 4px;
+  background-color: c.$surface-2;
+  overflow: hidden;
+  display: flex;
+}
+.mini-progress-fill {
+  background-color: c.$green;
+  height: 100%;
+}
+
+// Migalha de Módulo/Processo nos agrupamentos planos (Tester/Status)
+.flat-breadcrumb {
+  font-size: 10.5px;
+  color: c.$text-faint;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+// Coluna de seleção e ícone de ordenação (elementos decorativos, sem função nesta passada)
+.sort-icon {
+  display: inline-flex;
+  vertical-align: middle;
+  opacity: 0.55;
+  margin-left: 3px;
+}
+.sort-icon svg {
+  width: 10px;
+  height: 10px;
+}
+
+// Pílula de toggle ("Minhas atividades")
+.toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid c.$border-strong;
+  background-color: c.$surface;
+  font-size: 12px;
+  font-weight: 600;
+  color: c.$text-dim;
+  cursor: pointer;
+  margin-bottom: 0;
+}
+.toggle-pill-active {
+  border-color: c.$yellow-deep;
+  background-color: c.$yellow-soft;
+  color: c.$text;
+}

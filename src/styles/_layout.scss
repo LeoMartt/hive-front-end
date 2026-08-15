@@ -1,0 +1,51 @@
+@use "colors" as c;
+
+.page-wrap {
+  padding: 86px clamp(20px, 6vw, 175px) 60px;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+.page-desc {
+  font-size: 13px;
+  color: c.$text-faint;
+  margin-top: 4px;
+}
+.head-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+// Variante mais compacta usada por páginas internas do projeto (ex.: Atividades),
+// que no mockup usam métricas um pouco menores que o Dashboard de projetos.
+.page-head.compact {
+  align-items: flex-end;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+.page-title.compact {
+  font-size: 20px;
+  letter-spacing: -0.2px;
+}
+.page-desc.compact {
+  font-size: 12.5px;
+  margin-top: 3px;
+}
+
+@media (max-width: 640px) {
+  .page-wrap {
+    padding: 86px 20px 40px;
+  }
+}

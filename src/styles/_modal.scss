@@ -1,0 +1,341 @@
+@use "colors" as c;
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(20, 20, 22, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  padding: 20px;
+}
+.modal-box {
+  background-color: c.$surface;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 380px;
+  max-height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 20px 16px;
+  position: relative;
+  box-shadow: 0 24px 60px rgba(31, 32, 36, 0.28);
+  box-sizing: border-box;
+}
+.modal-box.wide {
+  max-width: 460px;
+}
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid c.$border-strong;
+  background-color: c.$surface;
+  color: c.$text-dim;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-close svg {
+  width: 13px;
+  height: 13px;
+}
+.modal-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  margin-bottom: 14px;
+  padding-right: 26px;
+}
+
+// Lista de membros da equipe
+.team-member-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 2px;
+  border-bottom: 1px solid c.$border;
+}
+.team-member-row:last-child {
+  border-bottom: none;
+}
+.team-member-av {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: c.$surface-2;
+  border: 1px solid c.$border-strong;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: c.$font-mono;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: c.$text-dim;
+  flex: none;
+}
+.team-member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.team-member-info b {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.team-member-info span {
+  font-size: 11px;
+  color: c.$text-faint;
+}
+
+// Formulário (Novo projeto)
+.form-group {
+  margin-bottom: 16px;
+}
+.form-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: c.$text-dim;
+  margin-bottom: 6px;
+  display: block;
+}
+.form-label .optional {
+  font-weight: 400;
+  color: c.$text-faint;
+}
+.form-hint {
+  font-size: 10.5px;
+  color: c.$text-faint;
+  margin-top: 5px;
+}
+.form-input,
+.form-textarea {
+  width: 100%;
+  background-color: c.$bg-alt;
+  border: 1px solid c.$border-strong;
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: c.$text;
+}
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: c.$text-dim;
+  background-color: c.$surface;
+}
+.form-textarea {
+  resize: vertical;
+  min-height: 60px;
+  line-height: 1.4;
+}
+select.form-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235A5D63' stroke-width='2'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 9px center;
+  background-size: 14px;
+  padding-right: 28px;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+}
+.mode-opt {
+  flex: 1;
+  border: 1px solid c.$border-strong;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  background-color: c.$surface;
+  color: c.$text-dim;
+}
+.mode-opt.sel.uat {
+  border-color: c.$blue;
+  background-color: c.$blue-soft;
+  color: c.$blue;
+}
+.mode-opt.sel.cutover {
+  border-color: c.$yellow-deep;
+  background-color: c.$yellow-soft;
+  color: c.$yellow-deep;
+}
+
+.level-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.level-row .level-badge {
+  font-family: c.$font-mono;
+  font-size: 10px;
+  font-weight: 700;
+  color: c.$text-faint;
+  width: 16px;
+  flex: none;
+  text-align: center;
+}
+.level-row .form-input {
+  margin-bottom: 0;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+// Adicionar usuários
+.user-add-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.user-search-wrap {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+}
+.user-search-wrap svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 13px;
+  height: 13px;
+  color: c.$text-faint;
+  pointer-events: none;
+}
+.user-search-wrap input {
+  padding-left: 30px;
+}
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background-color: c.$surface;
+  border: 1px solid c.$border-strong;
+  border-radius: 8px;
+  box-shadow: 0 10px 26px rgba(31, 32, 36, 0.14);
+  max-height: 170px;
+  overflow-y: auto;
+  z-index: 5;
+}
+.user-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+.user-dropdown-item:hover,
+.user-dropdown-item.active {
+  background-color: c.$bg-alt;
+}
+.user-dropdown-item .team-member-av {
+  width: 22px;
+  height: 22px;
+  font-size: 8.5px;
+}
+.user-dropdown-empty {
+  padding: 9px 10px;
+  font-size: 11.5px;
+  color: c.$text-faint;
+}
+.role-select {
+  flex: 0 0 150px;
+}
+.btn-add-user {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid c.$border-strong;
+  background-color: c.$surface;
+  color: c.$text;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-add-user:hover {
+  border-color: c.$text-dim;
+}
+.btn-add-user:disabled {
+  opacity: 0.45;
+}
+.btn-add-user svg {
+  width: 16px;
+  height: 16px;
+}
+.user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.user-list-empty {
+  font-size: 11.5px;
+  color: c.$text-faint;
+  padding: 10px 2px;
+}
+.user-list-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border: 1px solid c.$border;
+  border-radius: 8px;
+  background-color: c.$bg-alt;
+}
+.user-list-row .team-member-av {
+  width: 28px;
+  height: 28px;
+  font-size: 9.5px;
+}
+.user-list-row .team-member-info {
+  flex: 1;
+  min-width: 0;
+}
+.user-list-row .team-member-info span {
+  color: c.$text-dim;
+}
+.btn-remove-user {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: 1px solid c.$border-strong;
+  background-color: c.$surface;
+  color: c.$text-faint;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-remove-user svg {
+  width: 11px;
+  height: 11px;
+}
+.btn-remove-user:hover {
+  color: c.$red;
+  border-color: c.$red;
+}
+
+@media (max-width: 640px) {
+  .modal-box {
+    max-width: 100%;
+  }
+}

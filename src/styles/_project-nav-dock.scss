@@ -1,0 +1,179 @@
+@use "colors" as c;
+
+// Escurece a página atrás do painel aberto — sem isso, o conteúdo (tabela, filtros)
+// aparece "vazando" pelas laterais e por baixo do painel, que é mais estreito que a página.
+.nav-dock-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  background-color: rgba(31, 32, 36, 0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+.nav-dock-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+// Contêiner fixo do dropdown (gatilho + painel).
+// Some subindo puro (sem opacity) — com fade junto, a pílula parecia "desaparecer"
+// em vez de deslizar pra fora da tela.
+//
+// translateY em PIXELS, não %: o gatilho é position:fixed e o painel é position:absolute,
+// então nenhum dos dois filhos contribui para a altura de .nav-dock — o próprio .nav-dock
+// tem altura 0. Uma % de translateY é relativa à altura do PRÓPRIO elemento, então
+// -140% de 0px = 0px (nenhum movimento). Por isso um valor fixo, grande o bastante
+// pra tirar o gatilho (54px de altura, a partir de top:18px) da tela.
+.nav-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 18px;
+  margin: 0 auto;
+  z-index: 20;
+  width: 520px;
+  max-width: calc(100% - 32px);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.nav-dock.hidden {
+  transform: translateY(-120px);
+  pointer-events: none;
+}
+
+// Gatilho — reaproveita .footer-widget
+// Largura fixa explícita (não 100%): o botão herda position:fixed de .footer-widget, e um
+// ancestral position:fixed (.nav-dock) NÃO estabelece containing block para um descendente
+// fixed (só transform/filter/etc. fariam isso) — width:100% aqui resolveria contra o viewport
+// inteiro, não contra os 520px de .nav-dock, quebrando o pill centralizado.
+//
+// Justamente por ser position:fixed, o gatilho SAI do fluxo normal — não dá pra empilhar
+// o painel abaixo dele com flex/block (o painel "não vê" a altura do gatilho e sobe até
+// colar no topo de .nav-dock, ficando atrás do próprio botão). Por isso o painel abaixo
+// usa position:absolute com um "top" fixo em pixels (altura do gatilho + respiro),
+// em vez de depender do fluxo do documento.
+.nav-dock-toggle {
+  width: 520px;
+  max-width: calc(100% - 32px);
+}
+
+// Painel — fica sempre montado (ver Dropdown keepMounted) e anima via max-height/opacity,
+// já que o conteúdo precisa ficar presente no DOM para a transição funcionar.
+// position:absolute + top fixo: .nav-dock (position:fixed) é o containing block, então
+// o painel fica ancorado nele independente do gatilho estar fora do fluxo (ver comentário acima).
+.nav-dock-panel {
+  position: absolute;
+  top: 60px; // 54px de altura do gatilho + 6px de respiro
+  left: 0;
+  width: 100%;
+  background-color: c.$surface;
+  border: 1px solid c.$border;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(31, 32, 36, 0.2);
+  padding: 0 14px;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition:
+    max-height 0.22s ease,
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+.nav-dock-panel.open {
+  max-height: 70vh;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+  padding: 14px;
+  overflow-y: auto;
+}
+
+.nav-dock-group-label {
+  font-size: 10px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 12px 10px 6px;
+  font-weight: 700;
+}
+.nav-dock-group-label:first-child {
+  padding-top: 2px;
+}
+
+.nav-dock-items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-dock-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  color: c.$text-dim;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+.nav-dock-item:hover {
+  background-color: c.$bg-alt;
+  color: c.$text;
+}
+.nav-dock-item.active {
+  background-color: c.$yellow-soft;
+  color: c.$yellow-deep;
+  border-color: rgba(255, 227, 110, 0.45);
+}
+
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  opacity: 0.75;
+}
+.nav-dock-item.active .nav-icon {
+  opacity: 1;
+}
+
+.nav-dock-footer {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid c.$border;
+}
+
+.nav-dock-project-pill {
+  border: 1px solid c.$border;
+  border-radius: 8px;
+  padding: 9px 10px;
+  background-color: c.$bg-alt;
+}
+.nav-dock-project-pill-label {
+  font-size: 9.5px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.nav-dock-project-pill-value {
+  font-size: 12.5px;
+  font-weight: 600;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: c.$text;
+}
+.nav-dock-project-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #4fbf8b;
+  flex: none;
+}
+
+.project-layout-content {
+  padding: 86px clamp(20px, 6vw, 175px) 60px;
+}

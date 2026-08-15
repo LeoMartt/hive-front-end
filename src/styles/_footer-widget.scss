@@ -18,11 +18,66 @@
   justify-content: space-between;
   box-shadow: 0 6px 20px rgba(31, 32, 36, 0.1);
 }
+// O hover mais forte só faz sentido quando o widget é o gatilho do nav dock (um <button>);
+// na tela de Projetos ele é um <div> estático, sem essa affordance.
+button.footer-widget:hover {
+  box-shadow: 0 10px 28px rgba(31, 32, 36, 0.14);
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1;
+  justify-content: flex-start;
+}
+.footer-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  text-align: left;
+}
+.footer-brand-text b {
+  font-family: c.$font-mono;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: c.$text;
+}
+.footer-brand-text span {
+  font-size: 9px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
 .footer-widget-divider {
   width: 1px;
   height: 26px;
   background-color: c.$border;
+}
+
+.footer-user {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex: 1;
+  justify-content: flex-end;
+}
+.footer-user-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+  text-align: right;
+}
+.footer-user-text b {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: c.$text;
+}
+.footer-user-text span {
+  font-size: 10.5px;
+  color: c.$text-faint;
 }
 
 .footer-widget-avatar {
@@ -38,4 +93,11 @@
   font-weight: 700;
   font-size: 0.72rem;
   color: c.$yellow-deep;
+  flex: none;
+}
+
+.bee-mark {
+  width: 30px;
+  height: 30px;
+  flex: none;
 }

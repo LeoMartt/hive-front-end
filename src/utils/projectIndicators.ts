@@ -1,11 +1,14 @@
 import type { Project } from "../types/project";
 
-export type StatusVariant = "success" | "danger" | "info";
+export type StatusVariant = "success" | "danger" | "warning" | "info";
 export type SpiVariant = "good" | "warn" | "bad";
 
 export function getProjectStatusVariant(project: Project): StatusVariant {
   if (project.progressPercent >= 100) return "success";
-  if (project.spi !== null && project.spi < 0.7) return "danger";
+  if (project.spi !== null && project.spi < 0.7) {
+    // Em Cutover o atraso é mais crítico (perto do go-live) do que em UAT.
+    return project.mode === "cutover" ? "danger" : "warning";
+  }
   return "info";
 }
 
