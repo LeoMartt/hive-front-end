@@ -241,7 +241,8 @@
 }
 
 @media (max-width: 1150px) {
-  .stat-grid-issues {
+  .stat-grid-issues,
+  .stat-grid-issues.stat-grid-issues-5 {
     grid-template-columns: repeat(2, 1fr);
   }
   .grid-2 {
@@ -258,7 +259,8 @@
   }
 }
 @media (max-width: 880px) {
-  .stat-grid-issues {
+  .stat-grid-issues,
+  .stat-grid-issues.stat-grid-issues-5 {
     grid-template-columns: repeat(2, 1fr);
   }
   .stat-grid-compact {
@@ -266,7 +268,8 @@
   }
 }
 @media (max-width: 560px) {
-  .stat-grid-issues {
+  .stat-grid-issues,
+  .stat-grid-issues.stat-grid-issues-5 {
     grid-template-columns: 1fr;
   }
   .stat-grid-compact {
