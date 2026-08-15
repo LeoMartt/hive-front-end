@@ -4,6 +4,7 @@ import ProjectLayout from "../layouts/ProjectLayout";
 import ProjectActivitiesPage from "../pages/ProjectActivitiesPage";
 import ActivityDetailPlaceholderPage from "../pages/ActivityDetailPlaceholderPage";
 import PlaceholderPage from "../pages/PlaceholderPage";
+import ProjectDashboardPage from "../pages/ProjectDashboardPage";
 
 export default function AppRoutes() {
   return (
@@ -12,7 +13,7 @@ export default function AppRoutes() {
       <Route path="/projetos" element={<ProjectsPage />} />
       <Route path="/projetos/:id" element={<ProjectLayout />}>
         <Route index element={<Navigate to="atividades" replace />} />
-        <Route path="dashboard" element={<PlaceholderPage title="O dashboard do projeto" />} />
+        <Route path="dashboard" element={<ProjectDashboardPage />} />
         <Route path="atividades" element={<ProjectActivitiesPage />} />
         <Route path="atividades/:activityId" element={<ActivityDetailPlaceholderPage />} />
         <Route path="estrutura" element={<PlaceholderPage title="A estrutura (WBS) do projeto" />} />
