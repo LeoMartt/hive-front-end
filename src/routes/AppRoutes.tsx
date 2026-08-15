@@ -12,7 +12,7 @@ export default function AppRoutes() {
       <Route path="/" element={<Navigate to="/projetos" replace />} />
       <Route path="/projetos" element={<ProjectsPage />} />
       <Route path="/projetos/:id" element={<ProjectLayout />}>
-        <Route index element={<Navigate to="atividades" replace />} />
+        <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<ProjectDashboardPage />} />
         <Route path="atividades" element={<ProjectActivitiesPage />} />
         <Route path="atividades/:activityId" element={<ActivityDetailPlaceholderPage />} />
