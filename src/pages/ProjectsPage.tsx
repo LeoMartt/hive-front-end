@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import StatCard from "../components/projects/StatCard";
+import StatCard from "../components/common/StatCard";
 import ProjectsToolbar, { type ProjectsTabFilter } from "../components/projects/ProjectsToolbar";
 import ProjectsTable from "../components/projects/ProjectsTable";
 import TeamModal from "../components/projects/TeamModal";
