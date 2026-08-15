@@ -1,0 +1,275 @@
+@use "colors" as c;
+
+// Bloco de métricas (Atividades / Issues) — barra de acento à esquerda + cards
+.metric-block {
+  border-left: 3px solid c.$blue;
+  padding: 2px 0 2px 16px;
+  margin-bottom: 24px;
+
+  &.issues {
+    border-left-color: c.$yellow-deep;
+  }
+
+  // O dashboard usa stat-cards mais compactos que a lista de Projetos.
+  .stat-card {
+    padding: 14px 16px;
+    min-height: 96px;
+    justify-content: space-between;
+  }
+  .stat-label {
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 32px;
+  }
+  .stat-sub {
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin: 0;
+}
+
+// Hero do SPI + grid compacta de 6 cards
+.stat-hero-row {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+}
+.spi-hero {
+  flex: 0 0 210px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(150deg, c.$yellow-soft, c.$surface 75%);
+  border: 1px solid rgba(255, 227, 110, 0.55);
+  border-radius: c.$radius;
+  padding: 18px 20px;
+
+  .stat-label {
+    color: c.$yellow-deep;
+    opacity: 0.85;
+  }
+}
+.spi-big {
+  font-family: c.$font-mono;
+  font-size: 54px;
+  font-weight: 800;
+  line-height: 1;
+  color: c.$yellow-deep;
+}
+.stat-grid-compact {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+}
+
+// Grid de 5 cards de Issues
+.stat-grid-issues {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+
+  &.stat-grid-issues-5 {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+// Curva S + Distribuição, lado a lado
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.panel {
+  background: c.$surface;
+  border: 1px solid c.$border;
+  border-radius: c.$radius;
+  padding: 16px 18px;
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.panel-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+
+  span {
+    color: c.$text-faint;
+    font-weight: 500;
+    font-size: 11px;
+  }
+}
+.legend {
+  display: flex;
+  gap: 12px;
+  font-size: 11px;
+  color: c.$text-dim;
+
+  i {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    margin-right: 5px;
+    vertical-align: middle;
+  }
+}
+
+// Donuts de Pace/Quality/Backlog
+.donut-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.donut-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+
+  .dv {
+    font-family: c.$font-mono;
+    font-size: 22px;
+    font-weight: 700;
+    color: c.$text;
+  }
+  .dl {
+    font-size: 12px;
+    color: c.$text-faint;
+    text-align: center;
+    line-height: 1.4;
+  }
+}
+
+// Log de atividades recentes
+.log-panel {
+  margin-bottom: 14px;
+}
+.log-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 11px 4px;
+  border-bottom: 1px solid c.$border;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+.log-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+  &.i-status {
+    background: c.$blue-soft;
+    color: c.$blue;
+  }
+  &.i-block {
+    background: c.$red-soft;
+    color: c.$red;
+  }
+  &.i-done {
+    background: c.$green-soft;
+    color: c.$green;
+  }
+  &.i-issue {
+    background: c.$yellow-soft;
+    color: c.$yellow-deep;
+  }
+}
+.log-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.log-text {
+  font-size: 12.5px;
+  color: c.$text;
+
+  .id {
+    font-family: c.$font-mono;
+    color: c.$text-dim;
+    font-size: 11.5px;
+  }
+  .log-name {
+    font-weight: 600;
+  }
+}
+.log-meta {
+  font-size: 11px;
+  color: c.$text-faint;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+@media (max-width: 1150px) {
+  .stat-grid-issues {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .stat-hero-row {
+    flex-direction: column;
+  }
+  .spi-hero {
+    flex: none;
+  }
+  .stat-grid-compact {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (max-width: 880px) {
+  .stat-grid-issues {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stat-grid-compact {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .stat-grid-issues {
+    grid-template-columns: 1fr;
+  }
+  .stat-grid-compact {
+    grid-template-columns: 1fr;
+  }
+}
