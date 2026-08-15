@@ -1,14 +1,17 @@
 @use "colors" as c;
 
 .accent-bar {
-  width: 4px;
+  width: 3px;
+  min-height: 36px;
   border-radius: 3px;
   align-self: stretch;
   flex-shrink: 0;
 }
 .accent-bar-success { background-color: c.$green; }
 .accent-bar-danger { background-color: c.$red; }
-.accent-bar-info { background-color: c.$blue; }
+.accent-bar-warning { background-color: c.$orange; }
+// "info" é o estado neutro/em-dia — cinza, não azul (o azul é reservado ao mode-tag UAT)
+.accent-bar-info { background-color: c.$border-strong; }
 
 .spi-value {
   font-family: c.$font-mono;
@@ -43,35 +46,32 @@
   margin-left: 0;
 }
 
-.project-search-input {
-  max-width: 260px;
-  background-color: c.$surface;
-}
-
-.empty-state-description {
-  max-width: 320px;
-}
-
-.level-index {
-  width: 16px;
-  flex-shrink: 0;
+// Estado vazio (tabelas sem resultado)
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  padding: 70px 20px;
+  gap: 10px;
+}
+.empty-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background-color: c.$yellow-soft;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.empty-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+.empty-desc {
+  font-size: 12.5px;
   color: c.$text-faint;
-}
-
-.role-select {
-  width: 180px;
-  flex-shrink: 0;
-}
-
-.progress-cell {
-  min-width: 170px;
-}
-
-.col-project-name {
-  width: 30%;
-}
-
-.projects-page {
-  padding-top: 6rem;
+  max-width: 320px;
 }

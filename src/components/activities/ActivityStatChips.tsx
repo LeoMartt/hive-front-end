@@ -27,7 +27,7 @@ interface ActivityStatChipsProps {
 
 export default function ActivityStatChips({ stats, activeChip, onSelect }: ActivityStatChipsProps) {
   return (
-    <div className="d-flex flex-wrap gap-2 mb-3">
+    <div className="stat-chips-row">
       {CHIPS.map((chip) => (
         <button
           key={chip.key}
@@ -35,7 +35,7 @@ export default function ActivityStatChips({ stats, activeChip, onSelect }: Activ
           className={`stat-chip${activeChip === chip.key ? " stat-chip-active" : ""}`}
           onClick={() => onSelect(chip.key)}
         >
-          <span className={`stat-chip-value font-monospace${chip.tone ? ` stat-chip-value-${chip.tone}` : ""}`}>
+          <span className={`stat-chip-value${chip.tone ? ` stat-chip-value-${chip.tone}` : ""}`}>
             {stats[chip.key]}
           </span>
           <span className="stat-chip-label">{chip.label}</span>

@@ -33,7 +33,7 @@ export default function TeamAvatars({ team, onOpenTeam }: TeamAvatarsProps) {
           {member.initials}
         </div>
       ))}
-      {remaining > 0 && <div className="avatar-circle text-body-secondary">+{remaining}</div>}
+      {remaining > 0 && <div className="avatar-circle">+{remaining}</div>}
     </div>
   );
 }

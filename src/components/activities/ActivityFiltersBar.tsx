@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import Form from "react-bootstrap/Form";
 import MultiSelectFilter, { type MultiSelectOption } from "./MultiSelectFilter";
 import ActivityModuleProcessFilter from "./ActivityModuleProcessFilter";
 import ActivityDateRangeFilter from "./ActivityDateRangeFilter";
@@ -97,20 +96,26 @@ export default function ActivityFiltersBar({ activities, filters, onFiltersChang
   }
 
   return (
-    <div className="d-flex flex-wrap align-items-center gap-2 mb-3">
-      <Form.Control
-        type="text"
-        placeholder="Buscar por nome ou ID…"
-        className="activity-search-input"
-        value={filters.search}
-        onChange={(event) => onFiltersChange({ search: event.target.value })}
-      />
+    <div className="filters-bar">
+      <div className="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <circle cx="11" cy="11" r="7" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Buscar por nome ou ID…"
+          value={filters.search}
+          onChange={(event) => onFiltersChange({ search: event.target.value })}
+        />
+      </div>
       <MultiSelectFilter
         idPrefix="status-filter"
         label="Status"
         options={statusOptions}
         selected={filters.statuses}
         onChange={(statuses) => onFiltersChange({ statuses: statuses as ActivityStatus[] })}
+        showOptionCounts
       />
       <MultiSelectFilter
         idPrefix="tester-filter"

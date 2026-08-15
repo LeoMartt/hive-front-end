@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
 import { useParams } from "react-router";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
 import ActivityStatChips, { type ActivityStatChipKey } from "../components/activities/ActivityStatChips";
 import ActivityFiltersBar from "../components/activities/ActivityFiltersBar";
 import ActivityGroupToggle from "../components/activities/ActivityGroupToggle";
@@ -37,8 +35,17 @@ export default function ProjectActivitiesPage() {
   const { activities, stats } = useActivities(projectId);
 
   const [filters, setFilters] = useState<ActivityFiltersState>(createEmptyFilters);
-  const [groupMode, setGroupMode] = useState<ActivityGroupMode>("tree");
+  const [groupMode, setGroupModeState] = useState<ActivityGroupMode>("tree");
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
+  // Processos nascem expandidos (igual ao mockup): guardamos só os que foram recolhidos.
+  const [collapsedProcesses, setCollapsedProcesses] = useState<Set<string>>(new Set());
+  // Grupos de "Por Tester"/"Por Status" nascem recolhidos, igual a Módulo na Árvore.
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  function setGroupMode(mode: ActivityGroupMode) {
+    setGroupModeState(mode);
+    setExpandedGroups(new Set());
+  }
 
   function updateFilters(partial: Partial<ActivityFiltersState>) {
     setFilters((prev) => ({ ...prev, ...partial }));
@@ -78,34 +85,64 @@ export default function ProjectActivitiesPage() {
     });
   }
 
-  function expandAllModules() {
-    const allModules = groupByModuleProcess(filteredActivities).map((group) => group.module);
-    setExpandedModules(new Set(allModules));
+  function toggleProcess(processKey: string) {
+    setCollapsedProcesses((prev) => {
+      const next = new Set(prev);
+      if (next.has(processKey)) {
+        next.delete(processKey);
+      } else {
+        next.add(processKey);
+      }
+      return next;
+    });
+  }
+
+  function toggleGroup(groupKey: string) {
+    setExpandedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupKey)) {
+        next.delete(groupKey);
+      } else {
+        next.add(groupKey);
+      }
+      return next;
+    });
+  }
+
+  const moduleGroups = useMemo(() => groupByModuleProcess(filteredActivities), [filteredActivities]);
+  const allModulesExpanded = moduleGroups.length > 0 && moduleGroups.every((group) => expandedModules.has(group.module));
+
+  function toggleAllModules() {
+    if (allModulesExpanded) {
+      setExpandedModules(new Set());
+    } else {
+      setExpandedModules(new Set(moduleGroups.map((group) => group.module)));
+    }
   }
 
   return (
     <div>
-      <div className="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-3">
+      <div className="page-head compact">
         <div>
-          <h1 className="h4 fw-bold mb-1">Atividades</h1>
-          <p className="text-body-secondary small mb-0">
+          <div className="page-title compact">Atividades</div>
+          <div className="page-desc compact">
             Mostrando {filteredActivities.length} de {activities.length} atividades
-          </p>
+          </div>
         </div>
-        <div className="d-flex gap-2">
-          <Button variant="outline-secondary" size="sm">
-            <NavIcon className="me-1">
+        <div className="head-actions">
+          <button type="button" className="btn btn-outline-secondary btn-sm">
+            <NavIcon>
               <path d="M12 3v12m0 0-4-4m4 4 4-4" />
               <path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
             </NavIcon>
             Exportar atividades
-          </Button>
-          <Button variant="outline-secondary" size="sm">
+          </button>
+          <button type="button" className="btn btn-outline-secondary btn-sm">
             Importar em massa
-          </Button>
-          <Button variant="primary" size="sm">
+          </button>
+          <button type="button" className="btn btn-primary btn-sm">
             + Nova atividade
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -113,37 +150,42 @@ export default function ProjectActivitiesPage() {
 
       <ActivityFiltersBar activities={activities} filters={filters} onFiltersChange={updateFilters} />
 
-      <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <div className="d-flex align-items-center gap-2">
+      <div className="activities-toolbar">
+        <div className="activities-toolbar-group">
           <ActivityGroupToggle mode={groupMode} onChange={setGroupMode} />
-        </div>
-        <div className="d-flex align-items-center gap-3">
           {groupMode === "tree" && (
-            <Button variant="outline-secondary" size="sm" onClick={expandAllModules}>
-              Abrir todos os módulos
-            </Button>
+            <button type="button" className="btn btn-sm" onClick={toggleAllModules}>
+              {allModulesExpanded ? "Fechar todos os módulos" : "Abrir todos os módulos"}
+            </button>
           )}
+        </div>
+        <div className="activities-toolbar-group">
           <label className={`toggle-pill${filters.onlyMine ? " toggle-pill-active" : ""}`} htmlFor="only-mine-toggle">
-            <Form.Check
-              type="switch"
-              id="only-mine-toggle"
-              checked={filters.onlyMine}
-              onChange={(event) => updateFilters({ onlyMine: event.target.checked })}
-            />
+            <span className="switch">
+              <input
+                type="checkbox"
+                id="only-mine-toggle"
+                checked={filters.onlyMine}
+                onChange={(event) => updateFilters({ onlyMine: event.target.checked })}
+              />
+              <span className="track" />
+            </span>
             Minhas atividades
           </label>
         </div>
       </div>
 
-      <div className="card">
-        <ActivitiesTable
-          activities={filteredActivities}
-          projectId={projectId}
-          groupMode={groupMode}
-          expandedModules={expandedModules}
-          onToggleModule={toggleModule}
-        />
-      </div>
+      <ActivitiesTable
+        activities={filteredActivities}
+        projectId={projectId}
+        groupMode={groupMode}
+        expandedModules={expandedModules}
+        onToggleModule={toggleModule}
+        collapsedProcesses={collapsedProcesses}
+        onToggleProcess={toggleProcess}
+        expandedGroups={expandedGroups}
+        onToggleGroup={toggleGroup}
+      />
     </div>
   );
 }

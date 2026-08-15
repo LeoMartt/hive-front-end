@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import Button from "react-bootstrap/Button";
 import StatCard from "../components/projects/StatCard";
 import ProjectsToolbar, { type ProjectsTabFilter } from "../components/projects/ProjectsToolbar";
 import ProjectsTable from "../components/projects/ProjectsTable";
@@ -29,32 +28,27 @@ export default function ProjectsPage() {
   const projectsSubLabel = `${stats.uatCount} em UAT · ${stats.cutoverCount} em Cutover`;
 
   return (
-    <main className="container py-5 projects-page">
+    <main className="page-wrap">
       <FooterWidget userName="Guilherme Fabretti" userRole="Gestor de Projetos" />
 
-      <div className="d-flex align-items-start justify-content-between flex-wrap gap-3 mb-4">
+      <div className="page-head">
         <div>
-          <h1 className="h4 fw-bold mb-1">Dashboard</h1>
-          <p className="text-body-secondary small mb-0">
-            Visão geral das homologações em UAT e Cutover
-          </p>
+          <div className="page-title">Dashboard</div>
+          <div className="page-desc">Visão geral das homologações em UAT e Cutover</div>
         </div>
-        <Button variant="primary" onClick={() => setShowNewProjectModal(true)}>
-          Novo projeto
-        </Button>
+        <div className="head-actions">
+          <button type="button" className="btn btn-primary" onClick={() => setShowNewProjectModal(true)}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4}>
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Novo projeto
+          </button>
+        </div>
       </div>
 
-      <div className="row g-3 mb-4">
-        <div className="col-md-6">
-          <StatCard label="Projetos ativos" value={String(stats.total)} sub={projectsSubLabel} />
-        </div>
-        <div className="col-md-6">
-          <StatCard
-            label="SPI médio pessoal"
-            value={avgSpiLabel}
-            sub="Calculado sobre os projetos ativos"
-          />
-        </div>
+      <div className="stat-grid">
+        <StatCard label="Projetos ativos" value={String(stats.total)} sub={projectsSubLabel} />
+        <StatCard label="SPI médio pessoal" value={avgSpiLabel} sub="Calculado sobre os projetos ativos" />
       </div>
 
       <ProjectsToolbar
@@ -69,9 +63,7 @@ export default function ProjectsPage() {
         onSearchChange={setSearchQuery}
       />
 
-      <div className="card">
-        <ProjectsTable projects={filteredProjects} onOpenTeam={setTeamModalMembers} />
-      </div>
+      <ProjectsTable projects={filteredProjects} onOpenTeam={setTeamModalMembers} />
 
       <TeamModal
         show={teamModalMembers !== null}

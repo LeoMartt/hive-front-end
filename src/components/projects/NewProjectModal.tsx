@@ -1,7 +1,6 @@
 import { useState } from "react";
-import Modal from "react-bootstrap/Modal";
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
+import Modal from "../common/Modal";
+import CloseIcon from "../common/CloseIcon";
 import type { NewProjectInput, ProjectMode, TeamMember, UserRole } from "../../types/project";
 
 interface NewProjectModalProps {
@@ -125,181 +124,190 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
   }
 
   const canConfirm = state.name.trim().length > 0;
+  const showUserDropdown = state.userSearch.trim().length > 0 && !state.selectedUser;
 
   return (
-    <Modal show={show} onHide={resetAndHide} centered size="lg">
-      <Modal.Header closeButton>
-        <Modal.Title as="h6">Novo projeto</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <Form.Group className="mb-3" controlId="npName">
-          <Form.Label>Nome do projeto</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Ex.: CRM Homologação Comercial"
-            value={state.name}
-            onChange={(event) => setState((prev) => ({ ...prev, name: event.target.value }))}
-          />
-        </Form.Group>
+    <Modal open={show} onClose={resetAndHide} wide labelledBy="new-project-modal-title">
+      <div className="modal-title" id="new-project-modal-title">
+        Novo projeto
+      </div>
 
-        <Form.Group className="mb-3" controlId="npDescription">
-          <Form.Label>
-            Descrição <span className="text-body-secondary fw-normal">(opcional)</span>
-          </Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={2}
-            placeholder="Contexto do projeto, escopo, sistemas envolvidos…"
-            value={state.description}
-            onChange={(event) =>
-              setState((prev) => ({ ...prev, description: event.target.value }))
-            }
-          />
-        </Form.Group>
+      <div className="form-group">
+        <label className="form-label" htmlFor="npName">
+          Nome do projeto
+        </label>
+        <input
+          className="form-input"
+          id="npName"
+          type="text"
+          placeholder="Ex.: CRM Homologação Comercial"
+          value={state.name}
+          onChange={(event) => setState((prev) => ({ ...prev, name: event.target.value }))}
+        />
+      </div>
 
-        <Form.Group className="mb-3" controlId="npMode">
-          <Form.Label className="d-block">Modo</Form.Label>
-          <div className="btn-group w-100" role="group">
-            <Button
-              type="button"
-              variant={state.mode === "uat" ? "primary" : "outline-secondary"}
-              aria-pressed={state.mode === "uat"}
-              onClick={() => handleModeChange("uat")}
-            >
-              UAT
-            </Button>
-            <Button
-              type="button"
-              variant={state.mode === "cutover" ? "primary" : "outline-secondary"}
-              aria-pressed={state.mode === "cutover"}
-              onClick={() => handleModeChange("cutover")}
-            >
-              Cutover
-            </Button>
+      <div className="form-group">
+        <label className="form-label" htmlFor="npDescription">
+          Descrição <span className="optional">(opcional)</span>
+        </label>
+        <textarea
+          className="form-textarea"
+          id="npDescription"
+          rows={2}
+          placeholder="Contexto do projeto, escopo, sistemas envolvidos…"
+          value={state.description}
+          onChange={(event) => setState((prev) => ({ ...prev, description: event.target.value }))}
+        />
+      </div>
+
+      <div className="form-group">
+        <span className="form-label">Modo</span>
+        <div className="mode-toggle">
+          <button
+            type="button"
+            className={`mode-opt${state.mode === "uat" ? " sel uat" : ""}`}
+            aria-pressed={state.mode === "uat"}
+            onClick={() => handleModeChange("uat")}
+          >
+            UAT
+          </button>
+          <button
+            type="button"
+            className={`mode-opt${state.mode === "cutover" ? " sel cutover" : ""}`}
+            aria-pressed={state.mode === "cutover"}
+            onClick={() => handleModeChange("cutover")}
+          >
+            Cutover
+          </button>
+        </div>
+        <div className="form-hint">O modo não pode ser alterado após a criação do projeto.</div>
+      </div>
+
+      <div className="form-group">
+        <span className="form-label" id="npLevelsLabel">
+          Nomes dos níveis hierárquicos
+        </span>
+        {state.levelNames.map((levelName, index) => (
+          <div className="level-row" key={index}>
+            <span className="level-badge">{index + 1}</span>
+            <input
+              className="form-input"
+              type="text"
+              id={`npLevel-${index}`}
+              aria-label={`Nível ${index + 1}`}
+              value={levelName}
+              onChange={(event) => handleLevelNameChange(index, event.target.value)}
+            />
           </div>
-          <Form.Text>O modo não pode ser alterado após a criação do projeto.</Form.Text>
-        </Form.Group>
+        ))}
+        <div className="level-row">
+          <span className="level-badge">{state.levelNames.length + 1}</span>
+          <span className="mono">Atividade (fixo)</span>
+        </div>
+      </div>
 
-        <Form.Group className="mb-3">
-          <Form.Label id="npLevelsLabel">Nomes dos níveis hierárquicos</Form.Label>
-          {state.levelNames.map((levelName, index) => (
-            <div className="d-flex align-items-center gap-2 mb-2" key={index}>
-              <span className="text-body-secondary small level-index">{index + 1}</span>
-              <Form.Control
-                type="text"
-                id={`npLevel-${index}`}
-                aria-label={`Nível ${index + 1}`}
-                value={levelName}
-                onChange={(event) => handleLevelNameChange(index, event.target.value)}
-              />
-            </div>
-          ))}
-          <div className="d-flex align-items-center gap-2 text-body-secondary small">
-            <span className="level-index">{state.levelNames.length + 1}</span>
-            <span>Atividade (fixo)</span>
-          </div>
-        </Form.Group>
-
-        <Form.Group className="mb-2">
-          <Form.Label>Usuários do projeto</Form.Label>
-          <div className="d-flex gap-2 mb-2">
-            <Form.Control
+      <div className="form-group">
+        <span className="form-label">Usuários do projeto</span>
+        <div className="user-add-row">
+          <div className="user-search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              className="form-input"
               type="text"
               id="npUserSearchInput"
               aria-label="Pesquisar usuário"
               placeholder="Pesquisar usuário…"
+              autoComplete="off"
               value={state.userSearch}
               onChange={(event) =>
                 setState((prev) => ({ ...prev, userSearch: event.target.value, selectedUser: null }))
               }
             />
-            <Form.Select
-              className="role-select"
-              id="npUserRole"
-              aria-label="Papel do usuário"
-              value={state.selectedRole}
-              onChange={(event) =>
-                setState((prev) => ({ ...prev, selectedRole: event.target.value as UserRole }))
-              }
-            >
-              {ROLE_OPTIONS.map((role) => (
-                <option key={role} value={role}>
-                  {role}
-                </option>
-              ))}
-            </Form.Select>
-            <Button
-              type="button"
-              variant="outline-secondary"
-              disabled={!state.selectedUser}
-              aria-label="Adicionar usuário"
-              onClick={handleAddUser}
-            >
-              +
-            </Button>
+            {showUserDropdown && (
+              <div className="user-dropdown">
+                {filteredUsers.length === 0 ? (
+                  <div className="user-dropdown-empty">Nenhum usuário encontrado.</div>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <button
+                      type="button"
+                      key={user.initials}
+                      className="user-dropdown-item"
+                      onClick={() => handleSelectUser(user)}
+                    >
+                      <span className="team-member-av">{user.initials}</span>
+                      {user.name}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
           </div>
+          <select
+            className="form-input role-select"
+            id="npUserRole"
+            aria-label="Papel do usuário"
+            value={state.selectedRole}
+            onChange={(event) => setState((prev) => ({ ...prev, selectedRole: event.target.value as UserRole }))}
+          >
+            {ROLE_OPTIONS.map((role) => (
+              <option key={role} value={role}>
+                {role}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="btn-add-user"
+            disabled={!state.selectedUser}
+            aria-label="Adicionar usuário"
+            onClick={handleAddUser}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4}>
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </button>
+        </div>
 
-          {state.userSearch && !state.selectedUser && (
-            <div className="list-group mb-2">
-              {filteredUsers.length === 0 && (
-                <div className="list-group-item text-body-secondary small">
-                  Nenhum usuário encontrado.
+        <div className="user-list">
+          {state.members.length === 0 ? (
+            <div className="user-list-empty">Nenhum usuário adicionado ainda.</div>
+          ) : (
+            state.members.map((member, index) => (
+              <div className="user-list-row" key={member.initials + member.role}>
+                <span className="team-member-av">{member.initials}</span>
+                <div className="team-member-info">
+                  <b>{member.name}</b>
+                  <span>{member.role}</span>
                 </div>
-              )}
-              {filteredUsers.map((user) => (
                 <button
                   type="button"
-                  key={user.initials}
-                  className="list-group-item list-group-item-action d-flex align-items-center gap-2"
-                  onClick={() => handleSelectUser(user)}
+                  className="btn-remove-user"
+                  aria-label={`Remover ${member.name}`}
+                  onClick={() => handleRemoveUser(index)}
                 >
-                  <span className="avatar-circle">{user.initials}</span>
-                  {user.name}
+                  <CloseIcon />
                 </button>
-              ))}
-            </div>
+              </div>
+            ))
           )}
+        </div>
+        <div className="form-hint">
+          Um usuário pode ter mais de um papel: adicione-o novamente com outro papel, se necessário.
+        </div>
+      </div>
 
-          {state.members.length === 0 ? (
-            <p className="text-body-secondary small mb-0">Nenhum usuário adicionado ainda.</p>
-          ) : (
-            <ul className="list-unstyled d-flex flex-column gap-2 mb-0">
-              {state.members.map((member, index) => (
-                <li
-                  key={member.initials + member.role}
-                  className="d-flex align-items-center gap-2 border rounded p-2"
-                >
-                  <span className="avatar-circle">{member.initials}</span>
-                  <span className="flex-grow-1">
-                    <span className="fw-semibold">{member.name}</span>{" "}
-                    <span className="text-body-secondary small">{member.role}</span>
-                  </span>
-                  <Button
-                    type="button"
-                    variant="outline-secondary"
-                    size="sm"
-                    aria-label={`Remover ${member.name}`}
-                    onClick={() => handleRemoveUser(index)}
-                  >
-                    ✕
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          )}
-          <Form.Text>
-            Um usuário pode ter mais de um papel: adicione-o novamente com outro papel, se necessário.
-          </Form.Text>
-        </Form.Group>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="outline-secondary" onClick={resetAndHide}>
+      <div className="modal-actions">
+        <button type="button" className="btn" onClick={resetAndHide}>
           Cancelar
-        </Button>
-        <Button variant="primary" type="button" disabled={!canConfirm} onClick={handleConfirm}>
+        </button>
+        <button type="button" className="btn btn-primary" disabled={!canConfirm} onClick={handleConfirm}>
           Criar projeto
-        </Button>
-      </Modal.Footer>
+        </button>
+      </div>
     </Modal>
   );
 }

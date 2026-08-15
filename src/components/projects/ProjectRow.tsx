@@ -1,15 +1,22 @@
 import { useNavigate } from "react-router";
-import ProgressBar from "react-bootstrap/ProgressBar";
-import Badge from "react-bootstrap/Badge";
 import TeamAvatars from "./TeamAvatars";
 import { formatRelativeTime } from "../../utils/formatRelativeTime";
-import { getProjectStatusVariant, getSpiVariant } from "../../utils/projectIndicators";
+import { getProjectStatusVariant, getSpiVariant, type StatusVariant } from "../../utils/projectIndicators";
 import type { Project } from "../../types/project";
 
 interface ProjectRowProps {
   project: Project;
   onOpenTeam: (team: Project["team"]) => void;
 }
+
+// A barra de progresso só tem 3 cores no mockup: "warning" usa o mesmo vermelho de "danger"
+// (só a accent-bar tem a 4ª cor, laranja, para diferenciar a severidade).
+const PROGRESS_FILL_CLASS: Record<StatusVariant, string> = {
+  success: "green",
+  danger: "red",
+  warning: "red",
+  info: "blue",
+};
 
 export default function ProjectRow({ project, onOpenTeam }: ProjectRowProps) {
   const navigate = useNavigate();
@@ -30,41 +37,46 @@ export default function ProjectRow({ project, onOpenTeam }: ProjectRowProps) {
       }}
     >
       <td>
-        <div className="d-flex gap-2">
+        <div className="proj-row">
           <span className={`accent-bar accent-bar-${statusVariant}`} />
-          <div>
-            <Badge bg={project.mode === "uat" ? "info" : "warning"} className="mb-1">
-              {project.mode === "uat" ? "UAT" : "Cutover"}
-            </Badge>
-            <div className="fw-semibold">{project.name}</div>
-            <div className="text-body-secondary small">
+          <div className="proj-main">
+            <div className="proj-top">
+              <span className={`mode-tag ${project.mode}`}>{project.mode === "uat" ? "UAT" : "Cutover"}</span>
+            </div>
+            <div className="proj-name">{project.name}</div>
+            <div className="proj-meta">
               {project.activityCount} atividades · nível {hierarchyLabel}
             </div>
           </div>
         </div>
       </td>
-      <td className="progress-cell">
-        <ProgressBar now={project.progressPercent} variant={statusVariant} className="mb-1" />
-        <div className="d-flex justify-content-between text-body-secondary small font-monospace">
-          <span>{project.progressPercent}%</span>
-          <span>
-            {project.completedCount}/{project.activityCount}
-          </span>
+      <td>
+        <div className="prog-wrap">
+          <div className="prog-track">
+            <div
+              className={`prog-fill ${PROGRESS_FILL_CLASS[statusVariant]}`}
+              style={{ width: `${project.progressPercent}%` }}
+            />
+          </div>
+          <div className="prog-nums">
+            <span>{project.progressPercent}%</span>
+            <span>
+              {project.completedCount}/{project.activityCount}
+            </span>
+          </div>
         </div>
       </td>
       <td>
         {project.spi !== null && spiVariant ? (
           <span className={`spi-value spi-value-${spiVariant}`}>{project.spi.toFixed(2)}</span>
         ) : (
-          <span className="text-body-secondary">—</span>
+          <span className="mono">—</span>
         )}
       </td>
       <td onClick={(event) => event.stopPropagation()}>
         <TeamAvatars team={project.team} onOpenTeam={() => onOpenTeam(project.team)} />
       </td>
-      <td className="text-body-secondary small font-monospace">
-        {formatRelativeTime(project.updatedAt)}
-      </td>
+      <td className="updated">{formatRelativeTime(project.updatedAt)}</td>
     </tr>
   );
 }

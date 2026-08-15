@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router";
-import Dropdown from "react-bootstrap/Dropdown";
+import Dropdown from "../common/Dropdown";
 import FooterWidgetContent from "../common/FooterWidgetContent";
 import NavIcon from "../common/NavIcon";
 import { useProjects } from "../../hooks/useProjects";
@@ -69,23 +69,66 @@ const BACK_ICON = (
   </>
 );
 
+const SCROLL_THRESHOLD = 8;
+
 export default function ProjectNavDock() {
   const { id } = useParams();
   const { projects } = useProjects();
   const currentProject = projects.find((project) => project.id === id);
   const projectLabel = currentProject?.name ?? id ?? "";
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
   function closePanel() {
     setOpen(false);
   }
 
+  // Esconde o dock ao rolar para baixo, revela ao rolar para cima (ou perto do topo).
+  // A referência "lastY" só é atualizada quando o limiar é cruzado (ou perto do topo) —
+  // não a cada evento — senão uma rolagem suave (trackpad, muitos eventos de poucos
+  // pixels) nunca acumula os 8px necessários entre dois eventos consecutivos e o dock
+  // nunca esconde.
+  useEffect(() => {
+    let lastY = window.scrollY;
+    function handleScroll() {
+      const currentY = window.scrollY;
+      if (currentY <= 40) {
+        setHidden(false);
+        lastY = currentY;
+        return;
+      }
+      const delta = currentY - lastY;
+      if (delta > SCROLL_THRESHOLD) {
+        setHidden(true);
+        setOpen(false);
+        lastY = currentY;
+      } else if (delta < -SCROLL_THRESHOLD) {
+        setHidden(false);
+        lastY = currentY;
+      }
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <Dropdown className="nav-dock" show={open} onToggle={setOpen}>
-      <Dropdown.Toggle as="button" type="button" id="nav-dock-toggle" className="footer-widget nav-dock-toggle">
-        <FooterWidgetContent userName={CURRENT_USER_NAME} userRole={CURRENT_USER_ROLE} />
-      </Dropdown.Toggle>
-      <Dropdown.Menu className="nav-dock-panel">
+    <>
+      {/* Escurece o resto da página enquanto o painel está aberto — sem isso, o conteúdo
+          por trás "vaza" pelas laterais do painel (que não cobre a largura toda). */}
+      <div className={`nav-dock-backdrop${open ? " open" : ""}`} />
+      <Dropdown
+        className={`nav-dock${hidden ? " hidden" : ""}`}
+        menuClassName="nav-dock-panel"
+        keepMounted
+        open={open}
+        onOpenChange={setOpen}
+        closeOnMenuClick={false}
+        toggle={({ toggle }) => (
+          <button type="button" id="nav-dock-toggle" className="footer-widget nav-dock-toggle" onClick={toggle}>
+            <FooterWidgetContent userName={CURRENT_USER_NAME} userRole={CURRENT_USER_ROLE} />
+          </button>
+        )}
+      >
         <div className="nav-dock-group-label">Workspace</div>
         <nav className="nav-dock-items">
           {WORKSPACE_ITEMS.map((item) => (
@@ -109,7 +152,7 @@ export default function ProjectNavDock() {
             onClick={closePanel}
           >
             <NavIcon>{CONFIG_ICON}</NavIcon>
-            Papel &amp; Config
+            Papéis &amp; Config
           </NavLink>
           <NavLink
             to="/projetos"
@@ -131,7 +174,7 @@ export default function ProjectNavDock() {
             </div>
           </div>
         </div>
-      </Dropdown.Menu>
-    </Dropdown>
+      </Dropdown>
+    </>
   );
 }

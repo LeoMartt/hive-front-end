@@ -1,0 +1,67 @@
+@use "colors" as c;
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 2px;
+  background-color: c.$surface-2;
+  padding: 3px;
+  border-radius: 9px;
+  border: 1px solid c.$border;
+}
+.tab {
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: c.$text-dim;
+}
+.tab .n {
+  margin-left: 5px;
+  color: c.$text-faint;
+  font-weight: 600;
+}
+.tab.active {
+  background-color: c.$surface;
+  color: c.$text;
+  box-shadow: 0 1px 2px rgba(31, 32, 36, 0.08);
+}
+.tab.active .n {
+  color: c.$text-dim;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: c.$surface;
+  border: 1px solid c.$border-strong;
+  border-radius: 8px;
+  padding: 8px 12px;
+  width: 250px;
+  max-width: 100%;
+}
+.search input {
+  background: none;
+  border: none;
+  color: c.$text;
+  font-size: 12.5px;
+  width: 100%;
+}
+.search input::placeholder {
+  color: c.$text-faint;
+}
+.search svg {
+  width: 14px;
+  height: 14px;
+  color: c.$text-faint;
+  flex: none;
+}

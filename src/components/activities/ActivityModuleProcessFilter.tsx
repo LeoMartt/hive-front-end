@@ -1,5 +1,4 @@
-import Dropdown from "react-bootstrap/Dropdown";
-import Form from "react-bootstrap/Form";
+import Dropdown from "../common/Dropdown";
 import type { Activity } from "../../types/activity";
 import { toSafeIdPart } from "../../utils/domId";
 import { groupByModuleProcess } from "../../utils/groupActivities";
@@ -39,7 +38,6 @@ export default function ActivityModuleProcessFilter({
 }: ActivityModuleProcessFilterProps) {
   const moduleOptions = buildModuleOptions(activities);
   const selectedCount = selectedModules.length + selectedProcesses.length;
-  const toggleLabel = selectedCount === 0 ? "Módulo/Processo" : `Módulo/Processo (${selectedCount})`;
   const hasValue = selectedCount > 0;
 
   function toggleModule(moduleName: string) {
@@ -58,43 +56,66 @@ export default function ActivityModuleProcessFilter({
     );
   }
 
+  function clearAll() {
+    onModulesChange([]);
+    onProcessesChange([]);
+  }
+
   return (
-    <Dropdown autoClose="outside">
-      <Dropdown.Toggle
-        as="button"
-        id="module-process-filter-toggle"
-        className={`multi-select-toggle${hasValue ? " has-value" : ""}`}
-      >
-        {toggleLabel}
-        <NavIcon className="multi-select-toggle-chevron">
-          <path d="m6 9 6 6 6-6" />
-        </NavIcon>
-      </Dropdown.Toggle>
-      <Dropdown.Menu className="multi-select-menu">
-        {moduleOptions.map((moduleOption) => (
-          <Dropdown.ItemText key={moduleOption.module} className="multi-select-item">
-            <Form.Check
+    <Dropdown
+      closeOnMenuClick={false}
+      menuClassName="multi-select-menu"
+      toggle={({ toggle }) => (
+        <button
+          type="button"
+          id="module-process-filter-toggle"
+          className={`multi-select-toggle${hasValue ? " has-value" : ""}`}
+          onClick={toggle}
+        >
+          Módulo/Processo
+          {hasValue && <span className="filter-count">{selectedCount}</span>}
+          <NavIcon className="multi-select-toggle-chevron">
+            <path d="m6 9 6 6 6-6" />
+          </NavIcon>
+        </button>
+      )}
+    >
+      {moduleOptions.map((moduleOption) => (
+        <div className="multi-select-item" key={moduleOption.module}>
+          <label htmlFor={`module-filter-${toSafeIdPart(moduleOption.module)}`}>
+            <input
               type="checkbox"
               id={`module-filter-${toSafeIdPart(moduleOption.module)}`}
-              label={`${moduleOption.module} (${moduleOption.count})`}
               checked={selectedModules.includes(moduleOption.module)}
               onChange={() => toggleModule(moduleOption.module)}
             />
-            <div className="module-process-filter-children">
-              {moduleOption.processes.map((processOption) => (
-                <Form.Check
-                  key={processOption.process}
+            {moduleOption.module}
+            <span className="dd-opt-count">{moduleOption.count}</span>
+          </label>
+          <div className="module-process-filter-children">
+            {moduleOption.processes.map((processOption) => (
+              <label
+                key={processOption.process}
+                htmlFor={`process-filter-${toSafeIdPart(moduleOption.module)}-${toSafeIdPart(processOption.process)}`}
+              >
+                <input
                   type="checkbox"
                   id={`process-filter-${toSafeIdPart(moduleOption.module)}-${toSafeIdPart(processOption.process)}`}
-                  label={`${processOption.process} (${processOption.count})`}
                   checked={selectedProcesses.includes(processOption.process)}
                   onChange={() => toggleProcess(processOption.process)}
                 />
-              ))}
-            </div>
-          </Dropdown.ItemText>
-        ))}
-      </Dropdown.Menu>
+                {processOption.process}
+                <span className="dd-opt-count">{processOption.count}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ))}
+      <div className="dd-foot">
+        <button type="button" className="dd-clear" onClick={clearAll}>
+          Limpar
+        </button>
+      </div>
     </Dropdown>
   );
 }

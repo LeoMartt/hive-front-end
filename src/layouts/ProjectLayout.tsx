@@ -5,7 +5,7 @@ export default function ProjectLayout() {
   return (
     <div>
       <ProjectNavDock />
-      <main className="container py-4 project-layout-content">
+      <main className="project-layout-content">
         <Outlet />
       </main>
     </div>

@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router";
-import Form from "react-bootstrap/Form";
 import ActivityStatusBadge from "./ActivityStatusBadge";
 import { isOverdue } from "../../utils/activityIndicators";
 import { getInitials } from "../../utils/initials";
@@ -10,6 +9,8 @@ interface ActivityRowProps {
   projectId: string;
   indent?: boolean;
   showBreadcrumb?: boolean;
+  checked: boolean;
+  onToggleSelect: (id: string) => void;
 }
 
 function formatDate(isoDate: string | null): string {
@@ -23,7 +24,14 @@ function retestPillClass(retestCount: number): string {
   return "retest-pill retest-pill-danger";
 }
 
-export default function ActivityRow({ activity, projectId, indent = false, showBreadcrumb = false }: ActivityRowProps) {
+export default function ActivityRow({
+  activity,
+  projectId,
+  indent = false,
+  showBreadcrumb = false,
+  checked,
+  onToggleSelect,
+}: ActivityRowProps) {
   const navigate = useNavigate();
   const overdue = isOverdue(activity);
 
@@ -45,41 +53,55 @@ export default function ActivityRow({ activity, projectId, indent = false, showB
       }}
     >
       <td>
-        <Form.Check
+        <input
           type="checkbox"
           aria-label={`Selecionar ${activity.name}`}
+          checked={checked}
+          onChange={() => onToggleSelect(activity.id)}
           onClick={(event) => event.stopPropagation()}
           onKeyDown={(event) => event.stopPropagation()}
         />
       </td>
-      <td style={indent ? { paddingLeft: 34 } : undefined}>
-        <div className="fw-semibold">{activity.name}</div>
-        {showBreadcrumb && (
-          <div className="flat-breadcrumb">
-            {activity.module} › {activity.process}
-          </div>
-        )}
+      <td></td>
+      <td>
+        <div
+          className={showBreadcrumb ? "cell-name cell-name-stacked" : "cell-name"}
+          style={indent ? { paddingLeft: 34 } : showBreadcrumb ? { paddingLeft: 10 } : undefined}
+        >
+          <span className="cell-name-text" title={activity.name}>
+            {activity.name}
+          </span>
+          {showBreadcrumb && (
+            <span className="flat-breadcrumb">
+              {activity.module} › {activity.process}
+            </span>
+          )}
+        </div>
       </td>
-      <td className="font-monospace small">{activity.id}</td>
+      <td className="mono">{activity.id}</td>
       <td>
         <ActivityStatusBadge status={activity.status} />
       </td>
       <td>
-        <span className="avatar-mini">{getInitials(activity.tester)}</span>
-        {activity.tester}
+        <div className="cell-person" title={activity.tester}>
+          <span className="avatar-mini">{getInitials(activity.tester)}</span>
+          <span className="cell-person-name">{activity.tester}</span>
+        </div>
       </td>
       <td>
-        <span className="avatar-mini">{getInitials(activity.dev)}</span>
-        {activity.dev}
+        <div className="cell-person" title={activity.dev}>
+          <span className="avatar-mini">{getInitials(activity.dev)}</span>
+          <span className="cell-person-name">{activity.dev}</span>
+        </div>
       </td>
-      <td className="font-monospace small">{formatDate(activity.plannedStart)}</td>
-      <td className={`font-monospace small${overdue ? " date-overdue" : ""}`}>
+      <td className="mono">{formatDate(activity.plannedStart)}</td>
+      <td className={`mono${overdue ? " date-overdue" : ""}`}>
         {formatDate(activity.plannedEnd)}
         {overdue && <span className="overdue-tag">Atrasado</span>}
       </td>
-      <td className="font-monospace small">{formatDate(activity.actualStart)}</td>
-      <td className="font-monospace small">{formatDate(activity.actualEnd)}</td>
-      <td className="small">{activity.predecessors.length === 0 ? "—" : activity.predecessors.join(", ")}</td>
+      <td className="mono">{formatDate(activity.actualStart)}</td>
+      <td className="mono">{formatDate(activity.actualEnd)}</td>
+      <td className="mono">{activity.predecessors.length === 0 ? "—" : activity.predecessors.join(", ")}</td>
       <td className="text-center">
         <span className={retestPillClass(activity.retestCount)}>{activity.retestCount}×</span>
       </td>
