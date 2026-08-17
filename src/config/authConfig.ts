@@ -33,3 +33,7 @@ export const msalConfig: Configuration = {
 export const loginRequest = {
   scopes: ["User.Read"],
 };
+// Escopo separado, usado só na hora de buscar usuários do tenant (não no login)
+export const graphUserSearchRequest = {
+  scopes: ["User.ReadBasic.All"],
+};
