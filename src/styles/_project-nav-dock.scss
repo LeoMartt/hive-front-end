@@ -129,6 +129,26 @@
   border-color: rgba(255, 227, 110, 0.45);
 }
 
+// O item "Sair" é um <button>, não um <NavLink> como os demais — precisa do reset
+// que o NavLink já ganha de graça (largura total, texto à esquerda, sem fundo/borda nativos).
+button.nav-dock-item {
+  width: 100%;
+  text-align: left;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+.nav-dock-item-danger {
+  color: c.$red;
+}
+.nav-dock-item-danger:hover {
+  background-color: c.$red-soft;
+  color: c.$red;
+}
+.nav-dock-item-danger .nav-icon {
+  opacity: 1;
+}
+
 .nav-icon {
   width: 16px;
   height: 16px;

@@ -29,8 +29,7 @@ export default function ProjectsPage() {
 
   return (
     <main className="page-wrap">
-      <FooterWidget userName="Guilherme Fabretti" userRole="Gestor de Projetos" />
-
+      <FooterWidget />
       <div className="page-head">
         <div>
           <div className="page-title">Dashboard</div>

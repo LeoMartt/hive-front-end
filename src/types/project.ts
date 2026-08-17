@@ -1,13 +1,12 @@
 export type ProjectMode = "uat" | "cutover";
-
 export type UserRole = "Gestor de Projetos" | "Tester" | "Desenvolvedor";
-
 export interface TeamMember {
+  id?: string;
   initials: string;
   name: string;
+  email?: string;
   role: UserRole;
 }
-
 export interface Project {
   id: string;
   name: string;
@@ -20,14 +19,12 @@ export interface Project {
   team: TeamMember[];
   updatedAt: string;
 }
-
 export interface ProjectStats {
   total: number;
   uatCount: number;
   cutoverCount: number;
   avgSpi: number | null;
 }
-
 export interface NewProjectInput {
   name: string;
   description: string;

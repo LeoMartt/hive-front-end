@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router";
+import { useMsal } from "@azure/msal-react";
 import Dropdown from "../common/Dropdown";
 import FooterWidgetContent from "../common/FooterWidgetContent";
 import NavIcon from "../common/NavIcon";
 import { useProjects } from "../../hooks/useProjects";
-
-const CURRENT_USER_NAME = "Guilherme Fabretti";
-const CURRENT_USER_ROLE = "Gestor de Projetos";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
 
 const WORKSPACE_ITEMS = [
   {
@@ -58,7 +57,7 @@ const WORKSPACE_ITEMS = [
 const CONFIG_ICON = (
   <>
     <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 0 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1.96Z" />
+    <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 0 1-4 0v-.09A1.71.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 04.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 0 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.71.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1.96Z" />
   </>
 );
 
@@ -69,11 +68,21 @@ const BACK_ICON = (
   </>
 );
 
+const LOGOUT_ICON = (
+  <>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <path d="M16 17l5-5-5-5" />
+    <path d="M21 12H9" />
+  </>
+);
+
 const SCROLL_THRESHOLD = 8;
 
 export default function ProjectNavDock() {
   const { id } = useParams();
   const { projects } = useProjects();
+  const { instance } = useMsal();
+  const { name: currentUserName, role: currentUserRole } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === id);
   const projectLabel = currentProject?.name ?? id ?? "";
   const [open, setOpen] = useState(false);
@@ -81,6 +90,10 @@ export default function ProjectNavDock() {
 
   function closePanel() {
     setOpen(false);
+  }
+
+  function handleLogout() {
+    instance.logoutRedirect();
   }
 
   // Esconde o dock ao rolar para baixo, revela ao rolar para cima (ou perto do topo).
@@ -125,7 +138,7 @@ export default function ProjectNavDock() {
         closeOnMenuClick={false}
         toggle={({ toggle }) => (
           <button type="button" id="nav-dock-toggle" className="footer-widget nav-dock-toggle" onClick={toggle}>
-            <FooterWidgetContent userName={CURRENT_USER_NAME} userRole={CURRENT_USER_ROLE} />
+            <FooterWidgetContent userName={currentUserName} userRole={currentUserRole} />
           </button>
         )}
       >
@@ -163,6 +176,10 @@ export default function ProjectNavDock() {
             <NavIcon>{BACK_ICON}</NavIcon>
             Meus Projetos
           </NavLink>
+          <button type="button" className="nav-dock-item nav-dock-item-danger" onClick={handleLogout}>
+            <NavIcon>{LOGOUT_ICON}</NavIcon>
+            Sair
+          </button>
         </nav>
 
         <div className="nav-dock-footer">

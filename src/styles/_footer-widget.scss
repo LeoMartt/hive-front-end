@@ -1,5 +1,4 @@
 @use "colors" as c;
-
 .footer-widget {
   position: fixed;
   top: 18px;
@@ -23,7 +22,6 @@
 button.footer-widget:hover {
   box-shadow: 0 10px 28px rgba(31, 32, 36, 0.14);
 }
-
 .footer-brand {
   display: flex;
   align-items: center;
@@ -50,13 +48,11 @@ button.footer-widget:hover {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-
 .footer-widget-divider {
   width: 1px;
   height: 26px;
   background-color: c.$border;
 }
-
 .footer-user {
   display: flex;
   align-items: center;
@@ -79,7 +75,6 @@ button.footer-widget:hover {
   font-size: 10.5px;
   color: c.$text-faint;
 }
-
 .footer-widget-avatar {
   width: 32px;
   height: 32px;
@@ -95,9 +90,31 @@ button.footer-widget:hover {
   color: c.$yellow-deep;
   flex: none;
 }
-
 .bee-mark {
   width: 30px;
   height: 30px;
   flex: none;
+}
+
+// --- Dropdown do FooterWidget (tela de Projetos) ---
+// Mesmo problema que o .nav-dock já resolve: como .footer-widget é position:fixed,
+// ele sai do fluxo normal, e o <div class="dropdown"> genérico que o envolve colapsa
+// pra altura 0 no topo da página — por isso o wrapper também precisa ser fixed,
+// replicando as mesmas coordenadas do próprio .footer-widget.
+.footer-widget-dock {
+  position: fixed;
+  top: 18px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  z-index: 20;
+  width: 520px;
+  max-width: calc(100% - 32px);
+}
+.footer-menu {
+  position: absolute;
+  top: 60px; // 54px de altura do pill + 6px de respiro (mesmo cálculo do nav-dock-panel)
+  right: 8px;
+  left: auto;
+  min-width: 160px;
 }
