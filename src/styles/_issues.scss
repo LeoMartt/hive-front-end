@@ -1,0 +1,126 @@
+@use "colors" as c;
+
+// Pills de filtro por status — seleção única, com contador
+.filter-pills-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid c.$border-strong;
+  background-color: c.$surface;
+  font-size: 12px;
+  font-weight: 600;
+  color: c.$text-dim;
+  cursor: pointer;
+}
+.filter-pill:hover {
+  border-color: c.$text-dim;
+}
+.filter-pill.active {
+  border-color: c.$yellow-deep;
+  background-color: c.$yellow-soft;
+  color: c.$text;
+}
+.filter-pill .n {
+  font-family: c.$font-mono;
+  font-size: 10.5px;
+  color: c.$text-faint;
+}
+.filter-pill.active .n {
+  color: c.$yellow-deep;
+}
+
+// Badge de impacto da issue
+.impact-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+  white-space: nowrap;
+}
+.impact-badge-muitoalto {
+  background-color: c.$red;
+  color: #fff;
+}
+.impact-badge-alto {
+  background-color: c.$red-soft;
+  color: c.$red;
+}
+.impact-badge-medio {
+  background-color: c.$yellow-soft;
+  color: c.$yellow-deep;
+}
+.impact-badge-baixo {
+  background-color: c.$surface-2;
+  color: c.$text-faint;
+}
+
+// Badge de risco de aging
+.risk-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+  white-space: nowrap;
+}
+.risk-badge-aceitavel {
+  background-color: c.$green-soft;
+  color: c.$green;
+}
+.risk-badge-alerta {
+  background-color: c.$yellow-soft;
+  color: c.$yellow-deep;
+}
+.risk-badge-risco {
+  background-color: c.$red;
+  color: #fff;
+}
+
+// Tag Sim/Não de impeditivo
+.impeditivo-tag {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.impeditivo-tag-sim {
+  background-color: c.$red;
+  color: #fff;
+}
+.impeditivo-tag-nao {
+  background-color: c.$surface-2;
+  color: c.$text-faint;
+}
+
+// Subtítulo de área abaixo do título da issue
+.issue-area-tag {
+  font-size: 10.5px;
+  color: c.$text-faint;
+  margin-top: 1px;
+  display: block;
+}
+
+// Contador de atividades impactadas em cascata pela mesma issue
+.cascata-tag {
+  font-family: c.$font-mono;
+  font-size: 9.5px;
+  color: c.$red;
+  font-weight: 700;
+  margin-left: 4px;
+  cursor: help;
+}
