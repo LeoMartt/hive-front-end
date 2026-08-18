@@ -74,12 +74,6 @@ export default function IssuesTable({ issues, projectId }: IssuesTableProps) {
                 <SortIcon />
               </span>
             </th>
-            <th>
-              Risco{" "}
-              <span className="sort-icon">
-                <SortIcon />
-              </span>
-            </th>
           </tr>
         </thead>
         <tbody>

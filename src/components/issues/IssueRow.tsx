@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router";
 import IssueStatusBadge from "./IssueStatusBadge";
 import IssueImpactBadge from "./IssueImpactBadge";
-import IssueRiskBadge from "./IssueRiskBadge";
 import { computeIssueAgingDays, computeIssueRisk, ISSUE_TYPE_LABELS } from "../../utils/issueIndicators";
 import { getInitials } from "../../utils/initials";
 import type { Issue } from "../../types/issue";
@@ -9,6 +8,12 @@ import type { Issue } from "../../types/issue";
 interface IssueRowProps {
   issue: Issue;
   projectId: string;
+}
+
+// Risco nulo (issue concluída) usa a cor neutra — os 3 níveis de risco usam a mesma
+// paleta do IssueImpactBadge (verde/amarelo/vermelho), só que aplicada ao texto do Aging.
+function agingColorClass(risk: ReturnType<typeof computeIssueRisk>): string {
+  return risk === null ? "aging-neutral" : `aging-${risk}`;
 }
 
 export default function IssueRow({ issue, projectId }: IssueRowProps) {
@@ -34,7 +39,7 @@ export default function IssueRow({ issue, projectId }: IssueRowProps) {
     >
       <td className="mono">{issue.id}</td>
       <td>
-        <div className="cell-name-text" title={issue.title}>
+        <div className="issue-title-text" title={issue.title}>
           {issue.title}
         </div>
         <span className="issue-area-tag">{issue.area}</span>
@@ -68,10 +73,7 @@ export default function IssueRow({ issue, projectId }: IssueRowProps) {
       <td>
         <IssueStatusBadge status={issue.status} />
       </td>
-      <td className="mono">{`${aging}d`}</td>
-      <td>
-        <IssueRiskBadge risk={risk} />
-      </td>
+      <td className={`mono ${agingColorClass(risk)}`}>{`${aging}d`}</td>
     </tr>
   );
 }

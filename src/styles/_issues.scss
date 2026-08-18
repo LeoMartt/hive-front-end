@@ -64,28 +64,22 @@
   color: c.$text-faint;
 }
 
-// Badge de risco de aging
-.risk-badge {
-  font-size: 9.5px;
-  font-weight: 800;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 4px;
-  display: inline-block;
-  white-space: nowrap;
+// Aging colorido conforme o risco — substitui a coluna de badge separada: em vez de
+// um badge próprio, o valor de dias já vem pintado (vermelho/amarelo/verde/cinza).
+.aging-risco {
+  color: c.$red;
+  font-weight: 700;
 }
-.risk-badge-aceitavel {
-  background-color: c.$green-soft;
-  color: c.$green;
-}
-.risk-badge-alerta {
-  background-color: c.$yellow-soft;
+.aging-alerta {
   color: c.$yellow-deep;
+  font-weight: 700;
 }
-.risk-badge-risco {
-  background-color: c.$red;
-  color: #fff;
+.aging-aceitavel {
+  color: c.$green;
+  font-weight: 700;
+}
+.aging-neutral {
+  color: c.$text-faint;
 }
 
 // Tag Sim/Não de impeditivo
@@ -105,6 +99,15 @@
 .impeditivo-tag-nao {
   background-color: c.$surface-2;
   color: c.$text-faint;
+}
+
+// Título da issue truncado com reticências — sem isso, títulos longos esticam a linha
+// e forçam scroll horizontal antes mesmo de chegar nas colunas de Aging/Status.
+.issue-title-text {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 // Subtítulo de área abaixo do título da issue
