@@ -3,6 +3,8 @@ import ProjectsPage from "../pages/ProjectsPage";
 import ProjectLayout from "../layouts/ProjectLayout";
 import ProjectActivitiesPage from "../pages/ProjectActivitiesPage";
 import ActivityDetailPlaceholderPage from "../pages/ActivityDetailPlaceholderPage";
+import ProjectIssuesPage from "../pages/ProjectIssuesPage";
+import IssueDetailPlaceholderPage from "../pages/IssueDetailPlaceholderPage";
 import PlaceholderPage from "../pages/PlaceholderPage";
 import ProjectDashboardPage from "../pages/ProjectDashboardPage";
 import LoginPage from "../pages/LoginPage";
@@ -22,7 +24,8 @@ export default function AppRoutes() {
           <Route path="atividades" element={<ProjectActivitiesPage />} />
           <Route path="atividades/:activityId" element={<ActivityDetailPlaceholderPage />} />
           <Route path="estrutura" element={<PlaceholderPage title="A estrutura (WBS) do projeto" />} />
-          <Route path="issues" element={<PlaceholderPage title="As issues do projeto" />} />
+          <Route path="issues" element={<ProjectIssuesPage />} />
+          <Route path="issues/:issueId" element={<IssueDetailPlaceholderPage />} />
           <Route path="config" element={<PlaceholderPage title="A configuração do projeto" />} />
         </Route>
       </Route>

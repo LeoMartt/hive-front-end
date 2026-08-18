@@ -1,0 +1,142 @@
+@use "colors" as c;
+
+// Pills de filtro por status — seleção única, com contador
+.filter-pills-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid c.$border-strong;
+  background-color: c.$surface;
+  font-size: 12px;
+  font-weight: 600;
+  color: c.$text-dim;
+  cursor: pointer;
+}
+.filter-pill:hover {
+  border-color: c.$text-dim;
+}
+.filter-pill.active {
+  border-color: c.$yellow-deep;
+  background-color: c.$yellow-soft;
+  color: c.$text;
+}
+.filter-pill .n {
+  font-family: c.$font-mono;
+  font-size: 10.5px;
+  color: c.$text-faint;
+}
+.filter-pill.active .n {
+  color: c.$yellow-deep;
+}
+
+// Badge de impacto da issue
+.impact-badge {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+  white-space: nowrap;
+}
+.impact-badge-muitoalto {
+  background-color: c.$red;
+  color: #fff;
+}
+.impact-badge-alto {
+  background-color: c.$red-soft;
+  color: c.$red;
+}
+.impact-badge-medio {
+  background-color: c.$yellow-soft;
+  color: c.$yellow-deep;
+}
+.impact-badge-baixo {
+  background-color: c.$surface-2;
+  color: c.$text-faint;
+}
+
+// Atividade e Aging: fonte maior que o padrão de .mono (10.5px) — são as colunas mais
+// lidas de relance na tabela (o que está travado, há quantos dias), então ganham
+// destaque em vez de ficarem no mesmo tamanho discreto de ID/datas.
+.issue-cell-emphasis {
+  font-size: 12.5px;
+}
+
+// Badge de status um pouco maior nesta tabela — o tamanho padrão do .activity-badge
+// (compartilhado com a tabela de Atividades) fica pequeno demais como coluna isolada aqui.
+.issue-status-cell .activity-badge {
+  font-size: 11px;
+}
+
+// Aging colorido conforme o risco — substitui a coluna de badge separada: em vez de
+// um badge próprio, o valor de dias já vem pintado (vermelho/amarelo/verde/cinza).
+.aging-risco {
+  color: c.$red;
+  font-weight: 700;
+}
+.aging-alerta {
+  color: c.$yellow-deep;
+  font-weight: 700;
+}
+.aging-aceitavel {
+  color: c.$green;
+  font-weight: 700;
+}
+.aging-neutral {
+  color: c.$text-faint;
+}
+
+// Tag Sim/Não de impeditivo
+.impeditivo-tag {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.impeditivo-tag-sim {
+  background-color: c.$red;
+  color: #fff;
+}
+.impeditivo-tag-nao {
+  background-color: c.$surface-2;
+  color: c.$text-faint;
+}
+
+// Título da issue truncado com reticências — sem isso, títulos longos esticam a linha
+// e forçam scroll horizontal antes mesmo de chegar nas colunas de Aging/Status.
+.issue-title-text {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Subtítulo de área abaixo do título da issue
+.issue-area-tag {
+  font-size: 10.5px;
+  color: c.$text-faint;
+  margin-top: 1px;
+  display: block;
+}
+
+// Contador de atividades impactadas em cascata pela mesma issue
+.cascata-tag {
+  font-family: c.$font-mono;
+  font-size: 9.5px;
+  color: c.$red;
+  font-weight: 700;
+  margin-left: 4px;
+  cursor: help;
+}
