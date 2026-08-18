@@ -53,7 +53,7 @@ export default function IssueRow({ issue, projectId }: IssueRowProps) {
           {issue.impeditiva ? "Sim" : "Não"}
         </span>
       </td>
-      <td className="mono">
+      <td className="mono issue-cell-emphasis">
         {issue.relatedActivityId ?? "—"}
         {issue.cascadeActivityIds.length > 0 && (
           <span
@@ -70,10 +70,10 @@ export default function IssueRow({ issue, projectId }: IssueRowProps) {
           <span className="cell-person-name">{issue.dev}</span>
         </div>
       </td>
-      <td>
+      <td className="issue-status-cell">
         <IssueStatusBadge status={issue.status} />
       </td>
-      <td className={`mono ${agingColorClass(risk)}`}>{`${aging}d`}</td>
+      <td className={`mono issue-cell-emphasis ${agingColorClass(risk)}`}>{`${aging}d`}</td>
     </tr>
   );
 }

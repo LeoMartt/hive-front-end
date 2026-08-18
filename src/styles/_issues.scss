@@ -64,6 +64,19 @@
   color: c.$text-faint;
 }
 
+// Atividade e Aging: fonte maior que o padrão de .mono (10.5px) — são as colunas mais
+// lidas de relance na tabela (o que está travado, há quantos dias), então ganham
+// destaque em vez de ficarem no mesmo tamanho discreto de ID/datas.
+.issue-cell-emphasis {
+  font-size: 12.5px;
+}
+
+// Badge de status um pouco maior nesta tabela — o tamanho padrão do .activity-badge
+// (compartilhado com a tabela de Atividades) fica pequeno demais como coluna isolada aqui.
+.issue-status-cell .activity-badge {
+  font-size: 11px;
+}
+
 // Aging colorido conforme o risco — substitui a coluna de badge separada: em vez de
 // um badge próprio, o valor de dias já vem pintado (vermelho/amarelo/verde/cinza).
 .aging-risco {
