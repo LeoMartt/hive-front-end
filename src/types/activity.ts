@@ -26,7 +26,7 @@ export interface Activity {
   system: string;
   transaction: string;
   expectedResult: string;
-  notes: string;
+  notes: string | null;
 }
 
 export interface ActivityStats {

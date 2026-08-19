@@ -117,7 +117,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     system: "SAP S/4HANA",
     transaction: "F110",
     expectedResult: "Boleto baixado automaticamente no sistema após confirmação de pagamento pelo banco.",
-    notes: "—",
+    notes: null,
   },
   {
     id: "ATV-1006",
@@ -227,7 +227,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     system: "SAP S/4HANA",
     transaction: "XD01",
     expectedResult: "Cliente PJ cadastrado com validação de CNPJ na Receita Federal, sem permitir CNPJ inválido.",
-    notes: "—",
+    notes: null,
   },
   {
     id: "ATV-1011",
@@ -249,7 +249,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     system: "SAP S/4HANA",
     transaction: "FD01",
     expectedResult: "Cliente PF cadastrado com validação de CPF, sem permitir duplicidade de cadastro.",
-    notes: "—",
+    notes: null,
   },
   {
     id: "ATV-1012",
@@ -315,7 +315,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     system: "SAP S/4HANA",
     transaction: "XD03",
     expectedResult: "Consulta à base da Receita retorna situação cadastral correta em até 3 segundos.",
-    notes: "—",
+    notes: null,
   },
   {
     id: "ATV-1015",
