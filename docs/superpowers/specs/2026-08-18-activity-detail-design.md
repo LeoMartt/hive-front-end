@@ -34,7 +34,7 @@ interface Activity {
   system: string;            // ex.: "SAP S/4HANA"
   transaction: string;       // ex.: "FB60"
   expectedResult: string;    // critério de aceite em texto livre
-  notes: string;             // observações gerais em texto livre
+  notes: string | null;      // observações gerais em texto livre; null quando não há nada a registrar
 }
 ```
 

@@ -72,7 +72,7 @@ export interface Activity {
   system: string;
   transaction: string;
   expectedResult: string;
-  notes: string;
+  notes: string | null;
 }
 ```
 
@@ -192,7 +192,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     system: "SAP S/4HANA",
     transaction: "F110",
     expectedResult: "Boleto baixado automaticamente no sistema após confirmação de pagamento pelo banco.",
-    notes: "—",
+    notes: null,
   },
   {
     id: "ATV-1006",
@@ -302,7 +302,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     system: "SAP S/4HANA",
     transaction: "XD01",
     expectedResult: "Cliente PJ cadastrado com validação de CNPJ na Receita Federal, sem permitir CNPJ inválido.",
-    notes: "—",
+    notes: null,
   },
   {
     id: "ATV-1011",
@@ -324,7 +324,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     system: "SAP S/4HANA",
     transaction: "FD01",
     expectedResult: "Cliente PF cadastrado com validação de CPF, sem permitir duplicidade de cadastro.",
-    notes: "—",
+    notes: null,
   },
   {
     id: "ATV-1012",
@@ -390,7 +390,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     system: "SAP S/4HANA",
     transaction: "XD03",
     expectedResult: "Consulta à base da Receita retorna situação cadastral correta em até 3 segundos.",
-    notes: "—",
+    notes: null,
   },
   {
     id: "ATV-1015",
@@ -616,7 +616,7 @@ export function deriveActivityAuditTrail(activity: Activity): ActivityAuditEntry
     entries.push({ at: activity.plannedStart, text: "Aguardando início" });
   }
 
-  return entries.sort((a, b) => (a.at < b.at ? 1 : -1));
+  return entries.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
 }
 ```
 
@@ -720,7 +720,7 @@ export default function ActivityFieldGrid({ activity }: ActivityFieldGridProps) 
       </div>
       <div className="field full">
         <div className="field-label">Observações</div>
-        <div className="field-value big">{activity.notes}</div>
+        <div className="field-value big">{activity.notes ?? "—"}</div>
       </div>
     </div>
   );
