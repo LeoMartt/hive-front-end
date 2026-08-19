@@ -21,6 +21,12 @@ export interface Activity {
   predecessors: string[];
   retestCount: number;
   issueCount: number;
+  wbs: string;
+  area: string;
+  system: string;
+  transaction: string;
+  expectedResult: string;
+  notes: string;
 }
 
 export interface ActivityStats {
