@@ -31,5 +31,5 @@ export function deriveActivityAuditTrail(activity: Activity): ActivityAuditEntry
     entries.push({ at: activity.plannedStart, text: "Aguardando início" });
   }
 
-  return entries.sort((a, b) => (a.at < b.at ? 1 : -1));
+  return entries.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));
 }
