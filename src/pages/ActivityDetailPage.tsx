@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
 import ActivityStatusBadge from "../components/activities/ActivityStatusBadge";
 import ActivityFieldGrid from "../components/activities/ActivityFieldGrid";
 import ActivityAuditTrail from "../components/activities/ActivityAuditTrail";
@@ -6,19 +6,16 @@ import ActivityLinkedIssuesPanel from "../components/activities/ActivityLinkedIs
 import ActivityAttachmentsPanel from "../components/activities/ActivityAttachmentsPanel";
 import ActivityPredecessorPanel from "../components/activities/ActivityPredecessorPanel";
 import { useActivities } from "../hooks/useActivities";
+import { useGoBack } from "../hooks/useGoBack";
 import { retestPillClass } from "../utils/activityIndicators";
 import { deriveActivityAuditTrail } from "../utils/activityAuditTrail";
 
 export default function ActivityDetailPage() {
   const { id, activityId } = useParams();
   const projectId = id ?? "";
-  const navigate = useNavigate();
   const { activities } = useActivities(projectId);
   const activity = activities.find((item) => item.id === activityId);
-
-  function goBack() {
-    navigate(`/projetos/${projectId}/atividades`);
-  }
+  const goBack = useGoBack(`/projetos/${projectId}/atividades`);
 
   if (!activity) {
     return (
