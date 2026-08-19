@@ -3,6 +3,8 @@ import ActivityStatusBadge from "../components/activities/ActivityStatusBadge";
 import ActivityFieldGrid from "../components/activities/ActivityFieldGrid";
 import ActivityAuditTrail from "../components/activities/ActivityAuditTrail";
 import ActivityLinkedIssuesPanel from "../components/activities/ActivityLinkedIssuesPanel";
+import ActivityAttachmentsPanel from "../components/activities/ActivityAttachmentsPanel";
+import ActivityPredecessorPanel from "../components/activities/ActivityPredecessorPanel";
 import { useActivities } from "../hooks/useActivities";
 import { retestPillClass } from "../utils/activityIndicators";
 import { deriveActivityAuditTrail } from "../utils/activityAuditTrail";
@@ -29,8 +31,14 @@ export default function ActivityDetailPage() {
     );
   }
 
-  const showActions = activity.status !== "concluido" && activity.status !== "cancelado";
   const auditEntries = deriveActivityAuditTrail(activity);
+
+  // Calculado independente do status — usado tanto pro painel "Predecessor" (só quando
+  // aguardando) quanto pelos anexos herdados (só quando bloqueado, ver
+  // ActivityAttachmentsPanel).
+  const predecessorActivity =
+    activity.predecessors.length > 0 ? (activities.find((item) => item.id === activity.predecessors[0]) ?? null) : null;
+  const showPredecessorPanel = activity.status === "aguardando" && predecessorActivity !== null;
 
   return (
     <div>
@@ -48,10 +56,27 @@ export default function ActivityDetailPage() {
           </div>
           <div style={{ marginBottom: 18, display: "flex", gap: 8, flexWrap: "wrap" }}>
             <ActivityStatusBadge status={activity.status} />
-            <span className={retestPillClass(activity.retestCount)}>{activity.retestCount}× reteste</span>
+            {activity.retestCount > 0 && (
+              <span className={retestPillClass(activity.retestCount)}>{activity.retestCount}× reteste</span>
+            )}
           </div>
 
-          {showActions && (
+          {showPredecessorPanel && predecessorActivity && (
+            <div className="info-banner">
+              ⏳ Aguardando conclusão do predecessor <b>{predecessorActivity.id}</b> para liberar o início desta
+              atividade.
+            </div>
+          )}
+          {activity.status === "concluido" && (
+            <div className="info-banner">✅ Atividade concluída. Nenhuma ação pendente.</div>
+          )}
+
+          {activity.status === "bloqueado" && (
+            <button type="button" className="btn" style={{ width: "100%", justifyContent: "center", marginBottom: 20 }}>
+              Registrar nova issue
+            </button>
+          )}
+          {(activity.status === "execucao" || activity.status === "liberado") && (
             <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
               <button type="button" className="btn btn-primary" style={{ flex: 1, justifyContent: "center" }}>
                 Concluir atividade
@@ -67,7 +92,14 @@ export default function ActivityDetailPage() {
         </div>
 
         <div className="activity-side">
-          <ActivityLinkedIssuesPanel activityId={activity.id} projectId={projectId} />
+          {showPredecessorPanel && predecessorActivity ? (
+            <ActivityPredecessorPanel predecessor={predecessorActivity} projectId={projectId} />
+          ) : (
+            <>
+              <ActivityLinkedIssuesPanel activityId={activity.id} projectId={projectId} />
+              <ActivityAttachmentsPanel activity={activity} predecessor={predecessorActivity} />
+            </>
+          )}
         </div>
       </div>
     </div>

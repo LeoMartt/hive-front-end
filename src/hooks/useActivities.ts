@@ -30,6 +30,16 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "VF01",
     expectedResult: "NF-e emitida com valor de ICMS calculado conforme alíquota da operação, sem divergência frente ao SPED Fiscal.",
     notes: "Cenário validado com alíquota interna de 18%.",
+    attachments: [
+      { fileName: "icms_calculo_v1.pdf", sizeLabel: "180 KB", uploadedBy: "Rafael Souza", uploadedAt: isoDaysFromNow(-9) },
+    ],
+    approvalEvidence: {
+      fileName: "icms_calculo_v1.pdf",
+      sizeLabel: "180 KB",
+      uploadedBy: "Rafael Souza",
+      uploadedAt: isoDaysFromNow(-9),
+    },
+    approvalNote: "Conferido contra o SPED Fiscal, sem divergências.",
   },
   {
     id: "ATV-1002",
@@ -52,6 +62,9 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "VF04",
     expectedResult: "Lote de notas fiscais emitido sem erros, com numeração sequencial preservada.",
     notes: "Depende da conclusão de ATV-1001 para reaproveitar a massa de dados de ICMS.",
+    attachments: [],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1003",
@@ -74,6 +87,16 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "VF11",
     expectedResult: "Nota fiscal cancelada dentro do prazo legal, com motivo de cancelamento registrado no XML.",
     notes: "Bloqueada aguardando ajuste na regra de determinação de alíquota (ver ISS-0291).",
+    attachments: [
+      {
+        fileName: "print_erro_cancelamento.png",
+        sizeLabel: "540 KB",
+        uploadedBy: "Leonardo Martins da Silva",
+        uploadedAt: isoDaysFromNow(-6),
+      },
+    ],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1004",
@@ -96,6 +119,9 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "J1B3",
     expectedResult: "Arquivo XML exportado no layout vigente da SEFAZ, sem falha de schema.",
     notes: "Aguardando conclusão de ATV-1002.",
+    attachments: [],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1005",
@@ -118,6 +144,16 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "F110",
     expectedResult: "Boleto baixado automaticamente no sistema após confirmação de pagamento pelo banco.",
     notes: null,
+    attachments: [
+      { fileName: "boleto_baixa_lote.pdf", sizeLabel: "96 KB", uploadedBy: "Guilherme Fabretti", uploadedAt: isoDaysFromNow(-14) },
+    ],
+    approvalEvidence: {
+      fileName: "boleto_baixa_lote.pdf",
+      sizeLabel: "96 KB",
+      uploadedBy: "Guilherme Fabretti",
+      uploadedAt: isoDaysFromNow(-14),
+    },
+    approvalNote: "Validado contra extrato bancário do dia.",
   },
   {
     id: "ATV-1006",
@@ -140,6 +176,16 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "FF67",
     expectedResult: "Transação PIX conciliada automaticamente com o extrato bancário, sem lançamento manual.",
     notes: "Depende da conclusão de ATV-1005.",
+    attachments: [
+      {
+        fileName: "conciliacao_pix_v1.xlsx",
+        sizeLabel: "72 KB",
+        uploadedBy: "Guilherme Fabretti",
+        uploadedAt: isoDaysFromNow(-2),
+      },
+    ],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1007",
@@ -162,6 +208,9 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "FCH8",
     expectedResult: "Pagamento duplicado identificado e estornado automaticamente, com notificação ao Financeiro.",
     notes: "Ainda não iniciada — aguardando liberação do ambiente de homologação.",
+    attachments: [],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1008",
@@ -184,6 +233,9 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "FB03",
     expectedResult: "Relatório lista todas as divergências entre extrato bancário e lançamentos do sistema, sem falso positivo.",
     notes: "Cancelada — escopo absorvido pela nova versão do relatório de conciliação.",
+    attachments: [],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1009",
@@ -206,6 +258,11 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "F-28",
     expectedResult: "Arquivo de remessa CNAB 240 processado pelo banco emissor sem timeout, mesmo com mais de 500 registros.",
     notes: "Bloqueada por timeout na integração (ver ISS-0290/ISS-0294).",
+    attachments: [
+      { fileName: "log_timeout_cnab240.txt", sizeLabel: "12 KB", uploadedBy: "Guilherme Fabretti", uploadedAt: isoDaysFromNow(-5) },
+    ],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1010",
@@ -228,6 +285,21 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "XD01",
     expectedResult: "Cliente PJ cadastrado com validação de CNPJ na Receita Federal, sem permitir CNPJ inválido.",
     notes: null,
+    attachments: [
+      {
+        fileName: "cadastro_pj_evidencia.png",
+        sizeLabel: "310 KB",
+        uploadedBy: "Leonardo Martins da Silva",
+        uploadedAt: isoDaysFromNow(-11),
+      },
+    ],
+    approvalEvidence: {
+      fileName: "cadastro_pj_evidencia.png",
+      sizeLabel: "310 KB",
+      uploadedBy: "Leonardo Martins da Silva",
+      uploadedAt: isoDaysFromNow(-11),
+    },
+    approvalNote: "CNPJ validado na Receita, cadastro aprovado sem ressalvas.",
   },
   {
     id: "ATV-1011",
@@ -250,6 +322,21 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "FD01",
     expectedResult: "Cliente PF cadastrado com validação de CPF, sem permitir duplicidade de cadastro.",
     notes: null,
+    attachments: [
+      {
+        fileName: "cadastro_pf_evidencia.png",
+        sizeLabel: "280 KB",
+        uploadedBy: "Leonardo Martins da Silva",
+        uploadedAt: isoDaysFromNow(-12),
+      },
+    ],
+    approvalEvidence: {
+      fileName: "cadastro_pf_evidencia.png",
+      sizeLabel: "280 KB",
+      uploadedBy: "Leonardo Martins da Silva",
+      uploadedAt: isoDaysFromNow(-12),
+    },
+    approvalNote: "CPF validado, sem duplicidade encontrada.",
   },
   {
     id: "ATV-1012",
@@ -272,6 +359,9 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "CV01N",
     expectedResult: "Documento enviado e vinculado ao cadastro do cliente, com limite de tamanho respeitado.",
     notes: "Falha registrada para arquivos acima de 10MB (ver ISS-0298).",
+    attachments: [],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1013",
@@ -294,6 +384,9 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "SIGN01",
     expectedResult: "Contrato assinado eletronicamente e arquivado com trilha de validade jurídica.",
     notes: "Aguardando conclusão de ATV-1012.",
+    attachments: [],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1014",
@@ -316,6 +409,9 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "XD03",
     expectedResult: "Consulta à base da Receita retorna situação cadastral correta em até 3 segundos.",
     notes: null,
+    attachments: [],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1015",
@@ -338,6 +434,9 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "XD02",
     expectedResult: "Cadastro com CPF/CNPJ inválido é bloqueado e dispara alerta ao usuário.",
     notes: "Bloqueada — alerta não está sendo disparado (ver ISS-0293), 3º reteste em andamento.",
+    attachments: [],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1016",
@@ -360,6 +459,9 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "XD05",
     expectedResult: "Sistema impede cadastro duplicado com o mesmo CPF/CNPJ, exibindo o registro existente.",
     notes: "Ainda não iniciada.",
+    attachments: [],
+    approvalEvidence: null,
+    approvalNote: null,
   },
   {
     id: "ATV-1017",
@@ -382,6 +484,21 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "XD99",
     expectedResult: "Atualização cadastral em lote processa mais de 500 registros sem travar o sistema.",
     notes: "Aprovada após 1 reteste — correção de performance validada.",
+    attachments: [
+      {
+        fileName: "atualizacao_massa_log.xlsx",
+        sizeLabel: "410 KB",
+        uploadedBy: "Leonardo Martins da Silva",
+        uploadedAt: isoDaysFromNow(-15),
+      },
+    ],
+    approvalEvidence: {
+      fileName: "atualizacao_massa_log.xlsx",
+      sizeLabel: "410 KB",
+      uploadedBy: "Leonardo Martins da Silva",
+      uploadedAt: isoDaysFromNow(-15),
+    },
+    approvalNote: "Segunda execução processou os 500+ registros sem travamento.",
   },
   {
     id: "ATV-1018",
@@ -404,6 +521,9 @@ const INITIAL_ACTIVITIES: Activity[] = [
     transaction: "SO10",
     expectedResult: "Notificação de boas-vindas enviada uma única vez por cadastro concluído, sem duplicidade.",
     notes: "Aguardando conclusão de ATV-1013.",
+    attachments: [],
+    approvalEvidence: null,
+    approvalNote: null,
   },
 ];
 

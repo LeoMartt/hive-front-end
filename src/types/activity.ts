@@ -6,6 +6,13 @@ export type ActivityStatus =
   | "concluido"
   | "cancelado";
 
+export interface ActivityAttachment {
+  fileName: string;
+  sizeLabel: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
 export interface Activity {
   id: string;
   name: string;
@@ -27,6 +34,9 @@ export interface Activity {
   transaction: string;
   expectedResult: string;
   notes: string | null;
+  attachments: ActivityAttachment[];
+  approvalEvidence: ActivityAttachment | null;
+  approvalNote: string | null;
 }
 
 export interface ActivityStats {

@@ -72,6 +72,28 @@ export default function ActivityFieldGrid({ activity }: ActivityFieldGridProps) 
         <div className="field-label">Observações</div>
         <div className="field-value big">{activity.notes ?? "—"}</div>
       </div>
+
+      {activity.status !== "aguardando" && (
+        <>
+          <div className="field">
+            <div className="field-label">Evidência de aprovação</div>
+            {activity.approvalEvidence ? (
+              <div className="evidence-file">
+                <span className="attach-icon">{activity.approvalEvidence.fileName.split(".").pop()?.toUpperCase()}</span>
+                {activity.approvalEvidence.fileName}
+              </div>
+            ) : (
+              <div className="field-value pending">— pendente</div>
+            )}
+          </div>
+          <div className="field">
+            <div className="field-label">Observação de aprovação</div>
+            <div className={activity.approvalNote ? "field-value" : "field-value pending"}>
+              {activity.approvalNote ?? "—"}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
