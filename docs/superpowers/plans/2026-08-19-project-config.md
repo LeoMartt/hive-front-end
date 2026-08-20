@@ -1935,6 +1935,8 @@ git commit -m "feat: add ConfigThresholdsPanel component"
 
 This is Task 14 of 18 — the one component that actually writes to `useProjectConfig()`. `draft` is a local copy, seeded once from `config` at mount (`useState(config)`); edits only touch `draft` until "Salvar limiares" calls `setConfig(draft)`, matching the mockup's explicit save-button UX (SPI/aging fields don't live-affect the Dashboard/Issues screens on every keystroke, only on save). `agingMode` is a **local UI toggle**, independent of the current project's own `mode` — the Gestor can edit either mode's thresholds regardless of which project they're viewing, since `ProjectConfig` isn't per-project (Task 1). `saved` resets to `false` on any further edit (`updateDraft`/`updateAging` both clear it) so the "✓" message doesn't linger after the user starts changing something else again. "Transições automáticas" is fully local, decorative state (`autoTransition`, never read by anything outside this component) — per the spec, it doesn't control the Issue Detail screen's real "Iniciar análise" button. `.panel`/`.panel-head`/`.panel-title`/`.page-desc`/`.subhead`/`.field-row`/`.field`/`.field-value`/`.toggle-pill`/`.switch`/`.filters`/`.filter-pill`/`.btn*` are all pre-existing classes. `.saved-msg` is new — added in Task 17.
 
+**Nota pós-implementação:** uma revisão de qualidade encontrou que a versão inicial deste componente não validava nada antes de `setConfig(draft)` — como `<input type="number">` não impede vazio/negativo ao digitar (`Number("")` vira `0`, não `NaN`), salvar um valor ruim recoloriria Dashboard/Issues de forma quebrada (ex.: limiar negativo faz toda issue aberta virar "em risco" instantaneamente). Corrigido com um `isValidConfig(draft)` que desabilita "Salvar limiares" (e mostra um `.error-banner`) enquanto os valores não fazem sentido (SPI fora de 0–1, crítico > saudável, risco < alerta). Também ganhou um prop `projectId` para pré-selecionar a sub-aba de aging (UAT/Cutover) que já bate com o modo real do projeto atual, em vez de sempre abrir em UAT — evita que o Gestor edite o modo errado sem perceber. Ver commit `b00b3b4`; a chamada em `ProjectConfigPage` (Task 16, ainda não implementada neste ponto) já foi corrigida acima para `<ConfigThresholdsPanel projectId={projectId} />`.
+
 ---
 
 ### Task 15: `ConfigAttachmentsPanel`
@@ -2062,7 +2064,7 @@ export default function ProjectConfigPage() {
         </div>
       ) : (
         <div className="config-limiares-grid">
-          <ConfigThresholdsPanel />
+          <ConfigThresholdsPanel projectId={projectId} />
           <ConfigAttachmentsPanel />
         </div>
       )}
