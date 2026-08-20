@@ -10,7 +10,7 @@ export default function ConfigAttachmentsPanel() {
 
       <div className="subhead">Tamanho máximo por arquivo</div>
       <div className="field-value" style={{ width: "fit-content", marginBottom: 16 }}>
-        <input type="number" min="1" defaultValue={10} /> MB
+        <input type="number" min="1" defaultValue={10} aria-label="Tamanho máximo por arquivo, em megabytes" /> MB
       </div>
 
       <div className="subhead">Evidência obrigatória</div>
