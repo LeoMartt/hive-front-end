@@ -75,9 +75,9 @@ Combina `useProjectConfig()` com `useProjects().find(p => p.id === projectId)` p
 
 - `src/utils/issueIndicators.ts`: `computeIssueRisk(issue: Issue, thresholds: AgingThresholds, now: Date = new Date()): IssueRiskLevel` — ganha o parâmetro `thresholds`; as constantes `AGING_ALERTA_DAYS`/`AGING_RISCO_DAYS` são removidas (viraram os defaults do Context). `computeIssueAgingDays`/`sortIssuesByPriority` não mudam (não dependem de limiar).
 - `src/components/issues/IssueRow.tsx`: ganha prop `agingThresholds: AgingThresholds`, passa para `computeIssueRisk`.
-- `src/components/issues/IssuesTable.tsx`: ganha prop `agingThresholds`, repassa para cada `IssueRow`.
-- `src/components/issues/IssuesKpiCards.tsx`: ganha prop `projectId` (não tinha), chama `useProjectAgingThresholds(projectId)` internamente e passa para `computeIssueRisk` (usado no cálculo de "Em risco (aging)").
-- `src/pages/ProjectIssuesPage.tsx`: passa `projectId` para `IssuesKpiCards` (já passa para `IssuesTable`).
+- `src/components/issues/IssuesTable.tsx`: já recebe `projectId` — passa a chamar `useProjectAgingThresholds(projectId)` internamente e repassar o resultado como `agingThresholds` para cada `IssueRow` (não precisa de um prop novo vindo de fora).
+- `src/components/issues/IssuesKpiCards.tsx`: ganha prop `projectId` (não tinha), chama `useProjectAgingThresholds(projectId)` internamente e passa para `computeIssueRisk` (usado no cálculo de "Em risco (aging)") — mesma resolução interna que `IssuesTable` agora faz.
+- `src/pages/ProjectIssuesPage.tsx`: passa `projectId` para `IssuesKpiCards` (já passa para `IssuesTable`, que agora resolve os limiares sozinho).
 - `src/utils/projectIndicators.ts`: nova função `getSpiVariantWithThresholds(spi: number | null, config: Pick<ProjectConfig, "spiSaudavel" | "spiCritico">): SpiVariant | null` — mesma lógica de 3 faixas de `getSpiVariant`, limiares parametrizados. `getSpiVariant` original **não muda** — continua servindo a lista de Projetos com os limiares fixos de hoje (fora de escopo desta spec).
 - `src/components/dashboard/DashboardActivitiesBlock.tsx`: chama `useProjectConfig()` diretamente (sem lookup de modo — SPI não é dividido por UAT/Cutover) e aplica `getSpiVariantWithThresholds` ao `.spi-big` (hoje sempre `c.$yellow-deep` fixo; ganha `.g`/`.y`/`.r`, mesma convenção de `.stat-value`).
 
