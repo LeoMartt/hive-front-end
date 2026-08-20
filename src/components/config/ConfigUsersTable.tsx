@@ -50,13 +50,15 @@ export default function ConfigUsersTable({ projectId }: ConfigUsersTableProps) {
                   <span className="avatar-mini">{member.initials}</span>
                   {member.name}
                 </td>
-                <td className="papeis-cell">
-                  {member.roles.map((role) => (
-                    <span key={role} className={`activity-badge ${ROLE_BADGE_CLASS[role]}`}>
-                      <span className="activity-badge-dot" />
-                      {role}
-                    </span>
-                  ))}
+                <td>
+                  <div className="papeis-cell">
+                    {member.roles.map((role) => (
+                      <span key={role} className={`activity-badge ${ROLE_BADGE_CLASS[role]}`}>
+                        <span className="activity-badge-dot" />
+                        {role}
+                      </span>
+                    ))}
+                  </div>
                 </td>
                 <td style={{ textAlign: "right" }}>
                   <button
