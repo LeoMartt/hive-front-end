@@ -19,7 +19,8 @@ src/
 ├── types/
 │   └── projectConfig.ts                          # new — AgingThresholds, ProjectConfig
 ├── context/
-│   └── ProjectConfigContext.tsx                   # new — first Context in the project
+│   ├── ProjectConfigContext.ts                     # new — first Context in the project (Context object, DEFAULT_PROJECT_CONFIG, useProjectConfig)
+│   └── ProjectConfigProvider.tsx                    # new — split out post-implementation so the .tsx only exports the component (react-refresh); see Task 1's note
 ├── hooks/
 │   ├── useProjectAgingThresholds.ts               # new
 │   ├── useGraphUserSearch.ts                      # new — extracted from NewProjectModal
@@ -140,6 +141,8 @@ git commit -m "feat: add ProjectConfig type and Context"
 ## Context
 
 This is Task 1 of 18. First use of `src/context/` in this codebase — every previous piece of state has been a `useX(projectId)` hook called independently per component, which works because no page has ever needed to read state that another page wrote. SPI/aging thresholds break that: saving in Config must be visible on the Dashboard and Issues screens in the same session, which plain independent `useState` calls can't do (each call site gets its own copy). `ProjectConfigProvider` isn't wired into the app yet — that's Task 2 — so nothing imports this file yet, but it type-checks standalone.
+
+**Nota pós-implementação:** a versão inicial colocava `DEFAULT_PROJECT_CONFIG`, `useProjectConfig` e o componente `ProjectConfigProvider` todos no mesmo `ProjectConfigContext.tsx`. Um `.tsx` que exporta uma mistura de componente + valores/hooks não-componente quebra o Fast Refresh (`react-refresh/only-export-components`), o que só apareceu ao rodar `npm run lint` na revisão final (fora do bar de verificação `tsc -b` + `build` + QA manual usado durante as tasks). Corrigido dividindo em dois arquivos: `src/context/ProjectConfigContext.ts` (sem JSX — objeto de Context, `DEFAULT_PROJECT_CONFIG`, `useProjectConfig`) e `src/context/ProjectConfigProvider.tsx` (só o componente Provider, importado por `ProjectLayout.tsx`). Ver commit `9e91398`.
 
 ---
 
@@ -1219,6 +1222,8 @@ git commit -m "feat: add addTeamMember and replaceTeamMemberRoles to useProjects
 
 This is Task 8 of 18. Both mutators follow the exact `setProjects((prev) => prev.map(...))` shape `createProject` (well, `createProject` prepends rather than maps, but the immutable-update style matches) already establishes for this hook — no new state-update pattern introduced. Like every other mutation in this app, this is ephemeral to the `useProjects()` call site's mount lifetime (not persisted across navigation away and back) — same limitation `createProject` already has today (creating a project via `NewProjectModal`, then leaving `/projetos` and coming back, already loses it). Not a regression this task introduces, and out of scope to fix — matches the project's established "mock data, no real backend" posture.
 
+**Nota pós-implementação:** a versão inicial de `replaceTeamMemberRoles` reconstruía as entradas com `[...withoutMember, ...newEntries]` — um filter seguido de append no final —, o que jogava a linha da pessoa editada pro fim da tabela de usuários toda vez que seus papéis eram salvos (visível e reproduzido no QA manual da Task 18). Corrigido para inserir as novas entradas na posição da primeira ocorrência do nome, preservando a ordem das outras pessoas. Ver commit `96d371b`.
+
 ---
 
 ### Task 9: `groupTeamMembersByName`
@@ -1756,6 +1761,8 @@ git commit -m "feat: add ConfigPermissionMatrix component"
 
 This is Task 13 of 18, standalone and fully decorative — matches the mockup's own explicit framing ("esta matriz não é aplicada de verdade ainda"). Checkboxes are **uncontrolled** (`defaultChecked`, no `useState`, no `onChange`) — the browser manages each input's own toggle state internally, so they're genuinely clickable without any React wiring, but nothing reads or persists the result. "Salvar matriz" has no `onClick` — decorative, same convention as every other unbuilt-feature button in this project. `.panel`/`.panel-head`/`.panel-title`/`.page-desc`/`.table-wrap`/`.btn*` are all pre-existing classes — zero new CSS for this component.
 
+**Nota pós-implementação:** a versão inicial não dava nome acessível a nenhum dos 30 checkboxes (a associação com a ação/papel era só visual, por posição na tabela). Corrigido adicionando `aria-label` por checkbox (ex. `"Criar / editar atividades — Gestor"`), mesmo padrão já usado em outras tabelas do projeto (`ActivitiesTable.tsx`, `ActivityRow.tsx`). Ver commit `acbdfa0`.
+
 ---
 
 ### Task 14: `ConfigThresholdsPanel`
@@ -2004,6 +2011,8 @@ git commit -m "feat: add ConfigAttachmentsPanel component"
 
 This is Task 15 of 18, fully decorative — matches the spec's "fora de escopo" for upload/evidência flows (none exist in any screen of the project yet). Inputs are uncontrolled (`defaultValue`/`defaultChecked`, no `useState`) — same reasoning as `ConfigPermissionMatrix` (Task 13): clickable/typeable without any React state backing it, since nothing needs to read the value. "Salvar limite" has no `onClick`. No new CSS.
 
+**Nota pós-implementação:** o input de tamanho máximo de arquivo não tinha nome acessível (o texto "Tamanho máximo por arquivo" fica num `.subhead` irmão, não associado por `<label>`/`aria-label`) — mesma categoria de gap encontrada e corrigida em `ConfigPermissionMatrix` (Task 13). Corrigido com `aria-label="Tamanho máximo por arquivo, em megabytes"`. Ver commit `a4a548d`.
+
 ---
 
 ### Task 16: `ProjectConfigPage` and route wiring
@@ -2244,6 +2253,8 @@ git commit -m "style: add Papéis & Config SCSS partial"
 ## Context
 
 This is Task 17 of 18. Ported from the mockup's `#page-config` styles the same way every previous styling task in this project has: translating `var(--...)` to literal Sass variables from `_colors.scss` (this codebase has no CSS custom-property layer). `.config-users-grid`/`.config-limiares-grid` collapse to 1 column at 900px, same breakpoint `.activity-layout` already uses. Everything else this screen needs (`.panel`, `.field-row`/`.field-value`, `.filters`/`.filter-pill`, `.toggle-pill`/`.switch`, `.avatar-mini`, `.activity-badge*`, `.table-wrap`, `.form-group`/`.form-label`/`.form-input`/`.user-search-wrap`/`.user-dropdown*`/`.error-banner`/`.modal-actions`, `.attach-dl`) already exists and needs no changes.
+
+**Nota pós-implementação:** o manual QA (Task 18) encontrou overflow horizontal na página inteira nas duas abas. Causa: itens de grid têm `min-width:auto` implícito (usa o tamanho mínimo do conteúdo), e a tabela da matriz de permissões (via `.table-wrap table` em `_table.scss`) tem `min-width:760px` — a mesma regra de toda tabela do projeto. Sem um `min-width:0` explícito nos filhos diretos de `.config-users-grid`/`.config-limiares-grid`, essa largura mínima "explode" a coluna do grid e empurra a página inteira para rolagem horizontal, em vez de deixar o `.table-wrap` interno (que já tem `overflow-x:auto`) rolar sozinho. Corrigido adicionando `> * { min-width: 0; }` a ambos os grids. Ver commit `aa7cc8d`.
 
 ---
 
