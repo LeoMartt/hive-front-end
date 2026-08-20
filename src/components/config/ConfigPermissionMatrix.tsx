@@ -43,13 +43,13 @@ export default function ConfigPermissionMatrix() {
               <tr key={row.action}>
                 <td>{row.action}</td>
                 <td style={{ textAlign: "center" }}>
-                  <input type="checkbox" defaultChecked={row.gestor} />
+                  <input type="checkbox" defaultChecked={row.gestor} aria-label={`${row.action} — Gestor`} />
                 </td>
                 <td style={{ textAlign: "center" }}>
-                  <input type="checkbox" defaultChecked={row.tester} />
+                  <input type="checkbox" defaultChecked={row.tester} aria-label={`${row.action} — Tester`} />
                 </td>
                 <td style={{ textAlign: "center" }}>
-                  <input type="checkbox" defaultChecked={row.dev} />
+                  <input type="checkbox" defaultChecked={row.dev} aria-label={`${row.action} — Dev`} />
                 </td>
               </tr>
             ))}
