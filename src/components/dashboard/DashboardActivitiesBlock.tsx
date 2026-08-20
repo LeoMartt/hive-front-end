@@ -1,5 +1,7 @@
 import NavIcon from "../common/NavIcon";
 import StatCard from "../common/StatCard";
+import { useProjectConfig } from "../../context/ProjectConfigContext";
+import { getSpiVariantWithThresholds } from "../../utils/projectIndicators";
 import type { ActivityStats } from "../../types/activity";
 
 interface DashboardActivitiesBlockProps {
@@ -11,7 +13,14 @@ function percentOf(part: number, total: number): number {
   return total === 0 ? 0 : Math.round((part / total) * 100);
 }
 
+// Mesma convenção g/y/r de StatCard.tsx (bad->r, warn->y, good->g).
+const SPI_VARIANT_TONE = { good: "g", warn: "y", bad: "r" } as const;
+
 export default function DashboardActivitiesBlock({ stats, spi }: DashboardActivitiesBlockProps) {
+  const { config } = useProjectConfig();
+  const spiVariant = getSpiVariantWithThresholds(spi, config);
+  const spiToneClass = spiVariant === null ? "" : ` ${SPI_VARIANT_TONE[spiVariant]}`;
+
   return (
     <div className="metric-block">
       <div className="section-head">
@@ -27,7 +36,7 @@ export default function DashboardActivitiesBlock({ stats, spi }: DashboardActivi
       <div className="stat-hero-row">
         <div className="spi-hero">
           <div className="stat-label">SPI do projeto</div>
-          <div className="spi-big">{spi === null ? "—" : spi.toFixed(2)}</div>
+          <div className={`spi-big${spiToneClass}`}>{spi === null ? "—" : spi.toFixed(2)}</div>
           <div className="stat-sub">Fixed Formula 0/50/100</div>
         </div>
         <div className="stat-grid-compact">
