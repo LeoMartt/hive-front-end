@@ -1,19 +1,51 @@
 import { useState } from "react";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
+import { useProjects } from "../../hooks/useProjects";
 import type { AgingThresholds, ProjectConfig } from "../../types/projectConfig";
 
 type AgingMode = "uat" | "cutover";
 
-export default function ConfigThresholdsPanel() {
+interface ConfigThresholdsPanelProps {
+  projectId: string;
+}
+
+function isValidAging(aging: AgingThresholds): boolean {
+  return aging.alerta >= 0 && aging.risco >= aging.alerta;
+}
+
+// Números digitados livremente (vazio -> 0, negativo, "em risco" <= "em alerta") não são
+// barrados pelos atributos min/max do <input> — esses só afetam as setas do navegador, não
+// o que o usuário digita. Sem essa validação, salvar um valor ruim aqui recoloriria o SPI
+// do Dashboard e o aging de Issues de outras telas já prontas de forma quebrada (ex.:
+// limiar negativo faz toda issue aberta aparecer "em risco" instantaneamente).
+function isValidConfig(config: ProjectConfig): boolean {
+  return (
+    config.spiSaudavel >= 0 &&
+    config.spiSaudavel <= 1 &&
+    config.spiCritico >= 0 &&
+    config.spiCritico <= 1 &&
+    config.spiCritico <= config.spiSaudavel &&
+    isValidAging(config.agingUat) &&
+    isValidAging(config.agingCutover)
+  );
+}
+
+export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPanelProps) {
   const { config, setConfig } = useProjectConfig();
+  const { projects } = useProjects();
+  const currentProject = projects.find((item) => item.id === projectId);
   const [draft, setDraft] = useState<ProjectConfig>(config);
-  const [agingMode, setAgingMode] = useState<AgingMode>("uat");
+  // Abre já na sub-aba do modo do projeto atual — evita que o Gestor edite "UAT" achando
+  // que está mudando os limiares do projeto que está vendo quando ele é, na verdade,
+  // Cutover. Ainda é só o ponto de partida: as duas sub-abas continuam editáveis.
+  const [agingMode, setAgingMode] = useState<AgingMode>(currentProject?.mode === "cutover" ? "cutover" : "uat");
   const [autoTransition, setAutoTransition] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const agingKey: keyof Pick<ProjectConfig, "agingUat" | "agingCutover"> =
     agingMode === "uat" ? "agingUat" : "agingCutover";
   const editingAging = draft[agingKey];
+  const canSave = isValidConfig(draft);
 
   function updateDraft(partial: Partial<ProjectConfig>) {
     setDraft((prev) => ({ ...prev, ...partial }));
@@ -33,6 +65,7 @@ export default function ConfigThresholdsPanel() {
   }
 
   function handleSave() {
+    if (!canSave) return;
     setConfig(draft);
     setSaved(true);
   }
@@ -139,10 +172,17 @@ export default function ConfigThresholdsPanel() {
         </div>
       </div>
       <div style={{ fontSize: 11, color: "inherit", marginBottom: 14 }}>
-        Editando limiares do modo {agingMode === "uat" ? "UAT" : "Cutover"}.
+        Editando limiares do modo {agingMode === "uat" ? "UAT" : "Cutover"}
+        {currentProject && agingMode !== currentProject.mode && " (diferente do modo deste projeto)"}.
       </div>
 
-      <button type="button" className="btn btn-primary btn-sm" onClick={handleSave}>
+      {!canSave && (
+        <div className="error-banner">
+          Limiares inválidos: os valores devem estar entre 0 e 1 (SPI), o crítico não pode ser maior que o saudável,
+          e "em risco" não pode ser menor que "em alerta".
+        </div>
+      )}
+      <button type="button" className="btn btn-primary btn-sm" disabled={!canSave} onClick={handleSave}>
         Salvar limiares
       </button>
       {saved && <span className="saved-msg">Limiares atualizados ✓</span>}
