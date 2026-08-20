@@ -7,6 +7,7 @@ import ProjectIssuesPage from "../pages/ProjectIssuesPage";
 import IssueDetailPage from "../pages/IssueDetailPage";
 import PlaceholderPage from "../pages/PlaceholderPage";
 import ProjectDashboardPage from "../pages/ProjectDashboardPage";
+import ProjectConfigPage from "../pages/ProjectConfigPage";
 import LoginPage from "../pages/LoginPage";
 import ProtectedRoute from "./ProtectedRoute";
 
@@ -26,7 +27,7 @@ export default function AppRoutes() {
           <Route path="estrutura" element={<PlaceholderPage title="A estrutura (WBS) do projeto" />} />
           <Route path="issues" element={<ProjectIssuesPage />} />
           <Route path="issues/:issueId" element={<IssueDetailPage />} />
-          <Route path="config" element={<PlaceholderPage title="A configuração do projeto" />} />
+          <Route path="config" element={<ProjectConfigPage />} />
         </Route>
       </Route>
     </Routes>
