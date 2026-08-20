@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext } from "react";
 import type { ProjectConfig } from "../types/projectConfig";
 
 // Mesmos valores hoje hardcoded em issueIndicators.ts (AGING_ALERTA_DAYS=2/AGING_RISCO_DAYS=6)
@@ -12,20 +12,14 @@ export const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
   agingCutover: { alerta: 3, risco: 8 },
 };
 
-interface ProjectConfigContextValue {
+export interface ProjectConfigContextValue {
   config: ProjectConfig;
   setConfig: (config: ProjectConfig) => void;
 }
 
-const ProjectConfigContext = createContext<ProjectConfigContextValue | null>(null);
-
-// Estado único e global (não por projectId) — mesma simplificação que useIssues/useActivities
-// já assumem (ambos ignoram projectId e retornam sempre o mesmo dataset mock). Não existe
-// backend real por trás; diferenciar por projeto seria complexidade sem contrapartida.
-export function ProjectConfigProvider({ children }: { children: ReactNode }) {
-  const [config, setConfig] = useState<ProjectConfig>(DEFAULT_PROJECT_CONFIG);
-  return <ProjectConfigContext.Provider value={{ config, setConfig }}>{children}</ProjectConfigContext.Provider>;
-}
+// Objeto de Context em arquivo próprio (sem JSX) — ProjectConfigProvider.tsx só exporta o
+// componente Provider, mantendo cada arquivo .tsx exportando só componentes (react-refresh).
+export const ProjectConfigContext = createContext<ProjectConfigContextValue | null>(null);
 
 export function useProjectConfig(): ProjectConfigContextValue {
   const ctx = useContext(ProjectConfigContext);

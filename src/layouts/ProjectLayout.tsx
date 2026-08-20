@@ -1,6 +1,6 @@
 import { Outlet } from "react-router";
 import ProjectNavDock from "../components/project-nav/ProjectNavDock";
-import { ProjectConfigProvider } from "../context/ProjectConfigContext";
+import { ProjectConfigProvider } from "../context/ProjectConfigProvider";
 
 export default function ProjectLayout() {
   return (
