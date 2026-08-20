@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import type { NewProjectInput, Project, ProjectStats } from "../types/project";
+import type { NewProjectInput, Project, ProjectStats, TeamMember, UserRole } from "../types/project";
+import { getInitials } from "../utils/initials";
 
 function minutesAgo(minutes: number): string {
   return new Date(Date.now() - minutes * 60000).toISOString();
@@ -109,6 +110,8 @@ interface UseProjectsResult {
   projects: Project[];
   stats: ProjectStats;
   createProject: (input: NewProjectInput) => void;
+  addTeamMember: (projectId: string, member: TeamMember) => void;
+  replaceTeamMemberRoles: (projectId: string, memberName: string, roles: UserRole[]) => void;
 }
 
 export function useProjects(): UseProjectsResult {
@@ -145,5 +148,37 @@ export function useProjects(): UseProjectsResult {
     setProjects((prev) => [newProject, ...prev]);
   }
 
-  return { projects, stats, createProject };
+  // Append direto, sem validação própria — mesma simplicidade de createProject. A
+  // checagem de duplicidade vive na camada de UI (InviteUserModal), que já tem o
+  // project.team completo para comparar contra.
+  function addTeamMember(projectId: string, member: TeamMember): void {
+    setProjects((prev) =>
+      prev.map((project) => (project.id === projectId ? { ...project, team: [...project.team, member] } : project))
+    );
+  }
+
+  // Remove todas as entradas TeamMember daquele nome no projeto e recria uma por papel
+  // em `roles` — é a mesma operação que "readicionar com outro papel" já faz em
+  // NewProjectModal, só que em lote/via edição. Reaproveita initials/email da entrada
+  // existente; se por algum motivo não houver nenhuma entrada prévia com esse nome,
+  // deriva initials via getInitials.
+  function replaceTeamMemberRoles(projectId: string, memberName: string, roles: UserRole[]): void {
+    setProjects((prev) =>
+      prev.map((project) => {
+        if (project.id !== projectId) return project;
+        const existing = project.team.find((member) => member.name === memberName);
+        const withoutMember = project.team.filter((member) => member.name !== memberName);
+        const newEntries: TeamMember[] = roles.map((role) => ({
+          id: existing?.id,
+          initials: existing?.initials ?? getInitials(memberName),
+          name: memberName,
+          email: existing?.email,
+          role,
+        }));
+        return { ...project, team: [...withoutMember, ...newEntries] };
+      })
+    );
+  }
+
+  return { projects, stats, createProject, addTeamMember, replaceTeamMemberRoles };
 }
