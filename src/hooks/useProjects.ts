@@ -157,17 +157,18 @@ export function useProjects(): UseProjectsResult {
     );
   }
 
-  // Remove todas as entradas TeamMember daquele nome no projeto e recria uma por papel
-  // em `roles` — é a mesma operação que "readicionar com outro papel" já faz em
+  // Substitui, no lugar, as entradas TeamMember daquele nome no projeto por uma nova por
+  // papel em `roles` — é a mesma operação que "readicionar com outro papel" já faz em
   // NewProjectModal, só que em lote/via edição. Reaproveita initials/email da entrada
   // existente; se por algum motivo não houver nenhuma entrada prévia com esse nome,
-  // deriva initials via getInitials.
+  // deriva initials via getInitials. As novas entradas entram na posição da primeira
+  // ocorrência do nome (não são anexadas ao final) — senão editar os papéis de alguém
+  // jogaria a linha dele pro fim da tabela de usuários.
   function replaceTeamMemberRoles(projectId: string, memberName: string, roles: UserRole[]): void {
     setProjects((prev) =>
       prev.map((project) => {
         if (project.id !== projectId) return project;
         const existing = project.team.find((member) => member.name === memberName);
-        const withoutMember = project.team.filter((member) => member.name !== memberName);
         const newEntries: TeamMember[] = roles.map((role) => ({
           id: existing?.id,
           initials: existing?.initials ?? getInitials(memberName),
@@ -175,7 +176,22 @@ export function useProjects(): UseProjectsResult {
           email: existing?.email,
           role,
         }));
-        return { ...project, team: [...withoutMember, ...newEntries] };
+
+        const team: TeamMember[] = [];
+        let inserted = false;
+        for (const member of project.team) {
+          if (member.name !== memberName) {
+            team.push(member);
+            continue;
+          }
+          if (!inserted) {
+            team.push(...newEntries);
+            inserted = true;
+          }
+        }
+        if (!inserted) team.push(...newEntries);
+
+        return { ...project, team };
       })
     );
   }
