@@ -66,7 +66,7 @@ export default function ProjectIssuesPage() {
         </div>
       </div>
 
-      <IssuesKpiCards issues={filteredIssues} />
+      <IssuesKpiCards issues={filteredIssues} projectId={projectId} />
 
       <div className="activities-toolbar">
         <IssueStatusPills counts={statusCounts} active={statusFilter} onSelect={setStatusFilter} />

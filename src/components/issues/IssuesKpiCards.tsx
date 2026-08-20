@@ -1,15 +1,18 @@
 import StatCard from "../common/StatCard";
 import { computeIssueAgingDays, computeIssueRisk } from "../../utils/issueIndicators";
+import { useProjectAgingThresholds } from "../../hooks/useProjectAgingThresholds";
 import type { Issue } from "../../types/issue";
 
 interface IssuesKpiCardsProps {
   issues: Issue[];
+  projectId: string;
 }
 
-export default function IssuesKpiCards({ issues }: IssuesKpiCardsProps) {
+export default function IssuesKpiCards({ issues, projectId }: IssuesKpiCardsProps) {
+  const agingThresholds = useProjectAgingThresholds(projectId);
   const abertas = issues.filter((issue) => issue.status !== "concluida");
   const impeditivasAbertas = abertas.filter((issue) => issue.impeditiva);
-  const emRisco = abertas.filter((issue) => computeIssueRisk(issue) === "risco");
+  const emRisco = abertas.filter((issue) => computeIssueRisk(issue, agingThresholds) === "risco");
   const somaAging = abertas.reduce((sum, issue) => sum + computeIssueAgingDays(issue), 0);
   const tempoMedio = abertas.length === 0 ? null : somaAging / abertas.length;
 
