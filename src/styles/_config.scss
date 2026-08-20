@@ -6,6 +6,15 @@
   grid-template-columns: 1.1fr 1fr;
   gap: 16px;
   align-items: start;
+
+  // Itens de grid têm min-width:auto implícito, que usa o tamanho mínimo do conteúdo —
+  // a tabela da matriz de permissões tem min-width:760px (mesma regra de toda tabela do
+  // projeto, em _table.scss), então sem isso a coluna "explode" a grid e empurra a
+  // página inteira para rolagem horizontal, em vez de deixar o .table-wrap interno
+  // (que já tem overflow-x:auto) rolar sozinho.
+  > * {
+    min-width: 0;
+  }
 }
 
 // Aba "Limiares e Regras": limiares à esquerda, anexos/evidências à direita
@@ -14,6 +23,10 @@
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   align-items: start;
+
+  > * {
+    min-width: 0;
+  }
 }
 
 // Badges de papel na tabela de usuários — várias por linha quando a pessoa acumula papéis
