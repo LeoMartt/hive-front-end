@@ -29,7 +29,7 @@ Novo hook `src/hooks/useGoBack.ts`:
 export function useGoBack(fallbackPath: string): () => void
 ```
 
-Implementação: se `location.key !== "default"` (react-router indica que existe uma entrada de histórico real dentro da sessão da SPA — não foi acesso direto por URL/link externo/reload), chama `navigate(-1)`; senão navega para `fallbackPath`.
+Implementação: se `window.history.state.idx > 0` (`idx` só é incrementado por navegação em modo "push", o padrão do `navigate()` — um "replace" mantém o mesmo `idx`; `idx > 0` indica que a sessão da SPA já empilhou pelo menos uma navegação real antes desta página), chama `navigate(-1)`; senão navega para `fallbackPath`. (Revisão pontual após a primeira versão: `location.key !== "default"` foi descartado por também mudar em navegações "replace", como os redirects já existentes no app — `idx` distingue os dois casos corretamente.)
 
 Isso substitui o `goBack` fixo hoje usado em `ActivityDetailPage` (ajuste pontual: `useGoBack(`/projetos/${projectId}/atividades`)`) e é usado também em `IssueDetailPage` (`useGoBack(`/projetos/${projectId}/issues`)`). Resultado: "← Voltar" retorna sempre para a tela de onde o usuário realmente veio — tabela de Issues, ou painel "Issues vinculadas" dentro do detalhe de uma Atividade — sem precisar enumerar origens explicitamente; qualquer tela futura que linke para um desses detalhes já funciona automaticamente.
 
