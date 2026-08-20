@@ -1,0 +1,61 @@
+@use "colors" as c;
+
+// Aba "Usuários": tabela à esquerda, matriz de permissões à direita
+.config-users-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+// Aba "Limiares e Regras": limiares à esquerda, anexos/evidências à direita
+.config-limiares-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+// Badges de papel na tabela de usuários — várias por linha quando a pessoa acumula papéis
+.papeis-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+// Checkboxes de papel no modal de editar papéis
+.role-checkbox-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+.role-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+// Nome do usuário ao lado do título "Editar papéis"
+.modal-title-sub {
+  font-weight: 400;
+  color: c.$text-faint;
+  margin-left: 6px;
+}
+
+// Confirmação "Limiares atualizados ✓" ao lado do botão Salvar
+.saved-msg {
+  margin-left: 10px;
+  font-size: 11.5px;
+  color: c.$green;
+}
+
+@media (max-width: 900px) {
+  .config-users-grid,
+  .config-limiares-grid {
+    grid-template-columns: 1fr;
+  }
+}
