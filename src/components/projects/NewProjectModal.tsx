@@ -1,23 +1,14 @@
 import { useState } from "react";
-import { useMsal } from "@azure/msal-react";
-import type { AccountInfo } from "@azure/msal-browser";
 import Modal from "../common/Modal";
 import CloseIcon from "../common/CloseIcon";
 import { getInitials } from "../../utils/initials";
-import { graphUserSearchRequest } from "../../config/authConfig";
+import { useGraphUserSearch } from "../../hooks/useGraphUserSearch";
 import type { NewProjectInput, ProjectMode, TeamMember, UserRole } from "../../types/project";
 
 interface NewProjectModalProps {
   show: boolean;
   onHide: () => void;
   onCreate: (input: NewProjectInput) => void;
-}
-
-interface GraphUser {
-  id: string;
-  displayName: string;
-  mail: string | null;
-  userPrincipalName: string;
 }
 
 const ROLE_OPTIONS: UserRole[] = ["Gestor de Projetos", "Tester", "Desenvolvedor"];
@@ -33,10 +24,6 @@ interface NewProjectFormState {
   mode: ProjectMode;
   levelNames: string[];
   members: TeamMember[];
-  userSearch: string;
-  searchResults: GraphUser[];
-  searchLoading: boolean;
-  selectedUser: GraphUser | null;
   selectedRole: UserRole;
   errorMsg: string | null;
 }
@@ -48,10 +35,6 @@ function createEmptyState(): NewProjectFormState {
     mode: "uat",
     levelNames: LEVEL_DEFAULTS.uat,
     members: [],
-    userSearch: "",
-    searchResults: [],
-    searchLoading: false,
-    selectedUser: null,
     selectedRole: ROLE_OPTIONS[0],
     errorMsg: null,
   };
@@ -59,10 +42,11 @@ function createEmptyState(): NewProjectFormState {
 
 export default function NewProjectModal({ show, onHide, onCreate }: NewProjectModalProps) {
   const [state, setState] = useState<NewProjectFormState>(createEmptyState);
-  const { instance, accounts } = useMsal();
+  const search = useGraphUserSearch();
 
   function resetAndHide() {
     setState(createEmptyState());
+    search.reset();
     onHide();
   }
 
@@ -78,62 +62,9 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
     });
   }
 
-  async function handleSearchChange(query: string) {
-    setState((prev) => ({
-      ...prev,
-      userSearch: query,
-      selectedUser: null,
-      errorMsg: null,
-    }));
-
-    if (query.trim().length < 2) {
-      setState((prev) => ({ ...prev, searchResults: [] }));
-      return;
-    }
-
-    setState((prev) => ({ ...prev, searchLoading: true }));
-    try {
-      const account = accounts[0] as AccountInfo;
-      const tokenResponse = await instance.acquireTokenSilent({
-        ...graphUserSearchRequest,
-        account,
-      });
-
-      const url = `https://graph.microsoft.com/v1.0/users?$search="displayName:${query}"&$select=id,displayName,mail,userPrincipalName&$top=8`;
-
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${tokenResponse.accessToken}`,
-          ConsistencyLevel: "eventual",
-        },
-      });
-
-      if (!response.ok) throw new Error(`Graph API retornou ${response.status}`);
-
-      const data = await response.json();
-      setState((prev) => ({ ...prev, searchResults: data.value ?? [] }));
-    } catch (err) {
-      if (err instanceof Error && err.name === "InteractionRequiredAuthError") {
-        instance.acquireTokenRedirect(graphUserSearchRequest);
-        return;
-      }
-      setState((prev) => ({ ...prev, searchResults: [] }));
-    } finally {
-      setState((prev) => ({ ...prev, searchLoading: false }));
-    }
-  }
-
-  function handleSelectUser(user: GraphUser) {
-    setState((prev) => ({
-      ...prev,
-      selectedUser: user,
-      userSearch: `${user.displayName} — ${user.mail ?? user.userPrincipalName}`,
-      searchResults: [],
-    }));
-  }
-
   function handleAddUser() {
-    const { selectedUser, selectedRole, members } = state;
+    const { selectedUser } = search;
+    const { selectedRole, members } = state;
     if (!selectedUser) return;
 
     const alreadyAdded = members.some(
@@ -158,10 +89,9 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
     setState((prev) => ({
       ...prev,
       members: [...prev.members, newMember],
-      userSearch: "",
-      selectedUser: null,
       errorMsg: null,
     }));
+    search.reset();
   }
 
   function handleRemoveUser(index: number) {
@@ -183,7 +113,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
   }
 
   const canConfirm = state.name.trim().length > 0;
-  const showUserDropdown = state.userSearch.trim().length >= 2 && !state.selectedUser;
+  const showUserDropdown = search.userSearch.trim().length >= 2 && !search.selectedUser;
 
   return (
     <Modal open={show} onClose={resetAndHide} wide labelledBy="new-project-modal-title">
@@ -283,24 +213,24 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
               aria-label="Pesquisar usuário"
               placeholder="Pesquisar usuário no tenant FUMEP…"
               autoComplete="off"
-              value={state.userSearch}
-              onChange={(event) => handleSearchChange(event.target.value)}
+              value={search.userSearch}
+              onChange={(event) => search.handleSearchChange(event.target.value)}
             />
             {showUserDropdown && (
               <div className="user-dropdown">
-                {state.searchLoading && (
+                {search.searchLoading && (
                   <div className="user-dropdown-loading">Buscando…</div>
                 )}
-                {!state.searchLoading && state.searchResults.length === 0 && (
+                {!search.searchLoading && search.searchResults.length === 0 && (
                   <div className="user-dropdown-empty">Nenhum usuário encontrado.</div>
                 )}
-                {!state.searchLoading &&
-                  state.searchResults.map((user) => (
+                {!search.searchLoading &&
+                  search.searchResults.map((user) => (
                     <button
                       type="button"
                       key={user.id}
                       className="user-dropdown-item"
-                      onClick={() => handleSelectUser(user)}
+                      onClick={() => search.handleSelectUser(user)}
                     >
                       <span className="team-member-av">{getInitials(user.displayName)}</span>
                       <span className="user-dropdown-item-text">
@@ -330,7 +260,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
           <button
             type="button"
             className="btn-add-user"
-            disabled={!state.selectedUser}
+            disabled={!search.selectedUser}
             aria-label="Adicionar usuário"
             onClick={handleAddUser}
           >
