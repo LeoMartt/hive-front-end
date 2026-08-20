@@ -21,7 +21,7 @@ export default function ActivityLinkedIssuesPanel({ activityId, projectId }: Act
         </div>
       </div>
       {linkedIssues.length === 0 ? (
-        <div className="linked-issues-empty">Nenhuma issue vinculada a esta atividade.</div>
+        <div className="empty-note">Nenhuma issue vinculada a esta atividade.</div>
       ) : (
         linkedIssues.map((issue) => (
           <div

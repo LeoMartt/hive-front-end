@@ -8,7 +8,7 @@ function isImage(fileName: string): boolean {
   return /\.(png|jpe?g|gif)$/i.test(fileName);
 }
 
-function AttachmentRow({ attachment, sentBy }: { attachment: IssueAttachment; sentBy: string }) {
+function AttachmentRow({ attachment, role }: { attachment: IssueAttachment; role: string }) {
   return (
     <div className="attach-row">
       <div className={isImage(attachment.fileName) ? "attach-icon img" : "attach-icon"}>
@@ -17,7 +17,7 @@ function AttachmentRow({ attachment, sentBy }: { attachment: IssueAttachment; se
       <div className="attach-body">
         <b>{attachment.fileName}</b>
         <span>
-          {attachment.sizeLabel} · enviado por {sentBy}
+          {attachment.sizeLabel} · enviado por {attachment.uploadedBy} ({role})
         </span>
       </div>
       <button type="button" className="attach-dl" title="Baixar anexo">
@@ -44,9 +44,9 @@ export default function IssueAttachmentsPanel({ issue }: IssueAttachmentsPanelPr
           </div>
         </div>
         {issue.openingAttachment ? (
-          <AttachmentRow attachment={issue.openingAttachment} sentBy={`${issue.tester} (Tester)`} />
+          <AttachmentRow attachment={issue.openingAttachment} role="Tester" />
         ) : (
-          <div className="linked-issues-empty">Nenhum anexo — opcional para issues não impeditivas.</div>
+          <div className="empty-note">Nenhum anexo — opcional para issues não impeditivas.</div>
         )}
       </div>
 
@@ -57,10 +57,10 @@ export default function IssueAttachmentsPanel({ issue }: IssueAttachmentsPanelPr
               Anexo da solução <span>enviado pelo Dev</span>
             </div>
           </div>
-          <AttachmentRow attachment={issue.solutionAttachment} sentBy={`${issue.dev} (Dev)`} />
+          <AttachmentRow attachment={issue.solutionAttachment} role="Dev" />
         </div>
       ) : (
-        <div className="linked-issues-empty">
+        <div className="empty-note">
           Anexo da solução ainda não existe — aguardando o Dev propor uma solução.
         </div>
       )}
