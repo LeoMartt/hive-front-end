@@ -6,8 +6,11 @@ import ActivityGroupToggle from "../components/activities/ActivityGroupToggle";
 import ActivitiesTable from "../components/activities/ActivitiesTable";
 import NavIcon from "../components/common/NavIcon";
 import { useActivities } from "../hooks/useActivities";
+import { useExportButton } from "../hooks/useExportButton";
 import { filterActivities } from "../utils/filterActivities";
 import { groupByModuleProcess } from "../utils/groupActivities";
+import { buildActivityExportRows, ACTIVITY_EXPORT_COLUMN_WIDTHS } from "../utils/activityExport";
+import { downloadXlsx } from "../utils/downloadXlsx";
 import type { ActivityFiltersState, ActivityGroupMode } from "../types/activity";
 
 const CURRENT_USER_NAME = "Guilherme Fabretti";
@@ -54,6 +57,23 @@ export default function ProjectActivitiesPage() {
   const filteredActivities = useMemo(
     () => filterActivities(activities, filters, CURRENT_USER_NAME),
     [activities, filters]
+  );
+
+  const {
+    label: exportActivitiesLabel,
+    isDefault: exportActivitiesIsDefault,
+    handleClick: handleExportActivities,
+  } = useExportButton(
+    "Exportar atividades",
+    filteredActivities.length === 0,
+    "Nenhuma atividade no filtro atual",
+    () =>
+      downloadXlsx(
+        buildActivityExportRows(filteredActivities),
+        ACTIVITY_EXPORT_COLUMN_WIDTHS,
+        "Atividades",
+        "hive_atividades",
+      ),
   );
 
   const singleStatus = filters.statuses.length === 1 ? filters.statuses[0] : null;
@@ -130,12 +150,18 @@ export default function ProjectActivitiesPage() {
           </div>
         </div>
         <div className="head-actions">
-          <button type="button" className="btn btn-outline-secondary btn-sm">
-            <NavIcon>
-              <path d="M12 3v12m0 0-4-4m4 4 4-4" />
-              <path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
-            </NavIcon>
-            Exportar atividades
+          <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleExportActivities}>
+            {exportActivitiesIsDefault ? (
+              <>
+                <NavIcon>
+                  <path d="M12 3v12m0 0-4-4m4 4 4-4" />
+                  <path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+                </NavIcon>
+                {exportActivitiesLabel}
+              </>
+            ) : (
+              exportActivitiesLabel
+            )}
           </button>
           <button type="button" className="btn btn-outline-secondary btn-sm">
             Importar em massa
