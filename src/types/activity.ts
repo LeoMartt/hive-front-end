@@ -39,6 +39,23 @@ export interface Activity {
   approvalNote: string | null;
 }
 
+export interface NewActivityInput {
+  name: string;
+  module: string;
+  process: string;
+  tester: string;
+  dev: string;
+  plannedStart: string;
+  plannedEnd: string;
+  predecessors: string[];
+  wbs: string;
+  area: string;
+  system: string;
+  transaction: string;
+  expectedResult: string;
+  notes: string | null;
+}
+
 export interface ActivityStats {
   total: number;
   concluido: number;
