@@ -156,13 +156,14 @@ export default function ImportActivitiesModal({ show, onHide, team, onImport }: 
       </details>
 
       <div className="form-group">
-        <label className="form-label" htmlFor="import-activities-file-input">
+        <label className="form-label" id="import-activities-file-label">
           Arquivo da carga
         </label>
         <div
           className={`dropzone${dragOver ? " drag-over" : ""}${selectedFile ? " has-file" : ""}`}
           role="button"
           tabIndex={0}
+          aria-labelledby="import-activities-file-label"
           onClick={() => fileInputRef.current?.click()}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
