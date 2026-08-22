@@ -221,7 +221,7 @@ export default function ImportActivitiesModal({ show, onHide, team, onImport }: 
 
       <button
         type="button"
-        className="btn btn-primary modal-submit"
+        className="btn btn-primary"
         disabled={!selectedFile || importing}
         onClick={handleImport}
       >
