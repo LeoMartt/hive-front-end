@@ -4,6 +4,7 @@ import ActivityStatChips, { type ActivityStatChipKey } from "../components/activ
 import ActivityFiltersBar from "../components/activities/ActivityFiltersBar";
 import ActivityGroupToggle from "../components/activities/ActivityGroupToggle";
 import ActivitiesTable from "../components/activities/ActivitiesTable";
+import ImportActivitiesModal from "../components/activities/ImportActivitiesModal";
 import NewActivityModal from "../components/activities/NewActivityModal";
 import NavIcon from "../components/common/NavIcon";
 import { useActivities } from "../hooks/useActivities";
@@ -13,7 +14,7 @@ import { filterActivities } from "../utils/filterActivities";
 import { groupByModuleProcess } from "../utils/groupActivities";
 import { buildActivityExportRows, ACTIVITY_EXPORT_COLUMN_WIDTHS } from "../utils/activityExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
-import type { ActivityFiltersState, ActivityGroupMode } from "../types/activity";
+import type { ActivityFiltersState, ActivityGroupMode, NewActivityInput } from "../types/activity";
 
 const CURRENT_USER_NAME = "Guilherme Fabretti";
 
@@ -43,6 +44,7 @@ export default function ProjectActivitiesPage() {
 
   const [filters, setFilters] = useState<ActivityFiltersState>(createEmptyFilters);
   const [showNewActivityModal, setShowNewActivityModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [groupMode, setGroupModeState] = useState<ActivityGroupMode>("tree");
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   // Processos nascem expandidos (igual ao mockup): guardamos só os que foram recolhidos.
@@ -145,6 +147,10 @@ export default function ProjectActivitiesPage() {
     }
   }
 
+  function handleImportActivities(inputs: NewActivityInput[]) {
+    inputs.forEach((input) => createActivity(input));
+  }
+
   return (
     <div>
       <div className="page-head compact">
@@ -168,7 +174,7 @@ export default function ProjectActivitiesPage() {
               exportActivitiesLabel
             )}
           </button>
-          <button type="button" className="btn btn-outline-secondary btn-sm">
+          <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setShowImportModal(true)}>
             Importar em massa
           </button>
           <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowNewActivityModal(true)}>
@@ -223,6 +229,13 @@ export default function ProjectActivitiesPage() {
         onHide={() => setShowNewActivityModal(false)}
         team={currentProject?.team ?? []}
         onCreate={createActivity}
+      />
+
+      <ImportActivitiesModal
+        show={showImportModal}
+        onHide={() => setShowImportModal(false)}
+        team={currentProject?.team ?? []}
+        onImport={handleImportActivities}
       />
     </div>
   );
