@@ -147,7 +147,7 @@ export default function NewActivityModal({ show, onHide, team, onCreate }: NewAc
             className="form-input"
             type="text"
             id="new-activity-module"
-            placeholder="Ex: Fiscal"
+            placeholder="Ex: Faturamento"
             value={state.module}
             onChange={(event) => updateField("module", event.target.value)}
           />
