@@ -48,10 +48,17 @@ function parseImportDate(value: unknown): string | null {
     return toLocalIsoString(value);
   }
   const text = String(value ?? "").trim();
-  const match = /^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/.exec(text);
+  const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(text);
   if (!match) return null;
-  const [, day, month, year] = match;
-  return toLocalIsoString(new Date(Number(year), Number(month) - 1, Number(day)));
+  const day = Number(match[1]);
+  const month = Number(match[2]);
+  const year = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+  // new Date() normaliza dia/mês fora da faixa em vez de rejeitar (ex.: 31/02 vira 02/03) —
+  // confere se o round-trip bate antes de aceitar, senão uma data de calendário inválida
+  // passaria como uma data errada em vez de dar erro de validação.
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null;
+  return toLocalIsoString(date);
 }
 
 function resolvePersonName(raw: string, candidates: TeamMember[]): string | null {
