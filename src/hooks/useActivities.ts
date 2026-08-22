@@ -1,11 +1,21 @@
 import { useMemo, useState } from "react";
-import type { Activity, ActivityStats } from "../types/activity";
+import type { Activity, ActivityStats, NewActivityInput } from "../types/activity";
 import { isOverdue, toLocalIsoString } from "../utils/activityIndicators";
 
 function isoDaysFromNow(days: number): string {
   const date = new Date();
   date.setDate(date.getDate() + days);
   return toLocalIsoString(date);
+}
+
+// Próximo ATV-XXXX após o maior número já existente — não um contador fixo, pra nunca
+// colidir se o seed crescer.
+function nextActivityId(activities: Activity[]): string {
+  const maxNum = activities.reduce((max, activity) => {
+    const match = /^ATV-(\d+)$/.exec(activity.id);
+    return match ? Math.max(max, Number(match[1])) : max;
+  }, 0);
+  return `ATV-${maxNum + 1}`;
 }
 
 const INITIAL_ACTIVITIES: Activity[] = [
@@ -530,13 +540,14 @@ const INITIAL_ACTIVITIES: Activity[] = [
 interface UseActivitiesResult {
   activities: Activity[];
   stats: ActivityStats;
+  createActivity: (input: NewActivityInput) => void;
 }
 
 export function useActivities(projectId: string): UseActivitiesResult {
   // O mock ainda não filtra por projeto — o parâmetro fica pronto para quando
   // os dados vierem de uma API real, escopados por projeto.
   void projectId;
-  const [activities] = useState<Activity[]>(INITIAL_ACTIVITIES);
+  const [activities, setActivities] = useState<Activity[]>(INITIAL_ACTIVITIES);
 
   const stats = useMemo<ActivityStats>(() => {
     let concluido = 0;
@@ -554,5 +565,38 @@ export function useActivities(projectId: string): UseActivitiesResult {
     return { total: activities.length, concluido, execucao, bloqueado, aguardando, atrasado };
   }, [activities]);
 
-  return { activities, stats };
+  // Append direto, sem validação própria — mesma simplicidade de useProjects.addTeamMember.
+  // A validação de campo obrigatório vive no modal (camada de UI).
+  function createActivity(input: NewActivityInput): void {
+    setActivities((prev) => {
+      const newActivity: Activity = {
+        id: nextActivityId(prev),
+        name: input.name,
+        status: input.predecessors.length > 0 ? "aguardando" : "liberado",
+        module: input.module,
+        process: input.process,
+        tester: input.tester,
+        dev: input.dev,
+        plannedStart: input.plannedStart,
+        plannedEnd: input.plannedEnd,
+        actualStart: null,
+        actualEnd: null,
+        predecessors: input.predecessors,
+        retestCount: 0,
+        issueCount: 0,
+        wbs: input.wbs,
+        area: input.area,
+        system: input.system,
+        transaction: input.transaction,
+        expectedResult: input.expectedResult,
+        notes: input.notes,
+        attachments: [],
+        approvalEvidence: null,
+        approvalNote: null,
+      };
+      return [...prev, newActivity];
+    });
+  }
+
+  return { activities, stats, createActivity };
 }
