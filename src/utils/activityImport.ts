@@ -150,7 +150,7 @@ const TEMPLATE_HEADERS = [
 
 const TEMPLATE_EXAMPLE_ROW = [
   "Validar cálculo de crédito ICMS",
-  "Fiscal",
+  "Faturamento",
   "Apuração de ICMS",
   "Nome do tester do projeto",
   "Nome do desenvolvedor do projeto",
