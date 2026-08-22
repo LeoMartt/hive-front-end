@@ -43,21 +43,21 @@ export default function ActivityFieldGrid({ activity }: ActivityFieldGridProps) 
       </div>
       <div className="field">
         <div className="field-label">WBS</div>
-        <div className="field-value mono">{activity.wbs}</div>
+        <div className="field-value mono">{activity.wbs || "—"}</div>
       </div>
 
       <div className="field">
         <div className="field-label">Área</div>
-        <div className="field-value">{activity.area}</div>
+        <div className="field-value">{activity.area || "—"}</div>
       </div>
       <div className="field">
         <div className="field-label">Sistema</div>
-        <div className="field-value">{activity.system}</div>
+        <div className="field-value">{activity.system || "—"}</div>
       </div>
 
       <div className="field">
         <div className="field-label">Transação</div>
-        <div className="field-value mono">{activity.transaction}</div>
+        <div className="field-value mono">{activity.transaction || "—"}</div>
       </div>
       <div className="field">
         <div className="field-label">Nº de reteste</div>
@@ -66,7 +66,7 @@ export default function ActivityFieldGrid({ activity }: ActivityFieldGridProps) 
 
       <div className="field full">
         <div className="field-label">Resultado esperado</div>
-        <div className="field-value big">{activity.expectedResult}</div>
+        <div className="field-value big">{activity.expectedResult || "—"}</div>
       </div>
       <div className="field full">
         <div className="field-label">Observações</div>
