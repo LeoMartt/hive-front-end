@@ -396,6 +396,78 @@ select.form-input {
   margin-bottom: 10px;
 }
 
+// Primeira dropzone de arquivo do projeto (Importar em massa)
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px 16px;
+  border: 1.5px dashed c.$border-strong;
+  border-radius: 10px;
+  color: c.$text-faint;
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+  background-color: c.$bg-alt;
+}
+.dropzone svg {
+  width: 22px;
+  height: 22px;
+}
+.dropzone.drag-over {
+  border-color: c.$text-dim;
+  background-color: c.$surface;
+}
+.dropzone.has-file {
+  color: c.$text-dim;
+  border-style: solid;
+}
+
+.import-ref {
+  margin-bottom: 14px;
+  font-size: 11.5px;
+}
+.import-ref summary {
+  cursor: pointer;
+  color: c.$text-dim;
+  font-weight: 600;
+}
+.import-ref-list {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: c.$text-faint;
+}
+.import-ref-list b {
+  color: c.$text-dim;
+}
+
+.import-result-banner {
+  display: none;
+  background-color: c.$red-soft;
+  color: c.$red;
+  border: 1px solid rgba(198, 55, 63, 0.25);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+.import-result-banner.show {
+  display: block;
+}
+.import-result-banner.success {
+  background-color: c.$green-soft;
+  color: c.$green;
+  border-color: rgba(47, 143, 91, 0.25);
+}
+.import-result-banner ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
 @media (max-width: 640px) {
   .modal-box {
     max-width: 100%;
