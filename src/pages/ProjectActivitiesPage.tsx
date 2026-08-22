@@ -4,9 +4,11 @@ import ActivityStatChips, { type ActivityStatChipKey } from "../components/activ
 import ActivityFiltersBar from "../components/activities/ActivityFiltersBar";
 import ActivityGroupToggle from "../components/activities/ActivityGroupToggle";
 import ActivitiesTable from "../components/activities/ActivitiesTable";
+import NewActivityModal from "../components/activities/NewActivityModal";
 import NavIcon from "../components/common/NavIcon";
 import { useActivities } from "../hooks/useActivities";
 import { useExportButton } from "../hooks/useExportButton";
+import { useProjects } from "../hooks/useProjects";
 import { filterActivities } from "../utils/filterActivities";
 import { groupByModuleProcess } from "../utils/groupActivities";
 import { buildActivityExportRows, ACTIVITY_EXPORT_COLUMN_WIDTHS } from "../utils/activityExport";
@@ -35,9 +37,12 @@ function createEmptyFilters(): ActivityFiltersState {
 export default function ProjectActivitiesPage() {
   const { id } = useParams();
   const projectId = id ?? "";
-  const { activities, stats } = useActivities(projectId);
+  const { activities, stats, createActivity } = useActivities(projectId);
+  const { projects } = useProjects();
+  const currentProject = projects.find((project) => project.id === projectId);
 
   const [filters, setFilters] = useState<ActivityFiltersState>(createEmptyFilters);
+  const [showNewActivityModal, setShowNewActivityModal] = useState(false);
   const [groupMode, setGroupModeState] = useState<ActivityGroupMode>("tree");
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   // Processos nascem expandidos (igual ao mockup): guardamos só os que foram recolhidos.
@@ -166,7 +171,7 @@ export default function ProjectActivitiesPage() {
           <button type="button" className="btn btn-outline-secondary btn-sm">
             Importar em massa
           </button>
-          <button type="button" className="btn btn-primary btn-sm">
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowNewActivityModal(true)}>
             + Nova atividade
           </button>
         </div>
@@ -211,6 +216,13 @@ export default function ProjectActivitiesPage() {
         onToggleProcess={toggleProcess}
         expandedGroups={expandedGroups}
         onToggleGroup={toggleGroup}
+      />
+
+      <NewActivityModal
+        show={showNewActivityModal}
+        onHide={() => setShowNewActivityModal(false)}
+        team={currentProject?.team ?? []}
+        onCreate={createActivity}
       />
     </div>
   );
