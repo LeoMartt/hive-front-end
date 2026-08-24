@@ -1,11 +1,21 @@
 import { useMemo, useState } from "react";
-import type { Issue, IssueStats } from "../types/issue";
+import type { Issue, IssueStats, NewIssueInput } from "../types/issue";
 import { toLocalIsoString } from "../utils/activityIndicators";
 
 function isoDaysAgo(days: number): string {
   const date = new Date();
   date.setDate(date.getDate() - days);
   return toLocalIsoString(date);
+}
+
+// Próximo ISS-XXXX após o maior número já existente, preservando o zero-padding de 4
+// dígitos do seed (ISS-0290...ISS-0304) — mesmo padrão de nextActivityId em useActivities.ts.
+function nextIssueId(issues: Issue[]): string {
+  const maxNum = issues.reduce((max, issue) => {
+    const match = /^ISS-(\d+)$/.exec(issue.id);
+    return match ? Math.max(max, Number(match[1])) : max;
+  }, 0);
+  return `ISS-${String(maxNum + 1).padStart(4, "0")}`;
 }
 
 const INITIAL_ISSUES: Issue[] = [
@@ -367,12 +377,13 @@ const INITIAL_ISSUES: Issue[] = [
 interface UseIssuesResult {
   issues: Issue[];
   stats: IssueStats;
+  createIssue: (input: NewIssueInput) => void;
 }
 
 export function useIssues(projectId: string): UseIssuesResult {
   // O mock ainda não filtra por projeto — mesmo padrão de useActivities.
   void projectId;
-  const [issues] = useState<Issue[]>(INITIAL_ISSUES);
+  const [issues, setIssues] = useState<Issue[]>(INITIAL_ISSUES);
 
   const stats = useMemo<IssueStats>(() => {
     const abertas = issues.filter((issue) => issue.status === "aberta").length;
@@ -406,5 +417,35 @@ export function useIssues(projectId: string): UseIssuesResult {
     };
   }, [issues]);
 
-  return { issues, stats };
+  // Append direto, sem validação própria — mesmo padrão de createActivity em
+  // useActivities.ts. A validação de campo obrigatório vive no modal (camada de UI).
+  function createIssue(input: NewIssueInput): void {
+    setIssues((prev) => {
+      const newIssue: Issue = {
+        id: nextIssueId(prev),
+        title: input.title,
+        status: "aberta",
+        impeditiva: input.impeditiva,
+        type: input.type,
+        impact: input.impact,
+        area: input.area,
+        tester: input.tester,
+        dev: input.dev,
+        relatedActivityId: input.relatedActivityId,
+        cascadeActivityIds: [],
+        openedAt: toLocalIsoString(new Date()),
+        resolvedAt: null,
+        description: input.description,
+        impactNote: input.impactNote,
+        proposedSolution: null,
+        analysisStartedAt: null,
+        solutionProposedAt: null,
+        openingAttachment: input.openingAttachment,
+        solutionAttachment: null,
+      };
+      return [...prev, newIssue];
+    });
+  }
+
+  return { issues, stats, createIssue };
 }
