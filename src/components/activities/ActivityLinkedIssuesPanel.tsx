@@ -1,16 +1,16 @@
 import { useNavigate } from "react-router";
 import IssueStatusBadge from "../issues/IssueStatusBadge";
-import { useIssues } from "../../hooks/useIssues";
 import { computeIssueAgingDays } from "../../utils/issueIndicators";
+import type { Issue } from "../../types/issue";
 
 interface ActivityLinkedIssuesPanelProps {
   activityId: string;
   projectId: string;
+  issues: Issue[];
 }
 
-export default function ActivityLinkedIssuesPanel({ activityId, projectId }: ActivityLinkedIssuesPanelProps) {
+export default function ActivityLinkedIssuesPanel({ activityId, projectId, issues }: ActivityLinkedIssuesPanelProps) {
   const navigate = useNavigate();
-  const { issues } = useIssues(projectId);
   const linkedIssues = issues.filter((issue) => issue.relatedActivityId === activityId);
 
   return (

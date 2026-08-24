@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams } from "react-router";
 import ActivityStatusBadge from "../components/activities/ActivityStatusBadge";
 import ActivityFieldGrid from "../components/activities/ActivityFieldGrid";
@@ -5,17 +6,26 @@ import ActivityAuditTrail from "../components/activities/ActivityAuditTrail";
 import ActivityLinkedIssuesPanel from "../components/activities/ActivityLinkedIssuesPanel";
 import ActivityAttachmentsPanel from "../components/activities/ActivityAttachmentsPanel";
 import ActivityPredecessorPanel from "../components/activities/ActivityPredecessorPanel";
+import RegisterIssueModal from "../components/issues/RegisterIssueModal";
 import { useActivities } from "../hooks/useActivities";
+import { useIssues } from "../hooks/useIssues";
+import { useProjects } from "../hooks/useProjects";
 import { useGoBack } from "../hooks/useGoBack";
 import { retestPillClass } from "../utils/activityIndicators";
 import { deriveActivityAuditTrail } from "../utils/activityAuditTrail";
+
+const CURRENT_USER_NAME = "Guilherme Fabretti";
 
 export default function ActivityDetailPage() {
   const { id, activityId } = useParams();
   const projectId = id ?? "";
   const { activities } = useActivities(projectId);
+  const { issues, createIssue } = useIssues(projectId);
+  const { projects } = useProjects();
+  const currentProject = projects.find((project) => project.id === projectId);
   const activity = activities.find((item) => item.id === activityId);
   const goBack = useGoBack(`/projetos/${projectId}/atividades`);
+  const [showRegisterIssueModal, setShowRegisterIssueModal] = useState(false);
 
   if (!activity) {
     return (
@@ -69,7 +79,12 @@ export default function ActivityDetailPage() {
           )}
 
           {activity.status === "bloqueado" && (
-            <button type="button" className="btn" style={{ width: "100%", justifyContent: "center", marginBottom: 20 }}>
+            <button
+              type="button"
+              className="btn"
+              style={{ width: "100%", justifyContent: "center", marginBottom: 20 }}
+              onClick={() => setShowRegisterIssueModal(true)}
+            >
               Registrar nova issue
             </button>
           )}
@@ -93,12 +108,22 @@ export default function ActivityDetailPage() {
             <ActivityPredecessorPanel predecessor={predecessorActivity} projectId={projectId} />
           ) : (
             <>
-              <ActivityLinkedIssuesPanel activityId={activity.id} projectId={projectId} />
+              <ActivityLinkedIssuesPanel activityId={activity.id} projectId={projectId} issues={issues} />
               <ActivityAttachmentsPanel activity={activity} predecessor={predecessorActivity} />
             </>
           )}
         </div>
       </div>
+
+      <RegisterIssueModal
+        show={showRegisterIssueModal}
+        onHide={() => setShowRegisterIssueModal(false)}
+        team={currentProject?.team ?? []}
+        activities={activities}
+        currentActivity={activity}
+        currentUserName={CURRENT_USER_NAME}
+        onCreate={createIssue}
+      />
     </div>
   );
 }
