@@ -27,6 +27,8 @@ export default function ConfigAttachmentsPanel() {
 
       <div className="subhead">Evidência obrigatória</div>
       <div style={{ marginBottom: 16, display: "flex", flexDirection: "column", gap: 10 }}>
+        {/* Decorativo até a feature de Ações de status da Atividade — "Salvar limite" não
+            lê nem persiste este toggle, só o de baixo. */}
         <label className="toggle-pill">
           <span className="switch">
             <input type="checkbox" defaultChecked />
