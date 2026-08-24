@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { Issue, IssueStats, NewIssueInput } from "../types/issue";
+import type { Issue, IssueStats, NewIssueInput, ProposeSolutionInput } from "../types/issue";
 import { toLocalIsoString } from "../utils/activityIndicators";
 
 function isoDaysAgo(days: number): string {
@@ -378,6 +378,8 @@ interface UseIssuesResult {
   issues: Issue[];
   stats: IssueStats;
   createIssue: (input: NewIssueInput) => void;
+  startAnalysis: (issueId: string) => void;
+  proposeSolution: (issueId: string, input: ProposeSolutionInput) => void;
 }
 
 export function useIssues(projectId: string): UseIssuesResult {
@@ -447,5 +449,33 @@ export function useIssues(projectId: string): UseIssuesResult {
     });
   }
 
-  return { issues, stats, createIssue };
+  // Primeiros mutators de ATUALIZAÇÃO (não criação) do hook — usam .map() em vez de
+  // [...prev, novo]. Mesma convenção de createIssue: sem validação própria, isso vive na UI.
+  function startAnalysis(issueId: string): void {
+    setIssues((prev) =>
+      prev.map((issue) =>
+        issue.id === issueId
+          ? { ...issue, status: "em_analise", analysisStartedAt: toLocalIsoString(new Date()) }
+          : issue
+      )
+    );
+  }
+
+  function proposeSolution(issueId: string, input: ProposeSolutionInput): void {
+    setIssues((prev) =>
+      prev.map((issue) =>
+        issue.id === issueId
+          ? {
+              ...issue,
+              status: "solucao_proposta",
+              proposedSolution: input.proposedSolution,
+              solutionProposedAt: toLocalIsoString(new Date()),
+              solutionAttachment: input.solutionAttachment,
+            }
+          : issue
+      )
+    );
+  }
+
+  return { issues, stats, createIssue, startAnalysis, proposeSolution };
 }

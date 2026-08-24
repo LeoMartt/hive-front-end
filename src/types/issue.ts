@@ -46,6 +46,11 @@ export interface NewIssueInput {
   openingAttachment: IssueAttachment | null;
 }
 
+export interface ProposeSolutionInput {
+  proposedSolution: string;
+  solutionAttachment: IssueAttachment | null;
+}
+
 export interface IssueStats {
   total: number;
   abertas: number;
