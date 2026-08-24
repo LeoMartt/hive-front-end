@@ -1,20 +1,25 @@
+import { useState } from "react";
 import { useParams } from "react-router";
 import IssueStatusBadge from "../components/issues/IssueStatusBadge";
 import IssueFieldGrid from "../components/issues/IssueFieldGrid";
 import IssueAuditTrail from "../components/issues/IssueAuditTrail";
 import IssueAttachmentsPanel from "../components/issues/IssueAttachmentsPanel";
+import ProposeSolutionModal from "../components/issues/ProposeSolutionModal";
 import { useIssues } from "../hooks/useIssues";
 import { useActivities } from "../hooks/useActivities";
 import { useGoBack } from "../hooks/useGoBack";
 import { deriveIssueAuditTrail } from "../utils/issueAuditTrail";
 
+const CURRENT_USER_NAME = "Guilherme Fabretti";
+
 export default function IssueDetailPage() {
   const { id, issueId } = useParams();
   const projectId = id ?? "";
-  const { issues } = useIssues(projectId);
+  const { issues, startAnalysis, proposeSolution } = useIssues(projectId);
   const { activities } = useActivities(projectId);
   const issue = issues.find((item) => item.id === issueId);
   const goBack = useGoBack(`/projetos/${projectId}/issues`);
+  const [showProposeSolutionModal, setShowProposeSolutionModal] = useState(false);
 
   if (!issue) {
     return (
@@ -65,6 +70,7 @@ export default function IssueDetailPage() {
               type="button"
               className="btn btn-primary"
               style={{ width: "100%", justifyContent: "center", marginBottom: 20 }}
+              onClick={() => startAnalysis(issue.id)}
             >
               Iniciar análise
             </button>
@@ -74,6 +80,7 @@ export default function IssueDetailPage() {
               type="button"
               className="btn btn-primary"
               style={{ width: "100%", justifyContent: "center", marginBottom: 20 }}
+              onClick={() => setShowProposeSolutionModal(true)}
             >
               Propor solução
             </button>
@@ -87,6 +94,13 @@ export default function IssueDetailPage() {
           <IssueAttachmentsPanel issue={issue} />
         </div>
       </div>
+
+      <ProposeSolutionModal
+        show={showProposeSolutionModal}
+        onHide={() => setShowProposeSolutionModal(false)}
+        currentUserName={CURRENT_USER_NAME}
+        onSubmit={(input) => proposeSolution(issue.id, input)}
+      />
     </div>
   );
 }
