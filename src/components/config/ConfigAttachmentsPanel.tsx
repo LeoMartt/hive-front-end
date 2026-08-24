@@ -1,4 +1,16 @@
+import { useState } from "react";
+import { useProjectConfig } from "../../context/ProjectConfigContext";
+
 export default function ConfigAttachmentsPanel() {
+  const { config, setConfig } = useProjectConfig();
+  const [draft, setDraft] = useState(config.evidenciaObrigatoriaIssue);
+  const [saved, setSaved] = useState(false);
+
+  function handleSave() {
+    setConfig({ ...config, evidenciaObrigatoriaIssue: draft });
+    setSaved(true);
+  }
+
   return (
     <div className="panel">
       <div className="panel-head">
@@ -24,16 +36,24 @@ export default function ConfigAttachmentsPanel() {
         </label>
         <label className="toggle-pill">
           <span className="switch">
-            <input type="checkbox" defaultChecked />
+            <input
+              type="checkbox"
+              checked={draft}
+              onChange={(event) => {
+                setDraft(event.target.checked);
+                setSaved(false);
+              }}
+            />
             <span className="track" />
           </span>
           Exigir evidência em issue impeditiva
         </label>
       </div>
 
-      <button type="button" className="btn btn-primary btn-sm">
+      <button type="button" className="btn btn-primary btn-sm" onClick={handleSave}>
         Salvar limite
       </button>
+      {saved && <span className="saved-msg">Limite atualizado ✓</span>}
     </div>
   );
 }

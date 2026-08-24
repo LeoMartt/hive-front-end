@@ -8,4 +8,5 @@ export interface ProjectConfig {
   spiCritico: number;
   agingUat: AgingThresholds;
   agingCutover: AgingThresholds;
+  evidenciaObrigatoriaIssue: boolean;
 }

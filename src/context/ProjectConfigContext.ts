@@ -10,6 +10,7 @@ export const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
   spiCritico: 0.75,
   agingUat: { alerta: 2, risco: 6 },
   agingCutover: { alerta: 3, risco: 8 },
+  evidenciaObrigatoriaIssue: true,
 };
 
 export interface ProjectConfigContextValue {
