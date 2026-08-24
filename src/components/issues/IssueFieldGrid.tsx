@@ -45,7 +45,8 @@ export default function IssueFieldGrid({ issue }: IssueFieldGridProps) {
       <div className="field">
         <div className="field-label">Categorização de impacto</div>
         <div className="field-value">
-          {ISSUE_IMPACT_LABELS[issue.impact]} — {issue.impactNote}
+          {ISSUE_IMPACT_LABELS[issue.impact]}
+          {issue.impactNote && ` — ${issue.impactNote}`}
         </div>
       </div>
 
