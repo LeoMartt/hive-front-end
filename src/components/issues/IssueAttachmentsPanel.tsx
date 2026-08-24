@@ -59,10 +59,12 @@ export default function IssueAttachmentsPanel({ issue }: IssueAttachmentsPanelPr
           </div>
           <AttachmentRow attachment={issue.solutionAttachment} role="Dev" />
         </div>
-      ) : (
+      ) : issue.status === "aberta" || issue.status === "em_analise" ? (
         <div className="empty-note">
           Anexo da solução ainda não existe — aguardando o Dev propor uma solução.
         </div>
+      ) : (
+        <div className="empty-note">Nenhuma evidência anexada com a solução.</div>
       )}
     </>
   );
