@@ -32,6 +32,20 @@ export interface Issue {
   solutionAttachment: IssueAttachment | null;
 }
 
+export interface NewIssueInput {
+  title: string;
+  description: string;
+  type: IssueType;
+  impeditiva: boolean;
+  impact: IssueImpact;
+  impactNote: string;
+  tester: string;
+  dev: string;
+  area: string;
+  relatedActivityId: string;
+  openingAttachment: IssueAttachment | null;
+}
+
 export interface IssueStats {
   total: number;
   abertas: number;
