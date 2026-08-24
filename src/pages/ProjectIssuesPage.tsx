@@ -3,9 +3,12 @@ import { useParams } from "react-router";
 import IssuesKpiCards from "../components/issues/IssuesKpiCards";
 import IssueStatusPills, { type IssueStatusFilter } from "../components/issues/IssueStatusPills";
 import IssuesTable from "../components/issues/IssuesTable";
+import RegisterIssueModal from "../components/issues/RegisterIssueModal";
 import NavIcon from "../components/common/NavIcon";
 import { useIssues } from "../hooks/useIssues";
+import { useActivities } from "../hooks/useActivities";
 import { useExportButton } from "../hooks/useExportButton";
+import { useProjects } from "../hooks/useProjects";
 import { sortIssuesByPriority } from "../utils/issueIndicators";
 import { buildIssueExportRows, ISSUE_EXPORT_COLUMN_WIDTHS } from "../utils/issueExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
@@ -15,11 +18,15 @@ const CURRENT_USER_NAME = "Guilherme Fabretti";
 export default function ProjectIssuesPage() {
   const { id } = useParams();
   const projectId = id ?? "";
-  const { issues } = useIssues(projectId);
+  const { issues, createIssue } = useIssues(projectId);
+  const { activities } = useActivities(projectId);
+  const { projects } = useProjects();
+  const currentProject = projects.find((project) => project.id === projectId);
 
   const [statusFilter, setStatusFilter] = useState<IssueStatusFilter>("todas");
   const [openedByMe, setOpenedByMe] = useState(false);
   const [assignedToMe, setAssignedToMe] = useState(false);
+  const [showRegisterIssueModal, setShowRegisterIssueModal] = useState(false);
 
   const orderedIssues = useMemo(() => sortIssuesByPriority(issues), [issues]);
 
@@ -77,7 +84,7 @@ export default function ProjectIssuesPage() {
               exportIssuesLabel
             )}
           </button>
-          <button type="button" className="btn btn-primary btn-sm">
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowRegisterIssueModal(true)}>
             + Registrar issue
           </button>
         </div>
@@ -122,6 +129,15 @@ export default function ProjectIssuesPage() {
       </div>
 
       <IssuesTable issues={filteredIssues} projectId={projectId} />
+
+      <RegisterIssueModal
+        show={showRegisterIssueModal}
+        onHide={() => setShowRegisterIssueModal(false)}
+        team={currentProject?.team ?? []}
+        activities={activities}
+        currentUserName={CURRENT_USER_NAME}
+        onCreate={createIssue}
+      />
     </div>
   );
 }
