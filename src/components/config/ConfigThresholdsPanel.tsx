@@ -64,9 +64,20 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
     }
   }
 
+  // Mescla só os 4 campos que este painel edita, em vez de substituir o ProjectConfig
+  // inteiro — o `draft` é tirado de um snapshot no mount e nunca resincroniza com mudanças
+  // externas, então um setConfig(draft) bruto reverteria silenciosamente qualquer campo
+  // salvo por outro painel montado ao lado (ex.: evidenciaObrigatoriaIssue em
+  // ConfigAttachmentsPanel) enquanto este ainda estivesse aberto na mesma sessão.
   function handleSave() {
     if (!canSave) return;
-    setConfig(draft);
+    setConfig({
+      ...config,
+      spiSaudavel: draft.spiSaudavel,
+      spiCritico: draft.spiCritico,
+      agingUat: draft.agingUat,
+      agingCutover: draft.agingCutover,
+    });
     setSaved(true);
   }
 
