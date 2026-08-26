@@ -380,6 +380,7 @@ interface UseIssuesResult {
   createIssue: (input: NewIssueInput) => void;
   startAnalysis: (issueId: string) => void;
   proposeSolution: (issueId: string, input: ProposeSolutionInput) => void;
+  resolveIssuesForActivity: (activityId: string) => void;
 }
 
 export function useIssues(projectId: string): UseIssuesResult {
@@ -477,5 +478,17 @@ export function useIssues(projectId: string): UseIssuesResult {
     );
   }
 
-  return { issues, stats, createIssue, startAnalysis, proposeSolution };
+  // Chamado pela página de Atividade logo após concludeActivity (useActivities.ts) — os
+  // dois hooks não se conhecem entre si, a página que orquestra as duas chamadas.
+  function resolveIssuesForActivity(activityId: string): void {
+    setIssues((prev) =>
+      prev.map((issue) =>
+        issue.relatedActivityId === activityId && issue.status === "solucao_proposta"
+          ? { ...issue, status: "concluida", resolvedAt: toLocalIsoString(new Date()) }
+          : issue
+      )
+    );
+  }
+
+  return { issues, stats, createIssue, startAnalysis, proposeSolution, resolveIssuesForActivity };
 }

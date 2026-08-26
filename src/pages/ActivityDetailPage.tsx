@@ -7,6 +7,7 @@ import ActivityLinkedIssuesPanel from "../components/activities/ActivityLinkedIs
 import ActivityAttachmentsPanel from "../components/activities/ActivityAttachmentsPanel";
 import ActivityPredecessorPanel from "../components/activities/ActivityPredecessorPanel";
 import RegisterIssueModal from "../components/issues/RegisterIssueModal";
+import ConcludeActivityModal from "../components/activities/ConcludeActivityModal";
 import { useActivities } from "../hooks/useActivities";
 import { useIssues } from "../hooks/useIssues";
 import { useProjects } from "../hooks/useProjects";
@@ -19,13 +20,15 @@ const CURRENT_USER_NAME = "Guilherme Fabretti";
 export default function ActivityDetailPage() {
   const { id, activityId } = useParams();
   const projectId = id ?? "";
-  const { activities } = useActivities(projectId);
-  const { issues, createIssue } = useIssues(projectId);
+  const { activities, concludeActivity, rejectActivity } = useActivities(projectId);
+  const { issues, createIssue, resolveIssuesForActivity } = useIssues(projectId);
   const { projects } = useProjects();
   const currentProject = projects.find((project) => project.id === projectId);
   const activity = activities.find((item) => item.id === activityId);
   const goBack = useGoBack(`/projetos/${projectId}/atividades`);
   const [showRegisterIssueModal, setShowRegisterIssueModal] = useState(false);
+  const [registerIssueMode, setRegisterIssueMode] = useState<"register" | "reject">("register");
+  const [showConcludeModal, setShowConcludeModal] = useState(false);
 
   if (!activity) {
     return (
@@ -83,17 +86,33 @@ export default function ActivityDetailPage() {
               type="button"
               className="btn"
               style={{ width: "100%", justifyContent: "center", marginBottom: 20 }}
-              onClick={() => setShowRegisterIssueModal(true)}
+              onClick={() => {
+                setRegisterIssueMode("register");
+                setShowRegisterIssueModal(true);
+              }}
             >
               Registrar nova issue
             </button>
           )}
           {(activity.status === "execucao" || activity.status === "liberado") && (
             <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-              <button type="button" className="btn btn-primary" style={{ flex: 1, justifyContent: "center" }}>
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ flex: 1, justifyContent: "center" }}
+                onClick={() => setShowConcludeModal(true)}
+              >
                 Concluir atividade
               </button>
-              <button type="button" className="btn btn-danger" style={{ flex: 1, justifyContent: "center" }}>
+              <button
+                type="button"
+                className="btn btn-danger"
+                style={{ flex: 1, justifyContent: "center" }}
+                onClick={() => {
+                  setRegisterIssueMode("reject");
+                  setShowRegisterIssueModal(true);
+                }}
+              >
                 Rejeitar atividade
               </button>
             </div>
@@ -122,7 +141,24 @@ export default function ActivityDetailPage() {
         activities={activities}
         currentActivity={activity}
         currentUserName={CURRENT_USER_NAME}
-        onCreate={createIssue}
+        submitLabel={registerIssueMode === "reject" ? "Reprovar e criar issue" : "Criar"}
+        title={registerIssueMode === "reject" ? "Rejeitar atividade" : "Registrar issue"}
+        onCreate={(input) => {
+          createIssue(input);
+          if (registerIssueMode === "reject") {
+            rejectActivity(activity.id, { reason: input.description, evidence: input.openingAttachment });
+          }
+        }}
+      />
+
+      <ConcludeActivityModal
+        show={showConcludeModal}
+        onHide={() => setShowConcludeModal(false)}
+        currentUserName={CURRENT_USER_NAME}
+        onSubmit={(input) => {
+          concludeActivity(activity.id, input);
+          resolveIssuesForActivity(activity.id);
+        }}
       />
     </div>
   );

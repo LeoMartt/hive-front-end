@@ -20,8 +20,8 @@ export function deriveActivityAuditTrail(activity: Activity): ActivityAuditEntry
 
   if (activity.retestCount > 0) {
     entries.push({
-      at: activity.actualStart ?? activity.plannedStart,
-      text: `Bloqueado → aguardando reteste (${activity.retestCount}ª vez)`,
+      at: activity.rejectedAt ?? activity.actualStart ?? activity.plannedStart,
+      text: `Em execução → Bloqueado (${activity.retestCount}ª rejeição)`,
     });
   }
 

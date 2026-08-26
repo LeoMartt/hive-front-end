@@ -37,6 +37,7 @@ export interface Activity {
   attachments: ActivityAttachment[];
   approvalEvidence: ActivityAttachment | null;
   approvalNote: string | null;
+  rejectedAt: string | null;
 }
 
 export interface NewActivityInput {
@@ -54,6 +55,16 @@ export interface NewActivityInput {
   transaction: string;
   expectedResult: string;
   notes: string | null;
+}
+
+export interface ConcludeActivityInput {
+  approvalNote: string | null;
+  approvalEvidence: ActivityAttachment;
+}
+
+export interface RejectActivityInput {
+  reason: string;
+  evidence: ActivityAttachment | null;
 }
 
 export interface ActivityStats {

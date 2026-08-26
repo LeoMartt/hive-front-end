@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import type { Activity, ActivityStats, NewActivityInput } from "../types/activity";
+import type { Activity, ActivityStats, NewActivityInput, ConcludeActivityInput, RejectActivityInput } from "../types/activity";
 import { isOverdue, toLocalIsoString } from "../utils/activityIndicators";
 
 function isoDaysFromNow(days: number): string {
@@ -50,6 +50,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
       uploadedAt: isoDaysFromNow(-9),
     },
     approvalNote: "Conferido contra o SPED Fiscal, sem divergências.",
+    rejectedAt: null,
   },
   {
     id: "ATV-1002",
@@ -75,6 +76,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     attachments: [],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: null,
   },
   {
     id: "ATV-1003",
@@ -107,6 +109,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     ],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: isoDaysFromNow(-6),
   },
   {
     id: "ATV-1004",
@@ -132,6 +135,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     attachments: [],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: null,
   },
   {
     id: "ATV-1005",
@@ -164,6 +168,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
       uploadedAt: isoDaysFromNow(-14),
     },
     approvalNote: "Validado contra extrato bancário do dia.",
+    rejectedAt: null,
   },
   {
     id: "ATV-1006",
@@ -196,6 +201,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     ],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: null,
   },
   {
     id: "ATV-1007",
@@ -221,6 +227,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     attachments: [],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: null,
   },
   {
     id: "ATV-1008",
@@ -246,6 +253,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     attachments: [],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: null,
   },
   {
     id: "ATV-1009",
@@ -273,6 +281,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     ],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: isoDaysFromNow(-4),
   },
   {
     id: "ATV-1010",
@@ -310,6 +319,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
       uploadedAt: isoDaysFromNow(-11),
     },
     approvalNote: "CNPJ validado na Receita, cadastro aprovado sem ressalvas.",
+    rejectedAt: null,
   },
   {
     id: "ATV-1011",
@@ -347,6 +357,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
       uploadedAt: isoDaysFromNow(-12),
     },
     approvalNote: "CPF validado, sem duplicidade encontrada.",
+    rejectedAt: null,
   },
   {
     id: "ATV-1012",
@@ -372,6 +383,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     attachments: [],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: null,
   },
   {
     id: "ATV-1013",
@@ -397,6 +409,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     attachments: [],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: null,
   },
   {
     id: "ATV-1014",
@@ -422,6 +435,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     attachments: [],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: null,
   },
   {
     id: "ATV-1015",
@@ -447,6 +461,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     attachments: [],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: isoDaysFromNow(-7),
   },
   {
     id: "ATV-1016",
@@ -472,6 +487,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     attachments: [],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: null,
   },
   {
     id: "ATV-1017",
@@ -509,6 +525,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
       uploadedAt: isoDaysFromNow(-15),
     },
     approvalNote: "Segunda execução processou os 500+ registros sem travamento.",
+    rejectedAt: isoDaysFromNow(-20),
   },
   {
     id: "ATV-1018",
@@ -534,6 +551,7 @@ const INITIAL_ACTIVITIES: Activity[] = [
     attachments: [],
     approvalEvidence: null,
     approvalNote: null,
+    rejectedAt: null,
   },
 ];
 
@@ -541,6 +559,8 @@ interface UseActivitiesResult {
   activities: Activity[];
   stats: ActivityStats;
   createActivity: (input: NewActivityInput) => void;
+  concludeActivity: (activityId: string, input: ConcludeActivityInput) => void;
+  rejectActivity: (activityId: string, input: RejectActivityInput) => void;
 }
 
 export function useActivities(projectId: string): UseActivitiesResult {
@@ -593,10 +613,47 @@ export function useActivities(projectId: string): UseActivitiesResult {
         attachments: [],
         approvalEvidence: null,
         approvalNote: null,
+        rejectedAt: null,
       };
       return [...prev, newActivity];
     });
   }
 
-  return { activities, stats, createActivity };
+  // Segundo par de mutators de ATUALIZAÇÃO do hook (depois de createActivity) — mesma
+  // convenção de startAnalysis/proposeSolution em useIssues.ts: .map(), sem validação
+  // própria (isso vive na UI).
+  function concludeActivity(activityId: string, input: ConcludeActivityInput): void {
+    setActivities((prev) =>
+      prev.map((activity) =>
+        activity.id === activityId
+          ? {
+              ...activity,
+              status: "concluido",
+              actualEnd: toLocalIsoString(new Date()),
+              approvalNote: input.approvalNote,
+              approvalEvidence: input.approvalEvidence,
+            }
+          : activity
+      )
+    );
+  }
+
+  function rejectActivity(activityId: string, input: RejectActivityInput): void {
+    setActivities((prev) =>
+      prev.map((activity) =>
+        activity.id === activityId
+          ? {
+              ...activity,
+              status: "bloqueado",
+              notes: input.reason,
+              retestCount: activity.retestCount + 1,
+              rejectedAt: toLocalIsoString(new Date()),
+              attachments: input.evidence ? [...activity.attachments, input.evidence] : activity.attachments,
+            }
+          : activity
+      )
+    );
+  }
+
+  return { activities, stats, createActivity, concludeActivity, rejectActivity };
 }

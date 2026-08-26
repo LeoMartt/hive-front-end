@@ -15,6 +15,8 @@ interface RegisterIssueModalProps {
   activities: Activity[];
   currentActivity?: Activity;
   currentUserName: string;
+  submitLabel?: string;
+  title?: string;
   onCreate: (input: NewIssueInput) => void;
 }
 
@@ -67,6 +69,8 @@ export default function RegisterIssueModal({
   activities,
   currentActivity,
   currentUserName,
+  submitLabel,
+  title,
   onCreate,
 }: RegisterIssueModalProps) {
   const { config } = useProjectConfig();
@@ -130,7 +134,7 @@ export default function RegisterIssueModal({
   return (
     <Modal open={show} onClose={resetAndHide} labelledBy="register-issue-modal-title">
       <div className="modal-title" id="register-issue-modal-title">
-        Registrar issue
+        {title ?? "Registrar issue"}
       </div>
 
       {state.errorMsg && <div className="error-banner">{state.errorMsg}</div>}
@@ -333,7 +337,7 @@ export default function RegisterIssueModal({
           Cancelar
         </button>
         <button type="button" className="btn btn-primary" onClick={handleConfirm}>
-          Criar
+          {submitLabel ?? "Criar"}
         </button>
       </div>
     </Modal>
