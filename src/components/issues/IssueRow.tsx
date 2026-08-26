@@ -4,10 +4,12 @@ import IssueImpactBadge from "./IssueImpactBadge";
 import { computeIssueAgingDays, computeIssueRisk, ISSUE_TYPE_LABELS } from "../../utils/issueIndicators";
 import { getInitials } from "../../utils/initials";
 import type { Issue } from "../../types/issue";
+import type { AgingThresholds } from "../../types/projectConfig";
 
 interface IssueRowProps {
   issue: Issue;
   projectId: string;
+  agingThresholds: AgingThresholds;
 }
 
 // Risco nulo (issue concluída) usa a cor neutra — os 3 níveis de risco usam a mesma
@@ -16,10 +18,10 @@ function agingColorClass(risk: ReturnType<typeof computeIssueRisk>): string {
   return risk === null ? "aging-neutral" : `aging-${risk}`;
 }
 
-export default function IssueRow({ issue, projectId }: IssueRowProps) {
+export default function IssueRow({ issue, projectId, agingThresholds }: IssueRowProps) {
   const navigate = useNavigate();
   const aging = computeIssueAgingDays(issue);
-  const risk = computeIssueRisk(issue);
+  const risk = computeIssueRisk(issue, agingThresholds);
 
   function goToDetail() {
     navigate(`/projetos/${projectId}/issues/${issue.id}`);

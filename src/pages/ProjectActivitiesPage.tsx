@@ -4,11 +4,17 @@ import ActivityStatChips, { type ActivityStatChipKey } from "../components/activ
 import ActivityFiltersBar from "../components/activities/ActivityFiltersBar";
 import ActivityGroupToggle from "../components/activities/ActivityGroupToggle";
 import ActivitiesTable from "../components/activities/ActivitiesTable";
+import ImportActivitiesModal from "../components/activities/ImportActivitiesModal";
+import NewActivityModal from "../components/activities/NewActivityModal";
 import NavIcon from "../components/common/NavIcon";
 import { useActivities } from "../hooks/useActivities";
+import { useExportButton } from "../hooks/useExportButton";
+import { useProjects } from "../hooks/useProjects";
 import { filterActivities } from "../utils/filterActivities";
 import { groupByModuleProcess } from "../utils/groupActivities";
-import type { ActivityFiltersState, ActivityGroupMode } from "../types/activity";
+import { buildActivityExportRows, ACTIVITY_EXPORT_COLUMN_WIDTHS } from "../utils/activityExport";
+import { downloadXlsx } from "../utils/downloadXlsx";
+import type { ActivityFiltersState, ActivityGroupMode, NewActivityInput } from "../types/activity";
 
 const CURRENT_USER_NAME = "Guilherme Fabretti";
 
@@ -32,9 +38,13 @@ function createEmptyFilters(): ActivityFiltersState {
 export default function ProjectActivitiesPage() {
   const { id } = useParams();
   const projectId = id ?? "";
-  const { activities, stats } = useActivities(projectId);
+  const { activities, stats, createActivity } = useActivities(projectId);
+  const { projects } = useProjects();
+  const currentProject = projects.find((project) => project.id === projectId);
 
   const [filters, setFilters] = useState<ActivityFiltersState>(createEmptyFilters);
+  const [showNewActivityModal, setShowNewActivityModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [groupMode, setGroupModeState] = useState<ActivityGroupMode>("tree");
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   // Processos nascem expandidos (igual ao mockup): guardamos só os que foram recolhidos.
@@ -54,6 +64,23 @@ export default function ProjectActivitiesPage() {
   const filteredActivities = useMemo(
     () => filterActivities(activities, filters, CURRENT_USER_NAME),
     [activities, filters]
+  );
+
+  const {
+    label: exportActivitiesLabel,
+    isDefault: exportActivitiesIsDefault,
+    handleClick: handleExportActivities,
+  } = useExportButton(
+    "Exportar atividades",
+    filteredActivities.length === 0,
+    "Nenhuma atividade no filtro atual",
+    () =>
+      downloadXlsx(
+        buildActivityExportRows(filteredActivities),
+        ACTIVITY_EXPORT_COLUMN_WIDTHS,
+        "Atividades",
+        "hive_atividades",
+      ),
   );
 
   const singleStatus = filters.statuses.length === 1 ? filters.statuses[0] : null;
@@ -120,6 +147,10 @@ export default function ProjectActivitiesPage() {
     }
   }
 
+  function handleImportActivities(inputs: NewActivityInput[]) {
+    inputs.forEach((input) => createActivity(input));
+  }
+
   return (
     <div>
       <div className="page-head compact">
@@ -130,17 +161,23 @@ export default function ProjectActivitiesPage() {
           </div>
         </div>
         <div className="head-actions">
-          <button type="button" className="btn btn-outline-secondary btn-sm">
-            <NavIcon>
-              <path d="M12 3v12m0 0-4-4m4 4 4-4" />
-              <path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
-            </NavIcon>
-            Exportar atividades
+          <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleExportActivities}>
+            {exportActivitiesIsDefault ? (
+              <>
+                <NavIcon>
+                  <path d="M12 3v12m0 0-4-4m4 4 4-4" />
+                  <path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
+                </NavIcon>
+                {exportActivitiesLabel}
+              </>
+            ) : (
+              exportActivitiesLabel
+            )}
           </button>
-          <button type="button" className="btn btn-outline-secondary btn-sm">
+          <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setShowImportModal(true)}>
             Importar em massa
           </button>
-          <button type="button" className="btn btn-primary btn-sm">
+          <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowNewActivityModal(true)}>
             + Nova atividade
           </button>
         </div>
@@ -185,6 +222,20 @@ export default function ProjectActivitiesPage() {
         onToggleProcess={toggleProcess}
         expandedGroups={expandedGroups}
         onToggleGroup={toggleGroup}
+      />
+
+      <NewActivityModal
+        show={showNewActivityModal}
+        onHide={() => setShowNewActivityModal(false)}
+        team={currentProject?.team ?? []}
+        onCreate={createActivity}
+      />
+
+      <ImportActivitiesModal
+        show={showImportModal}
+        onHide={() => setShowImportModal(false)}
+        team={currentProject?.team ?? []}
+        onImport={handleImportActivities}
       />
     </div>
   );

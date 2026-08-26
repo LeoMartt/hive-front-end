@@ -2,6 +2,13 @@ export type IssueStatus = "aberta" | "em_analise" | "solucao_proposta" | "conclu
 export type IssueType = "requisito" | "performance" | "dados" | "integracao" | "interface" | "configuracao" | "outro";
 export type IssueImpact = "muito_alto" | "alto" | "medio" | "baixo";
 
+export interface IssueAttachment {
+  fileName: string;
+  sizeLabel: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
 export interface Issue {
   id: string;
   title: string;
@@ -16,6 +23,32 @@ export interface Issue {
   cascadeActivityIds: string[];
   openedAt: string;
   resolvedAt: string | null;
+  description: string;
+  impactNote: string;
+  proposedSolution: string | null;
+  analysisStartedAt: string | null;
+  solutionProposedAt: string | null;
+  openingAttachment: IssueAttachment | null;
+  solutionAttachment: IssueAttachment | null;
+}
+
+export interface NewIssueInput {
+  title: string;
+  description: string;
+  type: IssueType;
+  impeditiva: boolean;
+  impact: IssueImpact;
+  impactNote: string;
+  tester: string;
+  dev: string;
+  area: string;
+  relatedActivityId: string;
+  openingAttachment: IssueAttachment | null;
+}
+
+export interface ProposeSolutionInput {
+  proposedSolution: string;
+  solutionAttachment: IssueAttachment | null;
 }
 
 export interface IssueStats {

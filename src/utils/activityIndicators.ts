@@ -29,6 +29,17 @@ export function isOverdue(activity: Activity): boolean {
   return activity.plannedEnd.slice(0, 10) < today;
 }
 
+export function formatActivityDate(isoDate: string | null): string {
+  if (!isoDate) return "—";
+  return new Date(isoDate).toLocaleDateString("pt-BR");
+}
+
+export function retestPillClass(retestCount: number): string {
+  if (retestCount === 0) return "retest-pill";
+  if (retestCount <= 2) return "retest-pill retest-pill-warn";
+  return "retest-pill retest-pill-danger";
+}
+
 export interface GroupRollup {
   done: number;
   total: number;

@@ -1,6 +1,7 @@
 import IssueRow from "./IssueRow";
 import EmptyState from "../common/EmptyState";
 import SortIcon from "../common/SortIcon";
+import { useProjectAgingThresholds } from "../../hooks/useProjectAgingThresholds";
 import type { Issue } from "../../types/issue";
 
 interface IssuesTableProps {
@@ -9,6 +10,8 @@ interface IssuesTableProps {
 }
 
 export default function IssuesTable({ issues, projectId }: IssuesTableProps) {
+  const agingThresholds = useProjectAgingThresholds(projectId);
+
   if (issues.length === 0) {
     return (
       <div className="table-wrap">
@@ -78,7 +81,7 @@ export default function IssuesTable({ issues, projectId }: IssuesTableProps) {
         </thead>
         <tbody>
           {issues.map((issue) => (
-            <IssueRow key={issue.id} issue={issue} projectId={projectId} />
+            <IssueRow key={issue.id} issue={issue} projectId={projectId} agingThresholds={agingThresholds} />
           ))}
         </tbody>
       </table>

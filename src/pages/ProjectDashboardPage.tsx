@@ -19,7 +19,7 @@ export default function ProjectDashboardPage() {
   const currentProject = projects.find((project) => project.id === projectId);
 
   const { activities, stats } = useActivities(projectId);
-  const { stats: issueStats } = useIssues(projectId);
+  const { issues, stats: issueStats } = useIssues(projectId);
   const logEntries = useActivityLog(projectId);
   const curvaS = useCurvaSData();
 
@@ -37,8 +37,8 @@ export default function ProjectDashboardPage() {
         </div>
       </div>
 
-      <DashboardActivitiesBlock stats={stats} spi={spi} />
-      <DashboardIssuesBlock stats={issueStats} />
+      <DashboardActivitiesBlock activities={activities} stats={stats} spi={spi} />
+      <DashboardIssuesBlock issues={issues} stats={issueStats} />
 
       <div className="grid-2">
         <div className="panel">

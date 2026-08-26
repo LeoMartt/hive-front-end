@@ -1,0 +1,242 @@
+@use "colors" as c;
+
+// Layout principal do detalhe: coluna de campos + coluna lateral de issues vinculadas
+.activity-layout {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.activity-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+// Identificador compacto acima do título (ex.: "ATV-1043 · Faturamento / Emissão de NF-e")
+.drawer-id {
+  font-family: c.$font-mono;
+  font-size: 11px;
+  color: c.$yellow-deep;
+  margin-bottom: 4px;
+}
+
+// Grid de campos (Tester/Dev/datas/WBS/Área/Sistema/Transação/Resultado esperado/Observações)
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field.full {
+  grid-column: 1 / -1;
+}
+.field-label {
+  font-size: 10.5px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-weight: 600;
+}
+.field-value {
+  font-size: 12.5px;
+  color: c.$text;
+  background-color: c.$bg-alt;
+  border: 1px solid c.$border;
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+.field-value.mono {
+  font-family: c.$font-mono;
+}
+.field-value.big {
+  min-height: 74px;
+  line-height: 1.55;
+  align-items: flex-start;
+}
+.field-value.pending {
+  color: c.$text-faint;
+}
+
+// Banner informativo no topo do card principal (aguardando predecessor / concluída)
+.info-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: c.$bg-alt;
+  border: 1px solid c.$border;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: c.$text-dim;
+  margin-bottom: 18px;
+}
+.info-banner b {
+  color: c.$text;
+}
+
+// Evidência de aprovação exibida como um mini-anexo dentro do grid de campos
+.evidence-file {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+.evidence-file .attach-icon {
+  width: 26px;
+  height: 26px;
+  font-size: 8.5px;
+}
+
+// Linhas de anexo (painel "Anexos")
+.attach-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 4px;
+  border-bottom: 1px solid c.$border;
+}
+.attach-row:last-child {
+  border-bottom: none;
+}
+.attach-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  flex: none;
+  background-color: c.$red-soft;
+  color: c.$red;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: c.$font-mono;
+  font-size: 8.5px;
+  font-weight: 800;
+}
+.attach-icon.img {
+  background-color: c.$blue-soft;
+  color: c.$blue;
+}
+.attach-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.attach-body b {
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attach-body span {
+  font-size: 10.5px;
+  color: c.$text-faint;
+}
+.attach-dl {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid c.$border-strong;
+  background-color: c.$surface;
+  color: c.$text-dim;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.attach-dl:hover {
+  border-color: c.$yellow-deep;
+  color: c.$yellow-deep;
+}
+.attach-dl svg {
+  width: 14px;
+  height: 14px;
+}
+.attach-divider {
+  font-size: 10px;
+  color: c.$text-faint;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  padding: 10px 4px 4px;
+}
+
+.divider {
+  height: 1px;
+  background-color: c.$border;
+  margin: 18px 0;
+}
+.subhead {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: c.$text-dim;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 10px;
+}
+
+// Trilha de auditoria — lista simples de eventos derivados
+.audit-trail {
+  font-size: 11.5px;
+  color: c.$text-dim;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.audit-trail-at {
+  color: c.$text-faint;
+}
+
+// Linha compacta do painel "Issues vinculadas"
+.issue-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  background-color: c.$bg-alt;
+  border: 1px solid c.$border;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background-color 0.12s ease;
+}
+.issue-row:hover {
+  border-color: c.$border-strong;
+  background-color: c.$surface-2;
+}
+.issue-row:last-child {
+  margin-bottom: 0;
+}
+.issue-row-l {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.issue-row-l b {
+  font-size: 12px;
+  font-weight: 600;
+}
+.issue-row-l span {
+  font-size: 10.5px;
+  color: c.$text-faint;
+}
+.empty-note {
+  font-size: 11.5px;
+  color: c.$text-faint;
+}
+
+@media (max-width: 900px) {
+  .activity-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,4 +1,5 @@
 import type { Issue, IssueImpact, IssueStatus, IssueType } from "../types/issue";
+import type { AgingThresholds } from "../types/projectConfig";
 
 export const ISSUE_STATUS_LABELS: Record<IssueStatus, string> = {
   aberta: "Aberta",
@@ -48,11 +49,6 @@ const ISSUE_IMPACT_RANK: Record<IssueImpact, number> = {
   baixo: 1,
 };
 
-// Limiares fixos do modo UAT do mockup — a tela de Papéis & Config, que tornaria isso
-// configurável por modo (UAT/Cutover), ainda não existe.
-const AGING_ALERTA_DAYS = 2;
-const AGING_RISCO_DAYS = 6;
-
 // Dias desde a abertura se ainda aberta; dias entre abertura e resolução (congelado) se concluída.
 export function computeIssueAgingDays(issue: Issue, now: Date = new Date()): number {
   const end = issue.resolvedAt !== null ? new Date(issue.resolvedAt) : now;
@@ -63,11 +59,13 @@ export function computeIssueAgingDays(issue: Issue, now: Date = new Date()): num
 export type IssueRiskLevel = "aceitavel" | "alerta" | "risco" | null;
 
 // null para issues concluídas — risco de aging não se aplica a algo que já foi resolvido.
-export function computeIssueRisk(issue: Issue, now: Date = new Date()): IssueRiskLevel {
+// Os limiares agora vêm de fora (configuráveis em Papéis & Config) em vez de constantes
+// fixas — ver useProjectAgingThresholds.
+export function computeIssueRisk(issue: Issue, thresholds: AgingThresholds, now: Date = new Date()): IssueRiskLevel {
   if (issue.status === "concluida") return null;
   const aging = computeIssueAgingDays(issue, now);
-  if (aging >= AGING_RISCO_DAYS) return "risco";
-  if (aging >= AGING_ALERTA_DAYS) return "alerta";
+  if (aging >= thresholds.risco) return "risco";
+  if (aging >= thresholds.alerta) return "alerta";
   return "aceitavel";
 }
 

@@ -6,6 +6,13 @@ export type ActivityStatus =
   | "concluido"
   | "cancelado";
 
+export interface ActivityAttachment {
+  fileName: string;
+  sizeLabel: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
 export interface Activity {
   id: string;
   name: string;
@@ -21,6 +28,43 @@ export interface Activity {
   predecessors: string[];
   retestCount: number;
   issueCount: number;
+  wbs: string;
+  area: string;
+  system: string;
+  transaction: string;
+  expectedResult: string;
+  notes: string | null;
+  attachments: ActivityAttachment[];
+  approvalEvidence: ActivityAttachment | null;
+  approvalNote: string | null;
+  rejectedAt: string | null;
+}
+
+export interface NewActivityInput {
+  name: string;
+  module: string;
+  process: string;
+  tester: string;
+  dev: string;
+  plannedStart: string;
+  plannedEnd: string;
+  predecessors: string[];
+  wbs: string;
+  area: string;
+  system: string;
+  transaction: string;
+  expectedResult: string;
+  notes: string | null;
+}
+
+export interface ConcludeActivityInput {
+  approvalNote: string | null;
+  approvalEvidence: ActivityAttachment;
+}
+
+export interface RejectActivityInput {
+  reason: string;
+  evidence: ActivityAttachment | null;
 }
 
 export interface ActivityStats {

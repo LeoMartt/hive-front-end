@@ -1,0 +1,74 @@
+@use "colors" as c;
+
+// Aba "Usuários": tabela à esquerda, matriz de permissões à direita
+.config-users-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: 16px;
+  align-items: start;
+
+  // Itens de grid têm min-width:auto implícito, que usa o tamanho mínimo do conteúdo —
+  // a tabela da matriz de permissões tem min-width:760px (mesma regra de toda tabela do
+  // projeto, em _table.scss), então sem isso a coluna "explode" a grid e empurra a
+  // página inteira para rolagem horizontal, em vez de deixar o .table-wrap interno
+  // (que já tem overflow-x:auto) rolar sozinho.
+  > * {
+    min-width: 0;
+  }
+}
+
+// Aba "Limiares e Regras": limiares à esquerda, anexos/evidências à direita
+.config-limiares-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+
+  > * {
+    min-width: 0;
+  }
+}
+
+// Badges de papel na tabela de usuários — várias por linha quando a pessoa acumula papéis
+.papeis-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+// Checkboxes de papel no modal de editar papéis
+.role-checkbox-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 4px 0;
+}
+.role-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+// Nome do usuário ao lado do título "Editar papéis"
+.modal-title-sub {
+  font-weight: 400;
+  color: c.$text-faint;
+  margin-left: 6px;
+}
+
+// Confirmação "Limiares atualizados ✓" ao lado do botão Salvar
+.saved-msg {
+  margin-left: 10px;
+  font-size: 11.5px;
+  color: c.$green;
+}
+
+@media (max-width: 900px) {
+  .config-users-grid,
+  .config-limiares-grid {
+    grid-template-columns: 1fr;
+  }
+}

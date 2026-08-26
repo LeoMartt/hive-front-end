@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import ActivityStatusBadge from "./ActivityStatusBadge";
-import { isOverdue } from "../../utils/activityIndicators";
+import { formatActivityDate, isOverdue, retestPillClass } from "../../utils/activityIndicators";
 import { getInitials } from "../../utils/initials";
 import type { Activity } from "../../types/activity";
 
@@ -11,17 +11,6 @@ interface ActivityRowProps {
   showBreadcrumb?: boolean;
   checked: boolean;
   onToggleSelect: (id: string) => void;
-}
-
-function formatDate(isoDate: string | null): string {
-  if (!isoDate) return "—";
-  return new Date(isoDate).toLocaleDateString("pt-BR");
-}
-
-function retestPillClass(retestCount: number): string {
-  if (retestCount === 0) return "retest-pill";
-  if (retestCount <= 2) return "retest-pill retest-pill-warn";
-  return "retest-pill retest-pill-danger";
 }
 
 export default function ActivityRow({
@@ -94,13 +83,13 @@ export default function ActivityRow({
           <span className="cell-person-name">{activity.dev}</span>
         </div>
       </td>
-      <td className="mono">{formatDate(activity.plannedStart)}</td>
+      <td className="mono">{formatActivityDate(activity.plannedStart)}</td>
       <td className={`mono${overdue ? " date-overdue" : ""}`}>
-        {formatDate(activity.plannedEnd)}
+        {formatActivityDate(activity.plannedEnd)}
         {overdue && <span className="overdue-tag">Atrasado</span>}
       </td>
-      <td className="mono">{formatDate(activity.actualStart)}</td>
-      <td className="mono">{formatDate(activity.actualEnd)}</td>
+      <td className="mono">{formatActivityDate(activity.actualStart)}</td>
+      <td className="mono">{formatActivityDate(activity.actualEnd)}</td>
       <td className="mono">{activity.predecessors.length === 0 ? "—" : activity.predecessors.join(", ")}</td>
       <td className="text-center">
         <span className={retestPillClass(activity.retestCount)}>{activity.retestCount}×</span>
