@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal from "../common/Modal";
 import CloseIcon from "../common/CloseIcon";
 import { getInitials } from "../../utils/initials";
+import Avatar from "../common/Avatar";
 import { useGraphUserSearch } from "../../hooks/useGraphUserSearch";
 import type { NewProjectInput, ProjectMode, TeamMember, UserRole } from "../../types/project";
 
@@ -232,7 +233,12 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
                       className="user-dropdown-item"
                       onClick={() => search.handleSelectUser(user)}
                     >
-                      <span className="team-member-av">{getInitials(user.displayName)}</span>
+                      <Avatar
+                        name={user.displayName}
+                        personKey={user.id}
+                        className="team-member-av"
+                        alt=""
+                      />
                       <span className="user-dropdown-item-text">
                         <span className="user-dropdown-item-name">{user.displayName}</span>
                         <span className="user-dropdown-item-email">

@@ -4,6 +4,8 @@ import { shortName } from "../utils/shortName";
 interface CurrentUser {
   name: string;
   role: string;
+  id?: string;
+  email?: string;
 }
 
 export function useCurrentUser(): CurrentUser {
@@ -16,5 +18,7 @@ export function useCurrentUser(): CurrentUser {
     // Mantido fixo como Gestor por enquanto, igual ao resto do protótipo (ver
     // comentário "role-gate removido temporariamente" no HTML de referência).
     role: "Gestor de Projetos",
+    id: account?.localAccountId,
+    email: account?.username,
   };
 }

@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import ActivityStatusBadge from "./ActivityStatusBadge";
 import { formatActivityDate, isBulkSelectable, isOverdue, retestPillClass } from "../../utils/activityIndicators";
-import { getInitials } from "../../utils/initials";
+import Avatar from "../common/Avatar";
 import { shortName } from "../../utils/shortName";
 import type { Activity } from "../../types/activity";
 
@@ -76,13 +76,13 @@ export default function ActivityRow({
       </td>
       <td>
         <div className="cell-person" title={activity.tester}>
-          <span className="avatar-mini">{getInitials(activity.tester)}</span>
+          <Avatar name={activity.tester} className="avatar-mini" alt="" />
           <span className="cell-person-name">{shortName(activity.tester)}</span>
         </div>
       </td>
       <td>
         <div className="cell-person" title={activity.dev}>
-          <span className="avatar-mini">{getInitials(activity.dev)}</span>
+          <Avatar name={activity.dev} className="avatar-mini" alt="" />
           <span className="cell-person-name">{shortName(activity.dev)}</span>
         </div>
       </td>

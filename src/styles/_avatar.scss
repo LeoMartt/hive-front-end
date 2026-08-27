@@ -1,0 +1,21 @@
+// Quando o <Avatar> tem foto, a <img> preenche o contêiner circular já existente
+// (.avatar-mini, .avatar-circle, .footer-widget-avatar, .team-member-av). Esses
+// contêineres já são redondos via border-radius; aqui só garantimos o recorte e
+// o preenchimento da imagem.
+.avatar-mini,
+.avatar-circle,
+.footer-widget-avatar,
+.team-member-av {
+  overflow: hidden;
+}
+
+.avatar-mini > img,
+.avatar-circle > img,
+.footer-widget-avatar > img,
+.team-member-av > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}

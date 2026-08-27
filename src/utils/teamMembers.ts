@@ -3,6 +3,7 @@ import type { TeamMember, UserRole } from "../types/project";
 export interface GroupedTeamMember {
   name: string;
   initials: string;
+  id?: string;
   email?: string;
   roles: UserRole[];
 }
@@ -25,6 +26,7 @@ export function groupTeamMembersByName(team: TeamMember[]): GroupedTeamMember[] 
     groups.set(member.name, {
       name: member.name,
       initials: member.initials,
+      id: member.id,
       email: member.email,
       roles: [member.role],
     });

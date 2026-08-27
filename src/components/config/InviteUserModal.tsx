@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal from "../common/Modal";
 import { useGraphUserSearch } from "../../hooks/useGraphUserSearch";
 import { getInitials } from "../../utils/initials";
+import Avatar from "../common/Avatar";
 import type { TeamMember, UserRole } from "../../types/project";
 
 interface InviteUserModalProps {
@@ -95,7 +96,12 @@ export default function InviteUserModal({ show, onHide, currentTeam, onInvite }:
                     className="user-dropdown-item"
                     onClick={() => search.handleSelectUser(user)}
                   >
-                    <span className="team-member-av">{getInitials(user.displayName)}</span>
+                    <Avatar
+                      name={user.displayName}
+                      personKey={user.id}
+                      className="team-member-av"
+                      alt=""
+                    />
                     <span className="user-dropdown-item-text">
                       <span className="user-dropdown-item-name">{user.displayName}</span>
                       <span className="user-dropdown-item-email">{user.mail ?? user.userPrincipalName}</span>

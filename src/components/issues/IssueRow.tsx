@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import IssueStatusBadge from "./IssueStatusBadge";
 import IssueImpactBadge from "./IssueImpactBadge";
 import { computeIssueAgingDays, computeIssueRisk, ISSUE_TYPE_LABELS } from "../../utils/issueIndicators";
-import { getInitials } from "../../utils/initials";
+import Avatar from "../common/Avatar";
 import { shortName } from "../../utils/shortName";
 import type { Issue } from "../../types/issue";
 import type { AgingThresholds } from "../../types/projectConfig";
@@ -69,7 +69,7 @@ export default function IssueRow({ issue, projectId, agingThresholds }: IssueRow
       </td>
       <td>
         <div className="cell-person" title={issue.dev}>
-          <span className="avatar-mini">{getInitials(issue.dev)}</span>
+          <Avatar name={issue.dev} className="avatar-mini" alt="" />
           <span className="cell-person-name">{shortName(issue.dev)}</span>
         </div>
       </td>

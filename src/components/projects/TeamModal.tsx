@@ -1,4 +1,5 @@
 import Modal from "../common/Modal";
+import Avatar from "../common/Avatar";
 import type { TeamMember } from "../../types/project";
 
 interface TeamModalProps {
@@ -16,7 +17,12 @@ export default function TeamModal({ show, onHide, team }: TeamModalProps) {
       <div>
         {team.map((member) => (
           <div className="team-member-row" key={member.initials + member.role}>
-            <div className="team-member-av">{member.initials}</div>
+            <Avatar
+              name={member.name}
+              personKey={member.id ?? member.email}
+              className="team-member-av"
+              alt=""
+            />
             <div className="team-member-info">
               <b>{member.name}</b>
               <span>{member.role}</span>
