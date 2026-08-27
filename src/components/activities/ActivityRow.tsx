@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import ActivityStatusBadge from "./ActivityStatusBadge";
 import { formatActivityDate, isBulkSelectable, isOverdue, retestPillClass } from "../../utils/activityIndicators";
 import { getInitials } from "../../utils/initials";
+import { shortName } from "../../utils/shortName";
 import type { Activity } from "../../types/activity";
 
 interface ActivityRowProps {
@@ -76,13 +77,13 @@ export default function ActivityRow({
       <td>
         <div className="cell-person" title={activity.tester}>
           <span className="avatar-mini">{getInitials(activity.tester)}</span>
-          <span className="cell-person-name">{activity.tester}</span>
+          <span className="cell-person-name">{shortName(activity.tester)}</span>
         </div>
       </td>
       <td>
         <div className="cell-person" title={activity.dev}>
           <span className="avatar-mini">{getInitials(activity.dev)}</span>
-          <span className="cell-person-name">{activity.dev}</span>
+          <span className="cell-person-name">{shortName(activity.dev)}</span>
         </div>
       </td>
       <td className="mono">{formatActivityDate(activity.plannedStart)}</td>
