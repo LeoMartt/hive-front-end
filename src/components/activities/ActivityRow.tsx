@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import ActivityStatusBadge from "./ActivityStatusBadge";
-import { formatActivityDate, isOverdue, retestPillClass } from "../../utils/activityIndicators";
+import { formatActivityDate, isBulkSelectable, isOverdue, retestPillClass } from "../../utils/activityIndicators";
 import { getInitials } from "../../utils/initials";
 import type { Activity } from "../../types/activity";
 
@@ -42,14 +42,16 @@ export default function ActivityRow({
       }}
     >
       <td>
-        <input
-          type="checkbox"
-          aria-label={`Selecionar ${activity.name}`}
-          checked={checked}
-          onChange={() => onToggleSelect(activity.id)}
-          onClick={(event) => event.stopPropagation()}
-          onKeyDown={(event) => event.stopPropagation()}
-        />
+        {isBulkSelectable(activity) && (
+          <input
+            type="checkbox"
+            aria-label={`Selecionar ${activity.name}`}
+            checked={checked}
+            onChange={() => onToggleSelect(activity.id)}
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+          />
+        )}
       </td>
       <td></td>
       <td>

@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface PermissionRow {
   action: string;
   gestor: boolean;
@@ -18,7 +20,23 @@ const PERMISSION_ROWS: PermissionRow[] = [
   { action: "Convidar usuário", gestor: true, tester: false, dev: false },
 ];
 
+type PermissionRole = "gestor" | "tester" | "dev";
+
 export default function ConfigPermissionMatrix() {
+  const [rows, setRows] = useState<PermissionRow[]>(PERMISSION_ROWS);
+  const [saved, setSaved] = useState(false);
+
+  function toggleCell(action: string, role: PermissionRole) {
+    setRows((prev) =>
+      prev.map((row) => (row.action === action ? { ...row, [role]: !row[role] } : row))
+    );
+    setSaved(false);
+  }
+
+  function handleSave() {
+    setSaved(true);
+  }
+
   return (
     <div className="panel">
       <div className="panel-head">
@@ -39,26 +57,46 @@ export default function ConfigPermissionMatrix() {
             </tr>
           </thead>
           <tbody>
-            {PERMISSION_ROWS.map((row) => (
+            {rows.map((row) => (
               <tr key={row.action}>
                 <td>{row.action}</td>
                 <td style={{ textAlign: "center" }}>
-                  <input type="checkbox" defaultChecked={row.gestor} aria-label={`${row.action} — Gestor`} />
+                  <input
+                    type="checkbox"
+                    checked={row.gestor}
+                    onChange={() => toggleCell(row.action, "gestor")}
+                    aria-label={`${row.action} — Gestor`}
+                  />
                 </td>
                 <td style={{ textAlign: "center" }}>
-                  <input type="checkbox" defaultChecked={row.tester} aria-label={`${row.action} — Tester`} />
+                  <input
+                    type="checkbox"
+                    checked={row.tester}
+                    onChange={() => toggleCell(row.action, "tester")}
+                    aria-label={`${row.action} — Tester`}
+                  />
                 </td>
                 <td style={{ textAlign: "center" }}>
-                  <input type="checkbox" defaultChecked={row.dev} aria-label={`${row.action} — Dev`} />
+                  <input
+                    type="checkbox"
+                    checked={row.dev}
+                    onChange={() => toggleCell(row.action, "dev")}
+                    aria-label={`${row.action} — Dev`}
+                  />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <button type="button" className="btn btn-primary btn-sm" style={{ marginTop: 14 }}>
+      <button type="button" className="btn btn-primary btn-sm" style={{ marginTop: 14 }} onClick={handleSave}>
         Salvar matriz
       </button>
+      {saved && (
+        <span className="saved-msg" style={{ marginLeft: 10 }}>
+          Matriz salva ✓
+        </span>
+      )}
     </div>
   );
 }

@@ -9,13 +9,22 @@ interface ConcludeActivityModalProps {
   onHide: () => void;
   currentUserName: string;
   onSubmit: (input: ConcludeActivityInput) => void;
+  title?: string;
+  subtitle?: string;
 }
 
 function formatFileSize(sizeBytes: number): string {
   return `${Math.ceil(sizeBytes / 1024)} KB`;
 }
 
-export default function ConcludeActivityModal({ show, onHide, currentUserName, onSubmit }: ConcludeActivityModalProps) {
+export default function ConcludeActivityModal({
+  show,
+  onHide,
+  currentUserName,
+  onSubmit,
+  title = "Concluir atividade",
+  subtitle = "Anexe a evidência de aprovação. A observação é opcional.",
+}: ConcludeActivityModalProps) {
   const [text, setText] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -51,9 +60,9 @@ export default function ConcludeActivityModal({ show, onHide, currentUserName, o
   return (
     <Modal open={show} onClose={resetAndHide} labelledBy="conclude-activity-modal-title">
       <div className="modal-title" id="conclude-activity-modal-title">
-        Concluir atividade
+        {title}
       </div>
-      <div className="modal-subtitle">Anexe a evidência de aprovação. A observação é opcional.</div>
+      <div className="modal-subtitle">{subtitle}</div>
 
       {errorMsg && <div className="error-banner">{errorMsg}</div>}
 
