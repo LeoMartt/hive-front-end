@@ -57,3 +57,18 @@ export function computeGroupRollup(activities: Activity[]): GroupRollup {
   const percent = total === 0 ? 0 : Math.round((done / total) * 100);
   return { done, total, late, percent };
 }
+
+// Atividades elegíveis para seleção em massa (aprovar e/ou cancelar) na lista de
+// Atividades. "concluido" e "cancelado" ficam de fora — não há ação em massa que
+// faça sentido sobre elas, então nem exibem checkbox de seleção.
+const BULK_SELECTABLE_STATUSES: ActivityStatus[] = ["aguardando", "liberado", "execucao", "bloqueado"];
+
+export function isBulkSelectable(activity: Activity): boolean {
+  return BULK_SELECTABLE_STATUSES.includes(activity.status);
+}
+
+// Das atividades elegíveis para seleção, só "liberado" e "execucao" podem ser
+// aprovadas em massa (mesma regra do fluxo de aprovação individual).
+export function isBulkApprovable(activity: Activity): boolean {
+  return activity.status === "liberado" || activity.status === "execucao";
+}

@@ -38,7 +38,7 @@ function createEmptyFilters(): ActivityFiltersState {
 export default function ProjectActivitiesPage() {
   const { id } = useParams();
   const projectId = id ?? "";
-  const { activities, stats, createActivity } = useActivities(projectId);
+  const { activities, stats, createActivity, bulkConcludeActivities, cancelActivities } = useActivities(projectId);
   const { projects } = useProjects();
   const currentProject = projects.find((project) => project.id === projectId);
 
@@ -222,6 +222,9 @@ export default function ProjectActivitiesPage() {
         onToggleProcess={toggleProcess}
         expandedGroups={expandedGroups}
         onToggleGroup={toggleGroup}
+        currentUserName={CURRENT_USER_NAME}
+        onBulkApprove={bulkConcludeActivities}
+        onBulkCancel={cancelActivities}
       />
 
       <NewActivityModal

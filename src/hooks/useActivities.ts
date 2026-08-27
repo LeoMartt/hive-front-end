@@ -561,6 +561,8 @@ interface UseActivitiesResult {
   createActivity: (input: NewActivityInput) => void;
   concludeActivity: (activityId: string, input: ConcludeActivityInput) => void;
   rejectActivity: (activityId: string, input: RejectActivityInput) => void;
+  bulkConcludeActivities: (activityIds: string[], input: ConcludeActivityInput) => void;
+  cancelActivities: (activityIds: string[]) => void;
 }
 
 export function useActivities(projectId: string): UseActivitiesResult {
@@ -655,5 +657,41 @@ export function useActivities(projectId: string): UseActivitiesResult {
     );
   }
 
-  return { activities, stats, createActivity, concludeActivity, rejectActivity };
+  // Aprovação em massa: mesma lógica de concludeActivity, aplicada a uma lista de ids
+  // num único setActivities (evita um re-render por atividade). A validação de quais
+  // atividades podem ser selecionadas (status liberado/execucao) vive na UI
+  // (ActivitiesTable), não aqui — mesma convenção dos outros mutators deste hook.
+  function bulkConcludeActivities(activityIds: string[], input: ConcludeActivityInput): void {
+    const idSet = new Set(activityIds);
+    setActivities((prev) =>
+      prev.map((activity) =>
+        idSet.has(activity.id)
+          ? {
+              ...activity,
+              status: "concluido",
+              actualEnd: toLocalIsoString(new Date()),
+              approvalNote: input.approvalNote,
+              approvalEvidence: input.approvalEvidence,
+            }
+          : activity
+      )
+    );
+  }
+
+  function cancelActivities(activityIds: string[]): void {
+    const idSet = new Set(activityIds);
+    setActivities((prev) =>
+      prev.map((activity) => (idSet.has(activity.id) ? { ...activity, status: "cancelado" } : activity))
+    );
+  }
+
+  return {
+    activities,
+    stats,
+    createActivity,
+    concludeActivity,
+    rejectActivity,
+    bulkConcludeActivities,
+    cancelActivities,
+  };
 }
