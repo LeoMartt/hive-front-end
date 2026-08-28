@@ -47,7 +47,11 @@ export function useGraphUserSearch(): UseGraphUserSearchResult {
         account,
       });
 
-      const url = `https://graph.microsoft.com/v1.0/users?$search="displayName:${query}"&$select=id,displayName,mail,userPrincipalName&$top=8`;
+      // Remove aspas do input (quebrariam o valor entre aspas do $search) e
+      // encoda o valor inteiro — evita OData injection e erro de request.
+      const term = query.replace(/"/g, "").trim();
+      const searchValue = encodeURIComponent(`"displayName:${term}"`);
+      const url = `https://graph.microsoft.com/v1.0/users?$search=${searchValue}&$select=id,displayName,mail,userPrincipalName&$top=8`;
 
       const response = await fetch(url, {
         headers: {

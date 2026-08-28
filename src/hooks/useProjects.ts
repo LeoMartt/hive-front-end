@@ -1,6 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { NewProjectInput, Project, ProjectStats, TeamMember, UserRole } from "../types/project";
 import { getInitials } from "../utils/initials";
+import { useMocks } from "../config/env";
+import { projectsApi } from "../api/resources/projects";
+import { ApiError, normalizeError } from "../api/apiError";
 
 function minutesAgo(minutes: number): string {
   return new Date(Date.now() - minutes * 60000).toISOString();
@@ -109,13 +112,39 @@ const INITIAL_PROJECTS: Project[] = [
 interface UseProjectsResult {
   projects: Project[];
   stats: ProjectStats;
+  loading: boolean;
+  error: ApiError | null;
   createProject: (input: NewProjectInput) => void;
   addTeamMember: (projectId: string, member: TeamMember) => void;
   replaceTeamMemberRoles: (projectId: string, memberName: string, roles: UserRole[]) => void;
 }
 
 export function useProjects(): UseProjectsResult {
-  const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
+  // useMocks === true: seed local, síncrono. useMocks === false: busca na API.
+  const [projects, setProjects] = useState<Project[]>(useMocks ? INITIAL_PROJECTS : []);
+  const [loading, setLoading] = useState<boolean>(!useMocks);
+  const [error, setError] = useState<ApiError | null>(null);
+
+  useEffect(() => {
+    if (useMocks) return;
+    // loading já inicia em !useMocks (true aqui) e error em null; o efeito roda uma
+    // única vez (deps []), então não é preciso resetar estado antes do fetch.
+    let cancelled = false;
+    projectsApi
+      .list()
+      .then((data) => {
+        if (!cancelled) setProjects(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof ApiError ? err : normalizeError(err));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const stats = useMemo<ProjectStats>(() => {
     const total = projects.length;
@@ -196,5 +225,5 @@ export function useProjects(): UseProjectsResult {
     );
   }
 
-  return { projects, stats, createProject, addTeamMember, replaceTeamMemberRoles };
+  return { projects, stats, loading, error, createProject, addTeamMember, replaceTeamMemberRoles };
 }

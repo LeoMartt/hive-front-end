@@ -9,7 +9,7 @@ import { useProjects } from "../hooks/useProjects";
 import type { TeamMember } from "../types/project";
 
 export default function ProjectsPage() {
-  const { projects, stats, createProject } = useProjects();
+  const { projects, stats, createProject, loading, error } = useProjects();
   const [activeTab, setActiveTab] = useState<ProjectsTabFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [teamModalMembers, setTeamModalMembers] = useState<TeamMember[] | null>(null);
@@ -62,7 +62,18 @@ export default function ProjectsPage() {
         onSearchChange={setSearchQuery}
       />
 
-      <ProjectsTable projects={filteredProjects} onOpenTeam={setTeamModalMembers} />
+      {error ? (
+        <div className="page-state page-state--error">
+          Não foi possível carregar os projetos.{" "}
+          <button type="button" className="btn btn-ghost" onClick={() => window.location.reload()}>
+            Tentar de novo
+          </button>
+        </div>
+      ) : loading ? (
+        <div className="page-state">Carregando projetos…</div>
+      ) : (
+        <ProjectsTable projects={filteredProjects} onOpenTeam={setTeamModalMembers} />
+      )}
 
       <TeamModal
         show={teamModalMembers !== null}
