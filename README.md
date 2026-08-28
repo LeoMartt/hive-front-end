@@ -1,28 +1,24 @@
-# Nome do Projeto
+# HIVE — Frontend
 
-Projeto frontend desenvolvido com React, Vite e TypeScript.
+HIVE (Homologation and Integrated Validation Environment) é o front-end de uma
+plataforma de gestão de projetos de UAT (User Acceptance Testing) para a FUMEP/EEP.
 
-## Tecnologias utilizadas
+## Tecnologias
 
-* React
+* React 19 + TypeScript
 * Vite
-* TypeScript
-* Bootstrap
-* React Router
-* Zod
-* Axios
-* SCSS
+* React Router v8
+* SCSS puro (sem Bootstrap)
+* `@azure/msal-browser` / `@azure/msal-react` — login SSO via Entra ID (Azure AD)
+* Chart.js v4 (uso direto, sem `react-chartjs-2`)
+* Zod — validação
+* Axios — cliente HTTP (camada `src/api/`)
+* **Sem suíte de testes automatizados** — decisão deliberada do projeto. Verificação é `npx tsc -b` + `npm run build` + QA manual.
 
 ## Pré-requisitos
 
-Antes de iniciar, é necessário ter instalado:
-
-* Git
-* Node.js
-* npm
-* Visual Studio Code, recomendado
-
-Para verificar as instalações, execute no PowerShell:
+* Git, Node.js, npm
+* Visual Studio Code (recomendado)
 
 ```powershell
 git --version
@@ -30,148 +26,79 @@ node --version
 npm --version
 ```
 
-## Clonar o projeto
-
-No PowerShell, acesse a pasta onde deseja salvar o projeto:
-
-```powershell
-cd C:\caminho\para\seus\projetos
-```
-
-Clone o repositório:
-
-```powershell
-git clone https://github.com/SEU-USUARIO/NOME-DO-REPOSITORIO.git
-```
-
-Entre na pasta do projeto:
-
-```powershell
-cd NOME-DO-REPOSITORIO
-```
-
-Abra o projeto no Visual Studio Code:
-
-```powershell
-code .
-```
-
-## Instalar as dependências
-
-Na raiz do projeto, execute:
+## Instalação
 
 ```powershell
 npm install
 ```
 
-Esse comando instala automaticamente todas as bibliotecas registradas no `package.json`, incluindo as dependências de desenvolvimento necessárias para executar o projeto.
+`node_modules/` não vai para o Git; recrie com `npm install`. Mantenha o
+`package-lock.json` versionado.
 
-As bibliotecas serão instaladas na pasta:
+## Configuração de ambiente
 
-```text
-node_modules/
-```
-
-Essa pasta não deve ser enviada para o GitHub, pois cada pessoa pode recriá-la executando `npm install`.
-
-O arquivo `package-lock.json` deve ser mantido no repositório para que todos instalem versões compatíveis das dependências.
-
-## Executar o projeto
-
-Após instalar as dependências, execute:
+Copie o modelo e ajuste se necessário:
 
 ```powershell
-npm run dev
+copy .env.example .env
 ```
 
-O terminal exibirá um endereço local semelhante a:
+| Variável | Descrição |
+|---|---|
+| `VITE_MSAL_CLIENT_ID` | Client ID da app registration (SPA) no Entra ID |
+| `VITE_MSAL_AUTHORITY` | `https://login.microsoftonline.com/<tenant-id>` |
+| `VITE_MSAL_REDIRECT_URI` | Redirect URI registrado (padrão `/`) |
+| `VITE_MSAL_POST_LOGOUT_REDIRECT_URI` | Destino após logout (padrão `/login`) |
+| `VITE_API_BASE_URL` | Endereço do backend. **Vazio = usa dados mockados.** |
+| `VITE_API_SCOPE` | Scope da API própria (`api://<api-app-id>/access_as_user`) |
+| `VITE_USE_MOCKS` | `true`/`false`. Força mock mesmo com `VITE_API_BASE_URL` definido. |
 
-```text
-http://localhost:5173
-```
+O `.env` não é versionado. `src/config/env.ts` valida as variáveis no boot e
+falha com mensagem clara se faltar algo.
 
-Abra esse endereço no navegador.
-
-## Gerar a versão de produção
-
-Para verificar os tipos e gerar a versão de produção:
+## Scripts
 
 ```powershell
-npm run build
+npm run dev      # servidor de desenvolvimento (porta 5173)
+npm run build    # tsc -b && vite build
+npm run preview  # serve o build de produção
+npm run lint     # eslint .
+npm run audit    # npm audit --omit=dev (vulnerabilidades de dependências)
 ```
 
-Os arquivos gerados ficarão na pasta:
-
-```text
-dist/
-```
-
-## Visualizar a versão de produção
-
-Depois de executar o build, use:
-
-```powershell
-npm run preview
-```
-
-## Atualizar o projeto local
-
-Para baixar as alterações mais recentes do GitHub:
-
-```powershell
-git pull origin main
-```
-
-Depois, execute novamente:
-
-```powershell
-npm install
-```
-
-Isso é importante quando o `package.json` ou o `package-lock.json` tiver sido alterado por outro desenvolvedor.
-
-## Estrutura principal
+## Estrutura
 
 ```text
 src/
-├── api/
-├── assets/
-├── components/
-├── config/
-├── hooks/
-├── layouts/
-├── pages/
-├── routes/
-├── styles/
-├── types/
-├── utils/
-└── validations/
+├── api/          # camada HTTP: client, token, interceptors, schemas Zod, resources
+├── assets/       # imagens, ícones, estáticos
+├── components/   # componentes visuais por feature
+├── config/       # env, MSAL (authConfig, msalInstance)
+├── context/      # React context providers
+├── hooks/        # hooks de dados (hoje mockados; useProjects tem caminho de API)
+├── layouts/      # estruturas compartilhadas entre páginas
+├── pages/        # páginas completas
+├── routes/       # roteamento (React Router)
+├── styles/       # SCSS e cores
+├── types/        # tipos e interfaces TypeScript
+├── utils/        # funções auxiliares puras
+└── validations/  # schemas Zod de formulários
 ```
 
-### Responsabilidade das pastas
+## Integração com o backend
 
-* `api/`: caminhos e endpoints da API.
-* `assets/`: imagens, ícones, fontes e arquivos estáticos.
-* `components/`: componentes visuais reutilizáveis.
-* `config/`: configurações globais e bibliotecas.
-* `hooks/`: hooks, chamadas da API e lógicas reutilizáveis.
-* `layouts/`: estruturas compartilhadas entre páginas.
-* `pages/`: páginas completas da aplicação.
-* `routes/`: configuração das rotas com React Router.
-* `styles/`: arquivos SCSS, personalizações do Bootstrap e cores.
-* `types/`: tipos e interfaces TypeScript.
-* `utils/`: funções auxiliares genéricas.
-* `validations/`: schemas e validações com Zod.
+O backend será construído numa segunda fase. As decisões de contrato,
+autenticação e a receita para migrar cada hook mockado estão em
+`docs/adr/0001-integracao-backend.md`. Enquanto `VITE_API_BASE_URL` estiver
+vazio, todo o app roda com dados mockados dos hooks em `src/hooks/`.
 
-## Padrões do projeto
+## Segurança
 
-* Utilizar Bootstrap como primeira opção para todo o design.
-* Não utilizar CSS comum ou estilos inline.
-* Utilizar SCSS quando o Bootstrap não atender à necessidade.
-* Centralizar cores personalizadas em um arquivo de cores.
-* Utilizar React Router para navegação.
-* Utilizar Zod para validação de dados e formulários.
-* Manter os endpoints da API na pasta `api/`.
-* Manter chamadas da API e lógicas reutilizáveis na pasta `hooks/`.
-* Manter todos os tipos TypeScript na pasta `types/`.
-* Utilizar `export default function` em páginas e componentes React.
+Audit do frontend em `docs/security/2026-08-27-audit-frontend.md`.
+Cabeçalhos de segurança para o hosting em `docs/security/headers.md`.
+
+## Fluxo de trabalho (specs → planos → implementação)
+
+Cada feature passa por brainstorm → spec (`docs/superpowers/specs/`) →
+plano (`docs/superpowers/plans/`) → implementação → PR. Leia as specs e planos
+existentes antes de propor algo novo.
