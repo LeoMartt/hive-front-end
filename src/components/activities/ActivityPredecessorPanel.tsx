@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import ActivityStatusBadge from "./ActivityStatusBadge";
 import { formatActivityDate } from "../../utils/activityIndicators";
 import { deriveActivityAuditTrail } from "../../utils/activityAuditTrail";
-import { getInitials } from "../../utils/initials";
+import Avatar from "../common/Avatar";
 import type { Activity } from "../../types/activity";
 
 interface ActivityPredecessorPanelProps {
@@ -31,14 +31,14 @@ export default function ActivityPredecessorPanel({ predecessor, projectId }: Act
         <div className="field">
           <div className="field-label">Tester</div>
           <div className="field-value">
-            <span className="avatar-mini">{getInitials(predecessor.tester)}</span>
+            <Avatar name={predecessor.tester} className="avatar-mini" alt="" />
             {predecessor.tester}
           </div>
         </div>
         <div className="field">
           <div className="field-label">Desenvolvedor</div>
           <div className="field-value">
-            <span className="avatar-mini">{getInitials(predecessor.dev)}</span>
+            <Avatar name={predecessor.dev} className="avatar-mini" alt="" />
             {predecessor.dev}
           </div>
         </div>

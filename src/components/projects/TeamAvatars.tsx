@@ -1,3 +1,4 @@
+import Avatar from "../common/Avatar";
 import type { TeamMember } from "../../types/project";
 
 interface TeamAvatarsProps {
@@ -29,9 +30,13 @@ export default function TeamAvatars({ team, onOpenTeam }: TeamAvatarsProps) {
       }}
     >
       {visible.map((member) => (
-        <div className="avatar-circle" key={member.initials + member.role}>
-          {member.initials}
-        </div>
+        <Avatar
+          key={member.initials + member.role}
+          name={member.name}
+          personKey={member.id ?? member.email}
+          className="avatar-circle"
+          alt={member.name}
+        />
       ))}
       {remaining > 0 && <div className="avatar-circle">+{remaining}</div>}
     </div>

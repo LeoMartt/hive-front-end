@@ -1,5 +1,5 @@
 import BeeMark from "./BeeMark";
-import { getInitials } from "../../utils/initials";
+import Avatar from "./Avatar";
 
 interface FooterWidgetContentProps {
   userName: string;
@@ -22,7 +22,7 @@ export default function FooterWidgetContent({ userName, userRole }: FooterWidget
           <b>{userName}</b>
           <span>{userRole}</span>
         </div>
-        <div className="footer-widget-avatar">{getInitials(userName)}</div>
+        <Avatar name={userName} personKey="me" className="footer-widget-avatar" alt="" />
       </div>
     </>
   );

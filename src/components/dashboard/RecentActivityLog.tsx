@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import NavIcon from "../common/NavIcon";
+import Avatar from "../common/Avatar";
 import { formatRelativeTime } from "../../utils/formatRelativeTime";
 import type { LogEntry, LogEntryIcon } from "../../types/activityLog";
 
@@ -49,7 +50,7 @@ export default function RecentActivityLog({ entries }: RecentActivityLogProps) {
                 {entry.text}
               </div>
               <div className="log-meta">
-                <span className="avatar-mini">{entry.authorInitials}</span>
+                <Avatar name={entry.authorName} className="avatar-mini" alt="" />
                 {entry.authorName} · {formatRelativeTime(entry.at)}
               </div>
             </div>

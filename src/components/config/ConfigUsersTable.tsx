@@ -3,6 +3,7 @@ import { useProjects } from "../../hooks/useProjects";
 import { groupTeamMembersByName, type GroupedTeamMember } from "../../utils/teamMembers";
 import InviteUserModal from "./InviteUserModal";
 import EditUserRolesModal from "./EditUserRolesModal";
+import Avatar from "../common/Avatar";
 import type { UserRole } from "../../types/project";
 
 interface ConfigUsersTableProps {
@@ -47,7 +48,12 @@ export default function ConfigUsersTable({ projectId }: ConfigUsersTableProps) {
             {groupedMembers.map((member) => (
               <tr key={member.name}>
                 <td>
-                  <span className="avatar-mini">{member.initials}</span>
+                  <Avatar
+                    name={member.name}
+                    personKey={member.id ?? member.email}
+                    className="avatar-mini"
+                    alt=""
+                  />
                   {member.name}
                 </td>
                 <td>
