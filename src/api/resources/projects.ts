@@ -7,7 +7,7 @@ import type { Project } from "../../types/project";
 // no useProjects até existir endpoint para testar (ver ADR 0001, seção 6.3).
 export const projectsApi = {
   async list(): Promise<Project[]> {
-    const { data } = await httpClient.get("/projects");
+    const { data } = await httpClient.get("/projects/");
     return z.array(projectSchema).parse(data);
   },
 };
