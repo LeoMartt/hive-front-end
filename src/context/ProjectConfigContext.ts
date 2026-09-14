@@ -10,6 +10,8 @@ export const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
   spiCritico: 0.75,
   agingUat: { alerta: 2, risco: 6 },
   agingCutover: { alerta: 3, risco: 8 },
+  anexoMaxMb: 10,
+  evidenciaObrigatoriaAtividade: true,
   evidenciaObrigatoriaIssue: true,
 };
 

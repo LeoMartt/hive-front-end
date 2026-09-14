@@ -15,20 +15,20 @@ export function deriveActivityAuditTrail(activity: Activity): ActivityAuditEntry
   const entries: ActivityAuditEntry[] = [];
 
   if (activity.status === "concluido" && activity.actualEnd !== null) {
-    entries.push({ at: activity.actualEnd, text: "Em execução → Concluído" });
+    entries.push({ at: activity.actualEnd, text: "Liberado → Concluído" });
   }
 
   if (activity.retestCount > 0) {
     entries.push({
       at: activity.rejectedAt ?? activity.actualStart ?? activity.plannedStart,
-      text: `Em execução → Bloqueado (${activity.retestCount}ª rejeição)`,
+      text: `Liberado → Bloqueado (${activity.retestCount}ª rejeição)`,
     });
   }
 
   if (activity.actualStart !== null) {
-    entries.push({ at: activity.actualStart, text: "Aguardando → Em execução" });
+    entries.push({ at: activity.actualStart, text: "Início real registrado" });
   } else {
-    entries.push({ at: activity.plannedStart, text: "Aguardando início" });
+    entries.push({ at: activity.plannedStart, text: "Atividade planejada" });
   }
 
   return entries.sort((a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0));

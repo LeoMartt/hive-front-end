@@ -21,7 +21,7 @@ export default function ProjectDashboardPage() {
   const { activities, stats } = useActivities(projectId);
   const { issues, stats: issueStats } = useIssues(projectId);
   const logEntries = useActivityLog(projectId);
-  const curvaS = useCurvaSData();
+  const curvaS = useCurvaSData(activities);
 
   const spi = useMemo(() => computeSpi(activities), [activities]);
   const indicators = useMemo(() => computeIndicators(activities), [activities]);

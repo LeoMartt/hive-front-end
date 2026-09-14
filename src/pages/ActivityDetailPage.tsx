@@ -11,24 +11,43 @@ import ConcludeActivityModal from "../components/activities/ConcludeActivityModa
 import { useActivities } from "../hooks/useActivities";
 import { useIssues } from "../hooks/useIssues";
 import { useProjects } from "../hooks/useProjects";
+import { useCurrentUser } from "../hooks/useCurrentUser";
+import { useMocks } from "../config/env";
 import { useGoBack } from "../hooks/useGoBack";
 import { retestPillClass } from "../utils/activityIndicators";
 import { deriveActivityAuditTrail } from "../utils/activityAuditTrail";
 
-const CURRENT_USER_NAME = "Guilherme Fabretti";
-
 export default function ActivityDetailPage() {
   const { id, activityId } = useParams();
   const projectId = id ?? "";
-  const { activities, concludeActivity, rejectActivity } = useActivities(projectId);
+  const { activities, loading, error, concludeActivity, rejectActivity } = useActivities(projectId);
   const { issues, createIssue, resolveIssuesForActivity } = useIssues(projectId);
   const { projects } = useProjects();
+  const { name: currentUserName } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === projectId);
   const activity = activities.find((item) => item.id === activityId);
   const goBack = useGoBack(`/projetos/${projectId}/atividades`);
   const [showRegisterIssueModal, setShowRegisterIssueModal] = useState(false);
   const [registerIssueMode, setRegisterIssueMode] = useState<"register" | "reject">("register");
   const [showConcludeModal, setShowConcludeModal] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="empty-state">
+        <div className="empty-title">Carregando atividade</div>
+        <div className="empty-desc">Buscando os dados atualizados no backend.</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="empty-state">
+        <div className="empty-title">Erro ao carregar atividade</div>
+        <div className="empty-desc">{error.message}</div>
+      </div>
+    );
+  }
 
   if (!activity) {
     return (
@@ -94,7 +113,7 @@ export default function ActivityDetailPage() {
               Registrar nova issue
             </button>
           )}
-          {(activity.status === "execucao" || activity.status === "liberado") && (
+          {activity.status === "liberado" && (
             <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
               <button
                 type="button"
@@ -140,12 +159,13 @@ export default function ActivityDetailPage() {
         team={currentProject?.team ?? []}
         activities={activities}
         currentActivity={activity}
-        currentUserName={CURRENT_USER_NAME}
+        currentUserName={currentUserName}
         submitLabel={registerIssueMode === "reject" ? "Reprovar e criar issue" : "Criar"}
         title={registerIssueMode === "reject" ? "Rejeitar atividade" : "Registrar issue"}
+        forceImpeditiva={registerIssueMode === "reject"}
         onCreate={(input) => {
           createIssue(input);
-          if (registerIssueMode === "reject") {
+          if (registerIssueMode === "reject" && useMocks) {
             rejectActivity(activity.id, { reason: input.description, evidence: input.openingAttachment });
           }
         }}
@@ -154,7 +174,7 @@ export default function ActivityDetailPage() {
       <ConcludeActivityModal
         show={showConcludeModal}
         onHide={() => setShowConcludeModal(false)}
-        currentUserName={CURRENT_USER_NAME}
+        currentUserName={currentUserName}
         onSubmit={(input) => {
           concludeActivity(activity.id, input);
           resolveIssuesForActivity(activity.id);

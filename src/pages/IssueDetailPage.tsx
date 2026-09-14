@@ -7,16 +7,16 @@ import IssueAttachmentsPanel from "../components/issues/IssueAttachmentsPanel";
 import ProposeSolutionModal from "../components/issues/ProposeSolutionModal";
 import { useIssues } from "../hooks/useIssues";
 import { useActivities } from "../hooks/useActivities";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useGoBack } from "../hooks/useGoBack";
 import { deriveIssueAuditTrail } from "../utils/issueAuditTrail";
-
-const CURRENT_USER_NAME = "Guilherme Fabretti";
 
 export default function IssueDetailPage() {
   const { id, issueId } = useParams();
   const projectId = id ?? "";
-  const { issues, startAnalysis, proposeSolution } = useIssues(projectId);
+  const { issues, startAnalysis, proposeSolution, cancelIssue } = useIssues(projectId);
   const { activities } = useActivities(projectId);
+  const { name: currentUserName } = useCurrentUser();
   const issue = issues.find((item) => item.id === issueId);
   const goBack = useGoBack(`/projetos/${projectId}/issues`);
   const [showProposeSolutionModal, setShowProposeSolutionModal] = useState(false);
@@ -32,8 +32,7 @@ export default function IssueDetailPage() {
     );
   }
 
-  const relatedActivity =
-    issue.relatedActivityId !== null ? (activities.find((item) => item.id === issue.relatedActivityId) ?? null) : null;
+  const relatedActivity = activities.find((item) => item.id === issue.relatedActivityId) ?? null;
   const auditEntries = deriveIssueAuditTrail(issue);
 
   return (
@@ -85,6 +84,16 @@ export default function IssueDetailPage() {
               Propor solução
             </button>
           )}
+          {issue.status !== "concluida" && issue.status !== "cancelada" && (
+            <button
+              type="button"
+              className="btn btn-danger"
+              style={{ width: "100%", justifyContent: "center", marginBottom: 20 }}
+              onClick={() => cancelIssue(issue.id)}
+            >
+              Cancelar issue
+            </button>
+          )}
 
           <IssueFieldGrid issue={issue} />
           <IssueAuditTrail entries={auditEntries} />
@@ -98,7 +107,7 @@ export default function IssueDetailPage() {
       <ProposeSolutionModal
         show={showProposeSolutionModal}
         onHide={() => setShowProposeSolutionModal(false)}
-        currentUserName={CURRENT_USER_NAME}
+        currentUserName={currentUserName}
         onSubmit={(input) => proposeSolution(issue.id, input)}
       />
     </div>

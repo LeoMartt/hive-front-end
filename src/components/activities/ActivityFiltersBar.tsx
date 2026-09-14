@@ -14,7 +14,6 @@ interface ActivityFiltersBarProps {
 const ALL_STATUSES: ActivityStatus[] = [
   "aguardando",
   "liberado",
-  "execucao",
   "bloqueado",
   "concluido",
   "cancelado",

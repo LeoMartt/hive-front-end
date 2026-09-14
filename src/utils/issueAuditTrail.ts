@@ -10,7 +10,9 @@ export interface IssueAuditEntry {
 export function deriveIssueAuditTrail(issue: Issue): IssueAuditEntry[] {
   const entries: IssueAuditEntry[] = [];
 
-  if (issue.status === "concluida" && issue.resolvedAt !== null) {
+  if (issue.status === "cancelada" && issue.resolvedAt !== null) {
+    entries.push({ at: issue.resolvedAt, text: "Issue cancelada" });
+  } else if (issue.status === "concluida" && issue.resolvedAt !== null) {
     entries.push({ at: issue.resolvedAt, text: "Solução proposta → Concluída (atividade vinculada aprovada)" });
   }
 

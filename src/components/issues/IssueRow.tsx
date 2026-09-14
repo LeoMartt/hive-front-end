@@ -57,7 +57,7 @@ export default function IssueRow({ issue, projectId, agingThresholds }: IssueRow
         </span>
       </td>
       <td className="mono issue-cell-emphasis">
-        {issue.relatedActivityId ?? "—"}
+        {issue.relatedActivityId}
         {issue.cascadeActivityIds.length > 0 && (
           <span
             className="cascata-tag"

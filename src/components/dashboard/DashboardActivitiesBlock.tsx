@@ -55,7 +55,7 @@ export default function DashboardActivitiesBlock({ activities, stats, spi }: Das
         <div className="spi-hero">
           <div className="stat-label">SPI do projeto</div>
           <div className={`spi-big${spiToneClass}`}>{spi === null ? "—" : spi.toFixed(2)}</div>
-          <div className="stat-sub">Fixed Formula 0/50/100</div>
+          <div className="stat-sub">Fixed Formula 0/100</div>
         </div>
         <div className="stat-grid-compact">
           <StatCard label="Total" value={String(stats.total)} sub="atividades" />
@@ -65,7 +65,7 @@ export default function DashboardActivitiesBlock({ activities, stats, spi }: Das
             sub={`${percentOf(stats.concluido, stats.total)}% do total`}
             tone="g"
           />
-          <StatCard label="Em execução" value={String(stats.execucao)} sub="50% de peso no SPI" tone="y" />
+          <StatCard label="Liberadas" value={String(stats.liberado)} sub="prontas para execução" tone="y" />
           <StatCard label="Bloqueado" value={String(stats.bloqueado)} sub="aguardando reteste" tone="r" />
           <StatCard label="Aguardando" value={String(stats.aguardando)} sub="predecessor pendente" />
           <StatCard label="Atrasado" value={String(stats.atrasado)} sub="vs. data planejada" tone="r" />

@@ -10,7 +10,7 @@ interface IssuesKpiCardsProps {
 
 export default function IssuesKpiCards({ issues, projectId }: IssuesKpiCardsProps) {
   const agingThresholds = useProjectAgingThresholds(projectId);
-  const abertas = issues.filter((issue) => issue.status !== "concluida");
+  const abertas = issues.filter((issue) => issue.status !== "concluida" && issue.status !== "cancelada");
   const impeditivasAbertas = abertas.filter((issue) => issue.impeditiva);
   const emRisco = abertas.filter((issue) => computeIssueRisk(issue, agingThresholds) === "risco");
   const somaAging = abertas.reduce((sum, issue) => sum + computeIssueAgingDays(issue), 0);

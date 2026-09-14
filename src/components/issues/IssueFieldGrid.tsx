@@ -40,7 +40,7 @@ export default function IssueFieldGrid({ issue }: IssueFieldGridProps) {
 
       <div className="field">
         <div className="field-label">Atividade vinculada</div>
-        <div className="field-value mono">{issue.relatedActivityId ?? "—"}</div>
+        <div className="field-value mono">{issue.relatedActivityId}</div>
       </div>
       <div className="field">
         <div className="field-label">Categorização de impacto</div>

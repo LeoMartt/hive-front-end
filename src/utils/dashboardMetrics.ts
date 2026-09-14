@@ -2,14 +2,13 @@ import type { Activity, ActivityStatus } from "../types/activity";
 
 const SPI_WEIGHT: Record<ActivityStatus, number> = {
   concluido: 100,
-  execucao: 50,
   aguardando: 0,
   liberado: 0,
   bloqueado: 0,
   cancelado: 0,
 };
 
-// SPI = média dos pesos por status (0/50/100), atividades canceladas saem do denominador.
+// SPI = média dos pesos por status (0/100), atividades canceladas saem do denominador.
 export function computeSpi(activities: Activity[]): number | null {
   const scored = activities.filter((activity) => activity.status !== "cancelado");
   if (scored.length === 0) return null;

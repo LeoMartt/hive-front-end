@@ -2,21 +2,23 @@ import { useState } from "react";
 import Modal from "../common/Modal";
 import { toLocalIsoString } from "../../utils/activityIndicators";
 import type { NewActivityInput } from "../../types/activity";
-import type { TeamMember } from "../../types/project";
+import type { HierarchyNode, ProjectMode, TeamMember } from "../../types/project";
 
 interface NewActivityModalProps {
   show: boolean;
   onHide: () => void;
   team: TeamMember[];
+  hierarchyNodes: HierarchyNode[];
+  projectMode: ProjectMode | null;
   onCreate: (input: NewActivityInput) => void;
 }
 
 interface NewActivityFormState {
   name: string;
-  module: string;
-  process: string;
-  tester: string;
-  dev: string;
+  moduleNodeId: string;
+  processNodeId: string;
+  testerId: string;
+  developerId: string;
   plannedStart: string;
   plannedEnd: string;
   predecessors: string;
@@ -32,10 +34,10 @@ interface NewActivityFormState {
 function createEmptyState(): NewActivityFormState {
   return {
     name: "",
-    module: "",
-    process: "",
-    tester: "",
-    dev: "",
+    moduleNodeId: "",
+    processNodeId: "",
+    testerId: "",
+    developerId: "",
     plannedStart: "",
     plannedEnd: "",
     predecessors: "",
@@ -57,19 +59,14 @@ function dateInputToIso(value: string): string {
   return toLocalIsoString(new Date(year, month - 1, day));
 }
 
-type RequiredFieldKey = "name" | "module" | "process" | "tester" | "dev" | "plannedStart" | "plannedEnd";
-
-const REQUIRED_FIELDS: { key: RequiredFieldKey; label: string }[] = [
-  { key: "name", label: "Nome da atividade" },
-  { key: "module", label: "Módulo" },
-  { key: "process", label: "Processo" },
-  { key: "tester", label: "Tester" },
-  { key: "dev", label: "Desenvolvedor" },
-  { key: "plannedStart", label: "Início planejado" },
-  { key: "plannedEnd", label: "Conclusão planejada" },
-];
-
-export default function NewActivityModal({ show, onHide, team, onCreate }: NewActivityModalProps) {
+export default function NewActivityModal({
+  show,
+  onHide,
+  team,
+  hierarchyNodes,
+  projectMode,
+  onCreate,
+}: NewActivityModalProps) {
   const [state, setState] = useState<NewActivityFormState>(createEmptyState);
 
   function resetAndHide() {
@@ -82,7 +79,21 @@ export default function NewActivityModal({ show, onHide, team, onCreate }: NewAc
   }
 
   function handleConfirm() {
-    const missing = REQUIRED_FIELDS.filter(({ key }) => !state[key].trim()).map(({ label }) => label);
+    const selectedModule = hierarchyNodes.find((node) => node.id === state.moduleNodeId) ?? null;
+    const selectedProcess = hierarchyNodes.find((node) => node.id === state.processNodeId) ?? null;
+    const selectedTester = team.find((member) => member.id === state.testerId) ?? null;
+    const selectedDeveloper = team.find((member) => member.id === state.developerId) ?? null;
+    const selectedNode = projectMode === "cutover" ? selectedModule : selectedProcess;
+
+    const missing: string[] = [];
+    if (!state.name.trim()) missing.push("Nome da atividade");
+    if (!selectedModule) missing.push("Módulo");
+    if (projectMode === "uat" && !selectedProcess) missing.push("Processo");
+    if (!selectedTester?.id) missing.push("Tester");
+    if (!selectedDeveloper?.id) missing.push("Desenvolvedor");
+    if (!state.plannedStart.trim()) missing.push("Início planejado");
+    if (!state.plannedEnd.trim()) missing.push("Conclusão planejada");
+
     if (missing.length > 0) {
       setState((prev) => ({ ...prev, errorMsg: `Preencha os campos obrigatórios: ${missing.join(", ")}.` }));
       return;
@@ -90,10 +101,13 @@ export default function NewActivityModal({ show, onHide, team, onCreate }: NewAc
 
     onCreate({
       name: state.name.trim(),
-      module: state.module.trim(),
-      process: state.process.trim(),
-      tester: state.tester,
-      dev: state.dev,
+      nodeId: selectedNode?.id,
+      module: selectedModule?.name ?? "",
+      process: selectedProcess?.name ?? "",
+      testerId: selectedTester?.id,
+      tester: selectedTester?.name ?? "",
+      developerId: selectedDeveloper?.id,
+      dev: selectedDeveloper?.name ?? "",
       plannedStart: dateInputToIso(state.plannedStart),
       plannedEnd: dateInputToIso(state.plannedEnd),
       predecessors: state.predecessors
@@ -112,6 +126,8 @@ export default function NewActivityModal({ show, onHide, team, onCreate }: NewAc
 
   const testers = team.filter((member) => member.role === "Tester");
   const devs = team.filter((member) => member.role === "Desenvolvedor");
+  const modules = hierarchyNodes.filter((node) => node.level === 1);
+  const processes = hierarchyNodes.filter((node) => node.level === 2 && node.parentId === state.moduleNodeId);
 
   return (
     <Modal open={show} onClose={resetAndHide} wide labelledBy="new-activity-modal-title">
@@ -143,27 +159,47 @@ export default function NewActivityModal({ show, onHide, team, onCreate }: NewAc
           <label className="form-label" htmlFor="new-activity-module">
             Módulo
           </label>
-          <input
+          <select
             className="form-input"
-            type="text"
             id="new-activity-module"
-            placeholder="Ex: Faturamento"
-            value={state.module}
-            onChange={(event) => updateField("module", event.target.value)}
-          />
+            value={state.moduleNodeId}
+            onChange={(event) => {
+              updateField("moduleNodeId", event.target.value);
+              updateField("processNodeId", "");
+            }}
+          >
+            <option value="">Selecione…</option>
+            {modules.map((node) => (
+              <option key={node.id} value={node.id}>
+                {node.name}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="new-activity-process">
             Processo
           </label>
-          <input
+          <select
             className="form-input"
-            type="text"
             id="new-activity-process"
-            placeholder="Ex: Apuração de ICMS"
-            value={state.process}
-            onChange={(event) => updateField("process", event.target.value)}
-          />
+            value={state.processNodeId}
+            onChange={(event) => updateField("processNodeId", event.target.value)}
+            disabled={projectMode === "cutover" || !state.moduleNodeId}
+          >
+            {projectMode === "cutover" ? (
+              <option value="">Cutover usa apenas módulo</option>
+            ) : (
+              <>
+                <option value="">Selecione…</option>
+                {processes.map((node) => (
+                  <option key={node.id} value={node.id}>
+                    {node.name}
+                  </option>
+                ))}
+              </>
+            )}
+          </select>
         </div>
       </div>
 
@@ -176,8 +212,8 @@ export default function NewActivityModal({ show, onHide, team, onCreate }: NewAc
             className="form-input"
             id="new-activity-tester"
             aria-label="Tester"
-            value={state.tester}
-            onChange={(event) => updateField("tester", event.target.value)}
+            value={state.testerId}
+            onChange={(event) => updateField("testerId", event.target.value)}
           >
             {testers.length === 0 ? (
               <option value="" disabled>
@@ -187,7 +223,7 @@ export default function NewActivityModal({ show, onHide, team, onCreate }: NewAc
               <>
                 <option value="">Selecione…</option>
                 {testers.map((member) => (
-                  <option key={member.name} value={member.name}>
+                  <option key={`${member.id ?? member.name}-tester`} value={member.id ?? ""}>
                     {member.name}
                   </option>
                 ))}
@@ -203,8 +239,8 @@ export default function NewActivityModal({ show, onHide, team, onCreate }: NewAc
             className="form-input"
             id="new-activity-dev"
             aria-label="Desenvolvedor"
-            value={state.dev}
-            onChange={(event) => updateField("dev", event.target.value)}
+            value={state.developerId}
+            onChange={(event) => updateField("developerId", event.target.value)}
           >
             {devs.length === 0 ? (
               <option value="" disabled>
@@ -214,7 +250,7 @@ export default function NewActivityModal({ show, onHide, team, onCreate }: NewAc
               <>
                 <option value="">Selecione…</option>
                 {devs.map((member) => (
-                  <option key={member.name} value={member.name}>
+                  <option key={`${member.id ?? member.name}-dev`} value={member.id ?? ""}>
                     {member.name}
                   </option>
                 ))}

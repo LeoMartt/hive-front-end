@@ -3,7 +3,6 @@ import type { Activity, ActivityStatus } from "../types/activity";
 export const ACTIVITY_STATUS_LABELS: Record<ActivityStatus, string> = {
   aguardando: "Aguardando",
   liberado: "Liberado",
-  execucao: "Em execução",
   bloqueado: "Bloqueado",
   concluido: "Concluído",
   cancelado: "Cancelado",
@@ -12,7 +11,6 @@ export const ACTIVITY_STATUS_LABELS: Record<ActivityStatus, string> = {
 export const ACTIVITY_STATUS_BADGE_CLASS: Record<ActivityStatus, string> = {
   aguardando: "activity-badge-aguardando",
   liberado: "activity-badge-liberado",
-  execucao: "activity-badge-execucao",
   bloqueado: "activity-badge-bloqueado",
   concluido: "activity-badge-concluido",
   cancelado: "activity-badge-cancelado",
@@ -61,14 +59,14 @@ export function computeGroupRollup(activities: Activity[]): GroupRollup {
 // Atividades elegíveis para seleção em massa (aprovar e/ou cancelar) na lista de
 // Atividades. "concluido" e "cancelado" ficam de fora — não há ação em massa que
 // faça sentido sobre elas, então nem exibem checkbox de seleção.
-const BULK_SELECTABLE_STATUSES: ActivityStatus[] = ["aguardando", "liberado", "execucao", "bloqueado"];
+const BULK_SELECTABLE_STATUSES: ActivityStatus[] = ["aguardando", "liberado", "bloqueado"];
 
 export function isBulkSelectable(activity: Activity): boolean {
   return BULK_SELECTABLE_STATUSES.includes(activity.status);
 }
 
-// Das atividades elegíveis para seleção, só "liberado" e "execucao" podem ser
-// aprovadas em massa (mesma regra do fluxo de aprovação individual).
+// Das atividades elegíveis para seleção, só "liberado" pode ser aprovada em massa
+// (mesma regra do fluxo de aprovação individual).
 export function isBulkApprovable(activity: Activity): boolean {
-  return activity.status === "liberado" || activity.status === "execucao";
+  return activity.status === "liberado";
 }

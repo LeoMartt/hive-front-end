@@ -161,6 +161,14 @@ export function useProjects(): UseProjectsResult {
   }, [projects]);
 
   function createProject(input: NewProjectInput): void {
+    if (!useMocks) {
+      void projectsApi.create(input).then(
+        (createdProject) => setProjects((prev) => [createdProject, ...prev]),
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     const team = input.team.length > 0 ? input.team : [CURRENT_USER_TEAM_MEMBER];
     const newProject: Project = {
       id: `project-${Date.now()}`,
@@ -181,6 +189,19 @@ export function useProjects(): UseProjectsResult {
   // checagem de duplicidade vive na camada de UI (InviteUserModal), que já tem o
   // project.team completo para comparar contra.
   function addTeamMember(projectId: string, member: TeamMember): void {
+    if (!useMocks) {
+      void projectsApi.addMembership(projectId, member).then(
+        (createdMember) =>
+          setProjects((prev) =>
+            prev.map((project) =>
+              project.id === projectId ? { ...project, team: [...project.team, createdMember] } : project,
+            ),
+          ),
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     setProjects((prev) =>
       prev.map((project) => (project.id === projectId ? { ...project, team: [...project.team, member] } : project))
     );
@@ -194,6 +215,52 @@ export function useProjects(): UseProjectsResult {
   // ocorrência do nome (não são anexadas ao final) — senão editar os papéis de alguém
   // jogaria a linha dele pro fim da tabela de usuários.
   function replaceTeamMemberRoles(projectId: string, memberName: string, roles: UserRole[]): void {
+    if (!useMocks) {
+      const project = projects.find((item) => item.id === projectId);
+      if (!project) return;
+
+      const existingEntries = project.team.filter((member) => member.name === memberName);
+      const existingRoles = new Set(existingEntries.map((member) => member.role));
+      const desiredRoles = new Set(roles);
+      const baseMember = existingEntries[0];
+      if (!baseMember) return;
+
+      const membershipsToRemove = existingEntries.filter(
+        (member) => !desiredRoles.has(member.role) && member.membershipId,
+      );
+      const rolesToAdd = roles.filter((role) => !existingRoles.has(role));
+
+      void Promise.all([
+        ...membershipsToRemove.map((member) => projectsApi.removeMembership(projectId, member.membershipId as string)),
+        ...rolesToAdd.map((role) =>
+          projectsApi.addMembership(projectId, {
+            id: baseMember.id,
+            initials: baseMember.initials,
+            name: baseMember.name,
+            email: baseMember.email,
+            role,
+          }),
+        ),
+      ]).then(
+        (results) => {
+          const createdMembers = results.filter((result): result is TeamMember => Boolean(result));
+          setProjects((prev) =>
+            prev.map((item) => {
+              if (item.id !== projectId) return item;
+              const keptMembers = item.team.filter(
+                (member) =>
+                  member.name !== memberName ||
+                  (desiredRoles.has(member.role) && !membershipsToRemove.some((removed) => removed.membershipId === member.membershipId)),
+              );
+              return { ...item, team: [...keptMembers, ...createdMembers] };
+            }),
+          );
+        },
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     setProjects((prev) =>
       prev.map((project) => {
         if (project.id !== projectId) return project;

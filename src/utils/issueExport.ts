@@ -13,7 +13,7 @@ export function buildIssueExportRows(issues: Issue[]): Record<string, string>[] 
     Impeditivo: issue.impeditiva ? "Sim" : "Não",
     Área: issue.area,
     Descrição: issue.description,
-    "Atividade vinculada": issue.relatedActivityId ?? "—",
+    "Atividade vinculada": issue.relatedActivityId,
     Tester: issue.tester,
     Desenvolvedor: issue.dev,
     Status: ISSUE_STATUS_LABELS[issue.status],

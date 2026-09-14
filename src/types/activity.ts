@@ -1,7 +1,6 @@
 export type ActivityStatus =
   | "aguardando"
   | "liberado"
-  | "execucao"
   | "bloqueado"
   | "concluido"
   | "cancelado";
@@ -19,7 +18,9 @@ export interface Activity {
   status: ActivityStatus;
   module: string;
   process: string;
+  testerId?: string;
   tester: string;
+  developerId?: string;
   dev: string;
   plannedStart: string;
   plannedEnd: string;
@@ -42,9 +43,12 @@ export interface Activity {
 
 export interface NewActivityInput {
   name: string;
+  nodeId?: string;
   module: string;
   process: string;
+  testerId?: string;
   tester: string;
+  developerId?: string;
   dev: string;
   plannedStart: string;
   plannedEnd: string;
@@ -70,7 +74,7 @@ export interface RejectActivityInput {
 export interface ActivityStats {
   total: number;
   concluido: number;
-  execucao: number;
+  liberado: number;
   bloqueado: number;
   aguardando: number;
   atrasado: number;

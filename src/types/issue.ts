@@ -1,4 +1,4 @@
-export type IssueStatus = "aberta" | "em_analise" | "solucao_proposta" | "concluida";
+export type IssueStatus = "aberta" | "em_analise" | "solucao_proposta" | "concluida" | "cancelada";
 export type IssueType = "requisito" | "performance" | "dados" | "integracao" | "interface" | "configuracao" | "outro";
 export type IssueImpact = "muito_alto" | "alto" | "medio" | "baixo";
 
@@ -19,7 +19,7 @@ export interface Issue {
   area: string;
   tester: string;
   dev: string;
-  relatedActivityId: string | null;
+  relatedActivityId: string;
   cascadeActivityIds: string[];
   openedAt: string;
   resolvedAt: string | null;
@@ -57,6 +57,7 @@ export interface IssueStats {
   emAnalise: number;
   solucaoProposta: number;
   concluidas: number;
+  canceladas: number;
   impeditivasAbertas: number;
   tempoMedioResolucaoDias: number | null;
 }

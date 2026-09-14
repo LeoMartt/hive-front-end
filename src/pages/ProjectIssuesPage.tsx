@@ -9,11 +9,10 @@ import { useIssues } from "../hooks/useIssues";
 import { useActivities } from "../hooks/useActivities";
 import { useExportButton } from "../hooks/useExportButton";
 import { useProjects } from "../hooks/useProjects";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 import { sortIssuesByPriority } from "../utils/issueIndicators";
 import { buildIssueExportRows, ISSUE_EXPORT_COLUMN_WIDTHS } from "../utils/issueExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
-
-const CURRENT_USER_NAME = "Guilherme Fabretti";
 
 export default function ProjectIssuesPage() {
   const { id } = useParams();
@@ -21,6 +20,7 @@ export default function ProjectIssuesPage() {
   const { issues, createIssue } = useIssues(projectId);
   const { activities } = useActivities(projectId);
   const { projects } = useProjects();
+  const { name: currentUserName } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === projectId);
 
   const [statusFilter, setStatusFilter] = useState<IssueStatusFilter>("todas");
@@ -33,11 +33,11 @@ export default function ProjectIssuesPage() {
   const filteredIssues = useMemo(() => {
     return orderedIssues.filter((issue) => {
       if (statusFilter !== "todas" && issue.status !== statusFilter) return false;
-      if (openedByMe && issue.tester !== CURRENT_USER_NAME) return false;
-      if (assignedToMe && issue.dev !== CURRENT_USER_NAME) return false;
+      if (openedByMe && issue.tester !== currentUserName) return false;
+      if (assignedToMe && issue.dev !== currentUserName) return false;
       return true;
     });
-  }, [orderedIssues, statusFilter, openedByMe, assignedToMe]);
+  }, [orderedIssues, statusFilter, openedByMe, assignedToMe, currentUserName]);
 
   const {
     label: exportIssuesLabel,
@@ -54,6 +54,7 @@ export default function ProjectIssuesPage() {
       em_analise: 0,
       solucao_proposta: 0,
       concluida: 0,
+      cancelada: 0,
     };
     for (const issue of issues) {
       counts[issue.status] += 1;
@@ -135,7 +136,7 @@ export default function ProjectIssuesPage() {
         onHide={() => setShowRegisterIssueModal(false)}
         team={currentProject?.team ?? []}
         activities={activities}
-        currentUserName={CURRENT_USER_NAME}
+        currentUserName={currentUserName}
         onCreate={createIssue}
       />
     </div>
