@@ -1,6 +1,6 @@
 @use "colors" as c;
 
-// Badges de status de atividade — texto normal (Em execução), não maiúsculo, igual ao mockup
+// Badges de status de atividade — texto normal, não maiúsculo, igual ao mockup
 .activity-badge {
   font-size: 9.5px;
   font-weight: 700;
@@ -27,7 +27,7 @@
   background-color: c.$yellow-soft;
   color: c.$yellow-deep;
 }
-.activity-badge-execucao {
+.role-badge-gestor {
   background-color: c.$blue-soft;
   color: c.$blue;
 }

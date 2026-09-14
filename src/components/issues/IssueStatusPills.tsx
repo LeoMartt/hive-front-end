@@ -9,6 +9,7 @@ const PILLS: { key: IssueStatusFilter; label: string }[] = [
   { key: "em_analise", label: ISSUE_STATUS_LABELS.em_analise },
   { key: "solucao_proposta", label: ISSUE_STATUS_LABELS.solucao_proposta },
   { key: "concluida", label: ISSUE_STATUS_LABELS.concluida },
+  { key: "cancelada", label: ISSUE_STATUS_LABELS.cancelada },
 ];
 
 interface IssueStatusPillsProps {

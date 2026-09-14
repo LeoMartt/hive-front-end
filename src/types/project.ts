@@ -1,6 +1,7 @@
 export type ProjectMode = "uat" | "cutover";
 export type UserRole = "Gestor de Projetos" | "Tester" | "Desenvolvedor";
 export interface TeamMember {
+  membershipId?: string;
   id?: string;
   initials: string;
   name: string;
@@ -18,6 +19,14 @@ export interface Project {
   spi: number | null;
   team: TeamMember[];
   updatedAt: string;
+  description?: string;
+  agingAlertaDias?: number;
+  agingRiscoDias?: number;
+  spiSaudavel?: number;
+  spiCritico?: number;
+  anexoMaxMb?: number;
+  exigirEvidenciaAtividade?: boolean;
+  exigirEvidenciaIssue?: boolean;
 }
 export interface ProjectStats {
   total: number;
@@ -31,4 +40,13 @@ export interface NewProjectInput {
   mode: ProjectMode;
   hierarchyLevels: string[];
   team: TeamMember[];
+}
+
+export interface HierarchyNode {
+  id: string;
+  parentId: string | null;
+  level: 1 | 2;
+  name: string;
+  order: number | null;
+  createdAt: string;
 }

@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface PermissionRow {
   action: string;
   gestor: boolean;
@@ -20,31 +18,14 @@ const PERMISSION_ROWS: PermissionRow[] = [
   { action: "Convidar usuário", gestor: true, tester: false, dev: false },
 ];
 
-type PermissionRole = "gestor" | "tester" | "dev";
-
 export default function ConfigPermissionMatrix() {
-  const [rows, setRows] = useState<PermissionRow[]>(PERMISSION_ROWS);
-  const [saved, setSaved] = useState(false);
-
-  function toggleCell(action: string, role: PermissionRole) {
-    setRows((prev) =>
-      prev.map((row) => (row.action === action ? { ...row, [role]: !row[role] } : row))
-    );
-    setSaved(false);
-  }
-
-  function handleSave() {
-    setSaved(true);
-  }
-
   return (
     <div className="panel">
       <div className="panel-head">
         <div className="panel-title">Matriz de Permissões por Papel</div>
       </div>
       <div className="page-desc" style={{ marginBottom: 16 }}>
-        Referência para quando a diferenciação por papel for reativada. Hoje todas as ações estão disponíveis a
-        qualquer papel — esta matriz não é aplicada de verdade ainda.
+        Referência das permissões atuais. A edição desta matriz será definida depois com o time.
       </div>
       <div className="table-wrap">
         <table>
@@ -57,14 +38,15 @@ export default function ConfigPermissionMatrix() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
+            {PERMISSION_ROWS.map((row) => (
               <tr key={row.action}>
                 <td>{row.action}</td>
                 <td style={{ textAlign: "center" }}>
                   <input
                     type="checkbox"
                     checked={row.gestor}
-                    onChange={() => toggleCell(row.action, "gestor")}
+                    disabled
+                    readOnly
                     aria-label={`${row.action} — Gestor`}
                   />
                 </td>
@@ -72,7 +54,8 @@ export default function ConfigPermissionMatrix() {
                   <input
                     type="checkbox"
                     checked={row.tester}
-                    onChange={() => toggleCell(row.action, "tester")}
+                    disabled
+                    readOnly
                     aria-label={`${row.action} — Tester`}
                   />
                 </td>
@@ -80,7 +63,8 @@ export default function ConfigPermissionMatrix() {
                   <input
                     type="checkbox"
                     checked={row.dev}
-                    onChange={() => toggleCell(row.action, "dev")}
+                    disabled
+                    readOnly
                     aria-label={`${row.action} — Dev`}
                   />
                 </td>
@@ -89,14 +73,6 @@ export default function ConfigPermissionMatrix() {
           </tbody>
         </table>
       </div>
-      <button type="button" className="btn btn-primary btn-sm" style={{ marginTop: 14 }} onClick={handleSave}>
-        Salvar matriz
-      </button>
-      {saved && (
-        <span className="saved-msg" style={{ marginLeft: 10 }}>
-          Matriz salva ✓
-        </span>
-      )}
     </div>
   );
 }

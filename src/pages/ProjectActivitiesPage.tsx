@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router";
 import ActivityStatChips, { type ActivityStatChipKey } from "../components/activities/ActivityStatChips";
 import ActivityFiltersBar from "../components/activities/ActivityFiltersBar";
@@ -10,13 +10,16 @@ import NavIcon from "../components/common/NavIcon";
 import { useActivities } from "../hooks/useActivities";
 import { useExportButton } from "../hooks/useExportButton";
 import { useProjects } from "../hooks/useProjects";
+import { useCurrentUser } from "../hooks/useCurrentUser";
+import { ApiError, normalizeError } from "../api/apiError";
+import { hierarchyApi } from "../api/resources/hierarchy";
+import { useMocks } from "../config/env";
 import { filterActivities } from "../utils/filterActivities";
 import { groupByModuleProcess } from "../utils/groupActivities";
 import { buildActivityExportRows, ACTIVITY_EXPORT_COLUMN_WIDTHS } from "../utils/activityExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
 import type { ActivityFiltersState, ActivityGroupMode, NewActivityInput } from "../types/activity";
-
-const CURRENT_USER_NAME = "Guilherme Fabretti";
+import type { HierarchyNode } from "../types/project";
 
 function createEmptyFilters(): ActivityFiltersState {
   return {
@@ -38,9 +41,29 @@ function createEmptyFilters(): ActivityFiltersState {
 export default function ProjectActivitiesPage() {
   const { id } = useParams();
   const projectId = id ?? "";
-  const { activities, stats, createActivity, bulkConcludeActivities, cancelActivities } = useActivities(projectId);
+  const { activities, stats, loading, error, createActivity, bulkConcludeActivities, cancelActivities } =
+    useActivities(projectId);
   const { projects } = useProjects();
+  const { name: currentUserName } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === projectId);
+  const [hierarchyNodes, setHierarchyNodes] = useState<HierarchyNode[]>([]);
+  const [hierarchyError, setHierarchyError] = useState<ApiError | null>(null);
+
+  useEffect(() => {
+    if (useMocks || !projectId) return;
+    let cancelled = false;
+    hierarchyApi
+      .list(projectId)
+      .then((nodes) => {
+        if (!cancelled) setHierarchyNodes(nodes);
+      })
+      .catch((err) => {
+        if (!cancelled) setHierarchyError(err instanceof ApiError ? err : normalizeError(err));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
 
   const [filters, setFilters] = useState<ActivityFiltersState>(createEmptyFilters);
   const [showNewActivityModal, setShowNewActivityModal] = useState(false);
@@ -62,8 +85,8 @@ export default function ProjectActivitiesPage() {
   }
 
   const filteredActivities = useMemo(
-    () => filterActivities(activities, filters, CURRENT_USER_NAME),
-    [activities, filters]
+    () => filterActivities(activities, filters, currentUserName),
+    [activities, filters, currentUserName]
   );
 
   const {
@@ -185,6 +208,10 @@ export default function ProjectActivitiesPage() {
 
       <ActivityStatChips stats={stats} activeChip={activeChip} onSelect={handleChipSelect} />
 
+      {loading && <div className="info-banner">Carregando atividades...</div>}
+      {error && <div className="error-banner">{error.message}</div>}
+      {hierarchyError && <div className="error-banner">{hierarchyError.message}</div>}
+
       <ActivityFiltersBar activities={activities} filters={filters} onFiltersChange={updateFilters} />
 
       <div className="activities-toolbar">
@@ -222,7 +249,7 @@ export default function ProjectActivitiesPage() {
         onToggleProcess={toggleProcess}
         expandedGroups={expandedGroups}
         onToggleGroup={toggleGroup}
-        currentUserName={CURRENT_USER_NAME}
+        currentUserName={currentUserName}
         onBulkApprove={bulkConcludeActivities}
         onBulkCancel={cancelActivities}
       />
@@ -231,6 +258,8 @@ export default function ProjectActivitiesPage() {
         show={showNewActivityModal}
         onHide={() => setShowNewActivityModal(false)}
         team={currentProject?.team ?? []}
+        hierarchyNodes={hierarchyNodes}
+        projectMode={currentProject?.mode ?? null}
         onCreate={createActivity}
       />
 

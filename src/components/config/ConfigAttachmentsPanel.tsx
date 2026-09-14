@@ -1,13 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
 
 export default function ConfigAttachmentsPanel() {
   const { config, setConfig } = useProjectConfig();
-  const [draft, setDraft] = useState(config.evidenciaObrigatoriaIssue);
+  const [draft, setDraft] = useState({
+    anexoMaxMb: config.anexoMaxMb,
+    evidenciaObrigatoriaAtividade: config.evidenciaObrigatoriaAtividade,
+    evidenciaObrigatoriaIssue: config.evidenciaObrigatoriaIssue,
+  });
   const [saved, setSaved] = useState(false);
 
+  useEffect(() => {
+    setDraft({
+      anexoMaxMb: config.anexoMaxMb,
+      evidenciaObrigatoriaAtividade: config.evidenciaObrigatoriaAtividade,
+      evidenciaObrigatoriaIssue: config.evidenciaObrigatoriaIssue,
+    });
+    setSaved(false);
+  }, [config]);
+
   function handleSave() {
-    setConfig({ ...config, evidenciaObrigatoriaIssue: draft });
+    setConfig({ ...config, ...draft });
     setSaved(true);
   }
 
@@ -22,16 +35,31 @@ export default function ConfigAttachmentsPanel() {
 
       <div className="subhead">Tamanho máximo por arquivo</div>
       <div className="field-value" style={{ width: "fit-content", marginBottom: 16 }}>
-        <input type="number" min="1" defaultValue={10} aria-label="Tamanho máximo por arquivo, em megabytes" /> MB
+        <input
+          type="number"
+          min="1"
+          value={draft.anexoMaxMb}
+          aria-label="Tamanho máximo por arquivo, em megabytes"
+          onChange={(event) => {
+            setDraft((prev) => ({ ...prev, anexoMaxMb: Number(event.target.value) }));
+            setSaved(false);
+          }}
+        />{" "}
+        MB
       </div>
 
       <div className="subhead">Evidência obrigatória</div>
       <div style={{ marginBottom: 16, display: "flex", flexDirection: "column", gap: 10 }}>
-        {/* Decorativo até a feature de Ações de status da Atividade — "Salvar limite" não
-            lê nem persiste este toggle, só o de baixo. */}
         <label className="toggle-pill">
           <span className="switch">
-            <input type="checkbox" defaultChecked />
+            <input
+              type="checkbox"
+              checked={draft.evidenciaObrigatoriaAtividade}
+              onChange={(event) => {
+                setDraft((prev) => ({ ...prev, evidenciaObrigatoriaAtividade: event.target.checked }));
+                setSaved(false);
+              }}
+            />
             <span className="track" />
           </span>
           Exigir evidência ao aprovar/concluir atividade
@@ -40,9 +68,9 @@ export default function ConfigAttachmentsPanel() {
           <span className="switch">
             <input
               type="checkbox"
-              checked={draft}
+              checked={draft.evidenciaObrigatoriaIssue}
               onChange={(event) => {
-                setDraft(event.target.checked);
+                setDraft((prev) => ({ ...prev, evidenciaObrigatoriaIssue: event.target.checked }));
                 setSaved(false);
               }}
             />

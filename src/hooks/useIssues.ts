@@ -1,4 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { ApiError, normalizeError } from "../api/apiError";
+import { issuesApi } from "../api/resources/issues";
+import { useMocks } from "../config/env";
 import type { Issue, IssueStats, NewIssueInput, ProposeSolutionInput } from "../types/issue";
 import { toLocalIsoString } from "../utils/activityIndicators";
 
@@ -75,7 +78,7 @@ const INITIAL_ISSUES: Issue[] = [
     area: "Infraestrutura",
     tester: "Rafael Souza",
     dev: "Guilherme Fabretti",
-    relatedActivityId: null,
+    relatedActivityId: "ATV-1001",
     cascadeActivityIds: [],
     openedAt: isoDaysAgo(2),
     resolvedAt: null,
@@ -167,7 +170,7 @@ const INITIAL_ISSUES: Issue[] = [
     area: "Infraestrutura",
     tester: "Leonardo Martins da Silva",
     dev: "Guilherme Fabretti",
-    relatedActivityId: null,
+    relatedActivityId: "ATV-1004",
     cascadeActivityIds: [],
     openedAt: isoDaysAgo(3),
     resolvedAt: null,
@@ -238,7 +241,7 @@ const INITIAL_ISSUES: Issue[] = [
     area: "Relatórios",
     tester: "Guilherme Fabretti",
     dev: "M. Torres",
-    relatedActivityId: null,
+    relatedActivityId: "ATV-1006",
     cascadeActivityIds: [],
     openedAt: isoDaysAgo(4),
     resolvedAt: null,
@@ -310,7 +313,7 @@ const INITIAL_ISSUES: Issue[] = [
     area: "Cadastro",
     tester: "Rafael Souza",
     dev: "J. Prado",
-    relatedActivityId: null,
+    relatedActivityId: "ATV-1008",
     cascadeActivityIds: [],
     openedAt: isoDaysAgo(20),
     resolvedAt: isoDaysAgo(16),
@@ -377,24 +380,52 @@ const INITIAL_ISSUES: Issue[] = [
 interface UseIssuesResult {
   issues: Issue[];
   stats: IssueStats;
+  loading: boolean;
+  error: ApiError | null;
   createIssue: (input: NewIssueInput) => void;
   startAnalysis: (issueId: string) => void;
   proposeSolution: (issueId: string, input: ProposeSolutionInput) => void;
+  cancelIssue: (issueId: string) => void;
   resolveIssuesForActivity: (activityId: string) => void;
 }
 
 export function useIssues(projectId: string): UseIssuesResult {
-  // O mock ainda não filtra por projeto — mesmo padrão de useActivities.
-  void projectId;
-  const [issues, setIssues] = useState<Issue[]>(INITIAL_ISSUES);
+  const [issues, setIssues] = useState<Issue[]>(useMocks ? INITIAL_ISSUES : []);
+  const [loading, setLoading] = useState<boolean>(!useMocks);
+  const [error, setError] = useState<ApiError | null>(null);
+
+  useEffect(() => {
+    if (useMocks || !projectId) return;
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    issuesApi
+      .list(projectId)
+      .then((data) => {
+        if (!cancelled) setIssues(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof ApiError ? err : normalizeError(err));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
 
   const stats = useMemo<IssueStats>(() => {
     const abertas = issues.filter((issue) => issue.status === "aberta").length;
     const emAnalise = issues.filter((issue) => issue.status === "em_analise").length;
     const solucaoProposta = issues.filter((issue) => issue.status === "solucao_proposta").length;
     const concluidas = issues.filter((issue) => issue.status === "concluida").length;
+    const canceladas = issues.filter((issue) => issue.status === "cancelada").length;
     const impeditivasAbertas = issues.filter(
-      (issue) => issue.impeditiva && issue.status !== "concluida"
+      (issue) => issue.impeditiva && issue.status !== "concluida" && issue.status !== "cancelada"
     ).length;
 
     const resolvedDurations: number[] = [];
@@ -415,6 +446,7 @@ export function useIssues(projectId: string): UseIssuesResult {
       emAnalise,
       solucaoProposta,
       concluidas,
+      canceladas,
       impeditivasAbertas,
       tempoMedioResolucaoDias,
     };
@@ -423,6 +455,14 @@ export function useIssues(projectId: string): UseIssuesResult {
   // Append direto, sem validação própria — mesmo padrão de createActivity em
   // useActivities.ts. A validação de campo obrigatório vive no modal (camada de UI).
   function createIssue(input: NewIssueInput): void {
+    if (!useMocks) {
+      void issuesApi.create(projectId, input).then(
+        (createdIssue) => setIssues((prev) => [...prev, createdIssue]),
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     setIssues((prev) => {
       const newIssue: Issue = {
         id: nextIssueId(prev),
@@ -453,6 +493,15 @@ export function useIssues(projectId: string): UseIssuesResult {
   // Primeiros mutators de ATUALIZAÇÃO (não criação) do hook — usam .map() em vez de
   // [...prev, novo]. Mesma convenção de createIssue: sem validação própria, isso vive na UI.
   function startAnalysis(issueId: string): void {
+    if (!useMocks) {
+      void issuesApi.startAnalysis(projectId, issueId).then(
+        (updatedIssue) =>
+          setIssues((prev) => prev.map((issue) => (issue.id === updatedIssue.id ? updatedIssue : issue))),
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     setIssues((prev) =>
       prev.map((issue) =>
         issue.id === issueId
@@ -463,6 +512,15 @@ export function useIssues(projectId: string): UseIssuesResult {
   }
 
   function proposeSolution(issueId: string, input: ProposeSolutionInput): void {
+    if (!useMocks) {
+      void issuesApi.proposeSolution(projectId, issueId, input).then(
+        (updatedIssue) =>
+          setIssues((prev) => prev.map((issue) => (issue.id === updatedIssue.id ? updatedIssue : issue))),
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     setIssues((prev) =>
       prev.map((issue) =>
         issue.id === issueId
@@ -478,9 +536,38 @@ export function useIssues(projectId: string): UseIssuesResult {
     );
   }
 
+  function cancelIssue(issueId: string): void {
+    if (!useMocks) {
+      void issuesApi.cancel(projectId, issueId).then(
+        (updatedIssue) =>
+          setIssues((prev) => prev.map((issue) => (issue.id === updatedIssue.id ? updatedIssue : issue))),
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
+    setIssues((prev) =>
+      prev.map((issue) => (issue.id === issueId ? { ...issue, status: "cancelada" } : issue))
+    );
+  }
+
   // Chamado pela página de Atividade logo após concludeActivity (useActivities.ts) — os
   // dois hooks não se conhecem entre si, a página que orquestra as duas chamadas.
   function resolveIssuesForActivity(activityId: string): void {
+    if (!useMocks) {
+      const issuesToResolve = issues.filter(
+        (issue) => issue.relatedActivityId === activityId && issue.status === "solucao_proposta",
+      );
+      void Promise.all(issuesToResolve.map((issue) => issuesApi.resolve(projectId, issue.id))).then(
+        (updatedIssues) => {
+          const byId = new Map(updatedIssues.map((issue) => [issue.id, issue]));
+          setIssues((prev) => prev.map((issue) => byId.get(issue.id) ?? issue));
+        },
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     setIssues((prev) =>
       prev.map((issue) =>
         issue.relatedActivityId === activityId && issue.status === "solucao_proposta"
@@ -490,5 +577,5 @@ export function useIssues(projectId: string): UseIssuesResult {
     );
   }
 
-  return { issues, stats, createIssue, startAnalysis, proposeSolution, resolveIssuesForActivity };
+  return { issues, stats, loading, error, createIssue, startAnalysis, proposeSolution, cancelIssue, resolveIssuesForActivity };
 }

@@ -6,16 +6,17 @@ export const ISSUE_STATUS_LABELS: Record<IssueStatus, string> = {
   em_analise: "Em análise",
   solucao_proposta: "Solução proposta",
   concluida: "Concluída",
+  cancelada: "Cancelada",
 };
 
-// Reaproveita as classes de cor já existentes em _activities.scss — activity-badge-execucao
-// é azul neste projeto, não amarelo, então usamos activity-badge-liberado (amarelo real)
-// para os dois status intermediários da issue.
+// Reaproveita as classes de cor já existentes em _activities.scss; usamos
+// activity-badge-liberado para os dois status intermediários da issue.
 export const ISSUE_STATUS_BADGE_CLASS: Record<IssueStatus, string> = {
   aberta: "activity-badge-bloqueado",
   em_analise: "activity-badge-liberado",
   solucao_proposta: "activity-badge-liberado",
   concluida: "activity-badge-concluido",
+  cancelada: "activity-badge-cancelado",
 };
 
 export const ISSUE_TYPE_LABELS: Record<IssueType, string> = {

@@ -82,8 +82,12 @@ export default function ProjectNavDock() {
   const { id } = useParams();
   const { projects } = useProjects();
   const { instance } = useMsal();
-  const { name: currentUserName, role: currentUserRole } = useCurrentUser();
+  const { name: currentUserName, role: currentUserRole, email: currentUserEmail } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === id);
+  const currentMembership = currentProject?.team.find(
+    (member) => member.email === currentUserEmail || member.name === currentUserName,
+  );
+  const displayedUserRole = currentMembership?.role ?? currentUserRole;
   const projectLabel = currentProject?.name ?? id ?? "";
   const [open, setOpen] = useState(false);
   const [hidden, setHidden] = useState(false);
@@ -138,7 +142,7 @@ export default function ProjectNavDock() {
         closeOnMenuClick={false}
         toggle={({ toggle }) => (
           <button type="button" id="nav-dock-toggle" className="footer-widget nav-dock-toggle" onClick={toggle}>
-            <FooterWidgetContent userName={currentUserName} userRole={currentUserRole} />
+            <FooterWidgetContent userName={currentUserName} userRole={displayedUserRole} />
           </button>
         )}
       >

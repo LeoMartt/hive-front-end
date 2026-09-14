@@ -1,5 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Activity, ActivityStats, NewActivityInput, ConcludeActivityInput, RejectActivityInput } from "../types/activity";
+import { ApiError, normalizeError } from "../api/apiError";
+import { activitiesApi } from "../api/resources/activities";
+import { useMocks } from "../config/env";
 import { isOverdue, toLocalIsoString } from "../utils/activityIndicators";
 
 function isoDaysFromNow(days: number): string {
@@ -55,14 +58,14 @@ const INITIAL_ACTIVITIES: Activity[] = [
   {
     id: "ATV-1002",
     name: "Testar emissão em lote de notas fiscais",
-    status: "execucao",
+    status: "liberado",
     module: "Faturamento",
     process: "Emissão de NF-e",
     tester: "Rafael Souza",
     dev: "Vinícius Calefo Assarice",
     plannedStart: isoDaysFromNow(-5),
     plannedEnd: isoDaysFromNow(3),
-    actualStart: isoDaysFromNow(-4),
+    actualStart: null,
     actualEnd: null,
     predecessors: ["ATV-1001"],
     retestCount: 0,
@@ -173,14 +176,14 @@ const INITIAL_ACTIVITIES: Activity[] = [
   {
     id: "ATV-1006",
     name: "Validar conciliação de PIX",
-    status: "execucao",
+    status: "liberado",
     module: "Faturamento",
     process: "Conciliação de Pagamentos",
     tester: "Guilherme Fabretti",
     dev: "C. Prado",
     plannedStart: isoDaysFromNow(-3),
     plannedEnd: isoDaysFromNow(4),
-    actualStart: isoDaysFromNow(-2),
+    actualStart: null,
     actualEnd: null,
     predecessors: ["ATV-1005"],
     retestCount: 0,
@@ -362,14 +365,14 @@ const INITIAL_ACTIVITIES: Activity[] = [
   {
     id: "ATV-1012",
     name: "Validar upload de documentos",
-    status: "execucao",
+    status: "liberado",
     module: "Cadastro de Clientes",
     process: "Onboarding",
     tester: "Rafael Souza",
     dev: "J. Prado",
     plannedStart: isoDaysFromNow(-2),
     plannedEnd: isoDaysFromNow(5),
-    actualStart: isoDaysFromNow(-1),
+    actualStart: null,
     actualEnd: null,
     predecessors: ["ATV-1010"],
     retestCount: 0,
@@ -414,14 +417,14 @@ const INITIAL_ACTIVITIES: Activity[] = [
   {
     id: "ATV-1014",
     name: "Validar CPF/CNPJ na base da Receita",
-    status: "execucao",
+    status: "liberado",
     module: "Cadastro de Clientes",
     process: "Validação de Dados",
     tester: "Leonardo Martins da Silva",
     dev: "M. Torres",
     plannedStart: isoDaysFromNow(-4),
     plannedEnd: isoDaysFromNow(-1),
-    actualStart: isoDaysFromNow(-3),
+    actualStart: null,
     actualEnd: null,
     predecessors: [],
     retestCount: 0,
@@ -558,6 +561,8 @@ const INITIAL_ACTIVITIES: Activity[] = [
 interface UseActivitiesResult {
   activities: Activity[];
   stats: ActivityStats;
+  loading: boolean;
+  error: ApiError | null;
   createActivity: (input: NewActivityInput) => void;
   concludeActivity: (activityId: string, input: ConcludeActivityInput) => void;
   rejectActivity: (activityId: string, input: RejectActivityInput) => void;
@@ -566,30 +571,72 @@ interface UseActivitiesResult {
 }
 
 export function useActivities(projectId: string): UseActivitiesResult {
-  // O mock ainda não filtra por projeto — o parâmetro fica pronto para quando
-  // os dados vierem de uma API real, escopados por projeto.
-  void projectId;
-  const [activities, setActivities] = useState<Activity[]>(INITIAL_ACTIVITIES);
+  const [activities, setActivities] = useState<Activity[]>(useMocks ? INITIAL_ACTIVITIES : []);
+  const [loading, setLoading] = useState<boolean>(!useMocks);
+  const [error, setError] = useState<ApiError | null>(null);
+
+  useEffect(() => {
+    if (useMocks || !projectId) return;
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    activitiesApi
+      .list(projectId)
+      .then((data) => {
+        if (!cancelled) setActivities(data);
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err instanceof ApiError ? err : normalizeError(err));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
 
   const stats = useMemo<ActivityStats>(() => {
     let concluido = 0;
-    let execucao = 0;
+    let liberado = 0;
     let bloqueado = 0;
     let aguardando = 0;
     let atrasado = 0;
     for (const activity of activities) {
       if (activity.status === "concluido") concluido += 1;
-      if (activity.status === "execucao") execucao += 1;
+      if (activity.status === "liberado") liberado += 1;
       if (activity.status === "bloqueado") bloqueado += 1;
       if (activity.status === "aguardando") aguardando += 1;
       if (isOverdue(activity)) atrasado += 1;
     }
-    return { total: activities.length, concluido, execucao, bloqueado, aguardando, atrasado };
+    return { total: activities.length, concluido, liberado, bloqueado, aguardando, atrasado };
   }, [activities]);
 
   // Append direto, sem validação própria — mesma simplicidade de useProjects.addTeamMember.
   // A validação de campo obrigatório vive no modal (camada de UI).
   function createActivity(input: NewActivityInput): void {
+    if (!useMocks) {
+      if (!input.nodeId || !input.testerId || !input.developerId) {
+        setError(
+          new ApiError({
+            status: null,
+            code: "INVALID_ACTIVITY_INPUT",
+            message: "Selecione módulo/processo, tester e desenvolvedor válidos.",
+          }),
+        );
+        return;
+      }
+
+      void activitiesApi.create(projectId, input).then(
+        (createdActivity) => setActivities((prev) => [...prev, createdActivity]),
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     setActivities((prev) => {
       const newActivity: Activity = {
         id: nextActivityId(prev),
@@ -625,6 +672,17 @@ export function useActivities(projectId: string): UseActivitiesResult {
   // convenção de startAnalysis/proposeSolution em useIssues.ts: .map(), sem validação
   // própria (isso vive na UI).
   function concludeActivity(activityId: string, input: ConcludeActivityInput): void {
+    if (!useMocks) {
+      void activitiesApi.complete(projectId, activityId, input.approvalNote).then(
+        (updatedActivity) =>
+          setActivities((prev) =>
+            prev.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity)),
+          ),
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     setActivities((prev) =>
       prev.map((activity) =>
         activity.id === activityId
@@ -641,6 +699,17 @@ export function useActivities(projectId: string): UseActivitiesResult {
   }
 
   function rejectActivity(activityId: string, input: RejectActivityInput): void {
+    if (!useMocks) {
+      void activitiesApi.block(projectId, activityId, input.reason).then(
+        (updatedActivity) =>
+          setActivities((prev) =>
+            prev.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity)),
+          ),
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     setActivities((prev) =>
       prev.map((activity) =>
         activity.id === activityId
@@ -659,9 +728,20 @@ export function useActivities(projectId: string): UseActivitiesResult {
 
   // Aprovação em massa: mesma lógica de concludeActivity, aplicada a uma lista de ids
   // num único setActivities (evita um re-render por atividade). A validação de quais
-  // atividades podem ser selecionadas (status liberado/execucao) vive na UI
+  // atividades podem ser selecionadas (status liberado) vive na UI
   // (ActivitiesTable), não aqui — mesma convenção dos outros mutators deste hook.
   function bulkConcludeActivities(activityIds: string[], input: ConcludeActivityInput): void {
+    if (!useMocks) {
+      void Promise.all(activityIds.map((activityId) => activitiesApi.complete(projectId, activityId, input.approvalNote))).then(
+        (updatedActivities) => {
+          const byId = new Map(updatedActivities.map((activity) => [activity.id, activity]));
+          setActivities((prev) => prev.map((activity) => byId.get(activity.id) ?? activity));
+        },
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     const idSet = new Set(activityIds);
     setActivities((prev) =>
       prev.map((activity) =>
@@ -679,6 +759,17 @@ export function useActivities(projectId: string): UseActivitiesResult {
   }
 
   function cancelActivities(activityIds: string[]): void {
+    if (!useMocks) {
+      void Promise.all(activityIds.map((activityId) => activitiesApi.cancel(projectId, activityId))).then(
+        (cancelledActivities) => {
+          const byId = new Map(cancelledActivities.map((activity) => [activity.id, activity]));
+          setActivities((prev) => prev.map((activity) => byId.get(activity.id) ?? activity));
+        },
+        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+      );
+      return;
+    }
+
     const idSet = new Set(activityIds);
     setActivities((prev) =>
       prev.map((activity) => (idSet.has(activity.id) ? { ...activity, status: "cancelado" } : activity))
@@ -688,6 +779,8 @@ export function useActivities(projectId: string): UseActivitiesResult {
   return {
     activities,
     stats,
+    loading,
+    error,
     createActivity,
     concludeActivity,
     rejectActivity,

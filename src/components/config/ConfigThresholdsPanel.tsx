@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
 import { useProjects } from "../../hooks/useProjects";
 import type { AgingThresholds, ProjectConfig } from "../../types/projectConfig";
-
-type AgingMode = "uat" | "cutover";
 
 interface ConfigThresholdsPanelProps {
   projectId: string;
@@ -35,13 +33,14 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
   const { projects } = useProjects();
   const currentProject = projects.find((item) => item.id === projectId);
   const [draft, setDraft] = useState<ProjectConfig>(config);
-  // Abre já na sub-aba do modo do projeto atual — evita que o Gestor edite "UAT" achando
-  // que está mudando os limiares do projeto que está vendo quando ele é, na verdade,
-  // Cutover. Ainda é só o ponto de partida: as duas sub-abas continuam editáveis.
-  const [agingMode, setAgingMode] = useState<AgingMode>(currentProject?.mode === "cutover" ? "cutover" : "uat");
-  const [autoTransition, setAutoTransition] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  useEffect(() => {
+    setDraft(config);
+    setSaved(false);
+  }, [config]);
+
+  const agingMode = currentProject?.mode === "cutover" ? "cutover" : "uat";
   const agingKey: keyof Pick<ProjectConfig, "agingUat" | "agingCutover"> =
     agingMode === "uat" ? "agingUat" : "agingCutover";
   const editingAging = draft[agingKey];
@@ -128,33 +127,16 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
         <span style={{ fontSize: 11.5, fontWeight: 600 }}>Issue: Aberta → Em análise</span>
         <label className="toggle-pill">
           <span className="switch">
-            <input
-              type="checkbox"
-              checked={autoTransition}
-              onChange={(event) => setAutoTransition(event.target.checked)}
-            />
+            <input type="checkbox" checked={false} disabled readOnly />
             <span className="track" />
           </span>
-          {autoTransition ? "Automática ao abrir a issue" : 'Manual — o Dev aciona "Iniciar análise"'}
+          Manual — o Dev aciona "Iniciar análise"
         </label>
       </div>
 
       <div className="subhead">Aging de issues abertas</div>
       <div className="filters" style={{ marginBottom: 12 }}>
-        <button
-          type="button"
-          className={`filter-pill${agingMode === "uat" ? " active" : ""}`}
-          onClick={() => setAgingMode("uat")}
-        >
-          UAT
-        </button>
-        <button
-          type="button"
-          className={`filter-pill${agingMode === "cutover" ? " active" : ""}`}
-          onClick={() => setAgingMode("cutover")}
-        >
-          Cutover
-        </button>
+        <span className="filter-pill active">{agingMode === "uat" ? "UAT" : "Cutover"}</span>
       </div>
       <div className="field-row" style={{ marginBottom: 10 }}>
         <div className="field">
@@ -183,8 +165,7 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
         </div>
       </div>
       <div style={{ fontSize: 11, color: "inherit", marginBottom: 14 }}>
-        Editando limiares do modo {agingMode === "uat" ? "UAT" : "Cutover"}
-        {currentProject && agingMode !== currentProject.mode && " (diferente do modo deste projeto)"}.
+        Editando os limiares salvos neste projeto.
       </div>
 
       {!canSave && (

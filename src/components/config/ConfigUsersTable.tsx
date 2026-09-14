@@ -10,10 +10,10 @@ interface ConfigUsersTableProps {
   projectId: string;
 }
 
-// Mesma convenção de cor do mockup: Gestor usa a cor "execução" (azul), Tester e Dev
-// usam a cor "liberado" (verde) — só Gestor se diferencia visualmente.
+// Gestor usa azul para se diferenciar visualmente; Tester e Dev reaproveitam o
+// estilo de liberado.
 const ROLE_BADGE_CLASS: Record<UserRole, string> = {
-  "Gestor de Projetos": "activity-badge-execucao",
+  "Gestor de Projetos": "role-badge-gestor",
   Tester: "activity-badge-liberado",
   Desenvolvedor: "activity-badge-liberado",
 };

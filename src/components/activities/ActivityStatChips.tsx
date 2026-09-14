@@ -1,6 +1,6 @@
 import type { ActivityStats } from "../../types/activity";
 
-export type ActivityStatChipKey = "total" | "concluido" | "execucao" | "bloqueado" | "aguardando" | "atrasado";
+export type ActivityStatChipKey = "total" | "concluido" | "liberado" | "bloqueado" | "aguardando" | "atrasado";
 
 type ChipTone = "" | "g" | "y" | "r";
 
@@ -13,7 +13,7 @@ interface ChipDefinition {
 const CHIPS: ChipDefinition[] = [
   { key: "total", label: "Total", tone: "" },
   { key: "concluido", label: "Concluído", tone: "g" },
-  { key: "execucao", label: "Em execução", tone: "y" },
+  { key: "liberado", label: "Liberadas", tone: "y" },
   { key: "bloqueado", label: "Bloqueado", tone: "r" },
   { key: "aguardando", label: "Aguardando", tone: "" },
   { key: "atrasado", label: "Atrasado", tone: "r" },

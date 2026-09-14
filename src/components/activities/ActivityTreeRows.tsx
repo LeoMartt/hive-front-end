@@ -58,14 +58,11 @@ export default function ActivityTreeRows({
   selectedIds,
   onToggleSelect,
 }: ActivityTreeRowsProps) {
-  let processSeq = 0;
-
   return (
     <>
-      {groups.map((moduleGroup, moduleIndex) => {
+      {groups.map((moduleGroup) => {
         const activitiesInModule = moduleGroup.processes.flatMap((process) => process.activities);
         const isExpanded = expandedModules.has(moduleGroup.module);
-        const moduleId = `MOD-${String(moduleIndex + 1).padStart(2, "0")}`;
 
         return (
           <Fragment key={moduleGroup.module}>
@@ -90,13 +87,11 @@ export default function ActivityTreeRows({
                   <b className="cell-name-text">{moduleGroup.module}</b>
                 </div>
               </td>
-              <td className="mono">{moduleId}</td>
+              <td className="mono"></td>
               <RollupCell activities={activitiesInModule} />
             </tr>
             {isExpanded &&
               moduleGroup.processes.map((processGroup) => {
-                processSeq += 1;
-                const processId = `PRC-${String(processSeq).padStart(2, "0")}`;
                 const processKey = `${moduleGroup.module}::${processGroup.process}`;
                 const isProcessExpanded = !collapsedProcesses.has(processKey);
 
@@ -126,7 +121,7 @@ export default function ActivityTreeRows({
                           <span className="cell-name-text">{processGroup.process}</span>
                         </div>
                       </td>
-                      <td className="mono">{processId}</td>
+                      <td className="mono"></td>
                       <RollupCell activities={processGroup.activities} />
                     </tr>
                     {isProcessExpanded &&
