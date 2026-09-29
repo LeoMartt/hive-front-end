@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import Modal from "../common/Modal";
 import NavIcon from "../common/NavIcon";
-import { toLocalIsoString } from "../../utils/activityIndicators";
+import { buildEvidenceMetadata, formatEvidenceFileSize, getEvidenceFileError } from "../../utils/evidenceFiles";
 import type { ConcludeActivityInput } from "../../types/activity";
 
 interface ConcludeActivityModalProps {
@@ -11,10 +11,6 @@ interface ConcludeActivityModalProps {
   onSubmit: (input: ConcludeActivityInput) => void;
   title?: string;
   subtitle?: string;
-}
-
-function formatFileSize(sizeBytes: number): string {
-  return `${Math.ceil(sizeBytes / 1024)} KB`;
 }
 
 export default function ConcludeActivityModal({
@@ -39,6 +35,17 @@ export default function ConcludeActivityModal({
     onHide();
   }
 
+  function selectFile(file: File) {
+    const error = getEvidenceFileError(file);
+    if (error) {
+      setSelectedFile(null);
+      setErrorMsg(error);
+      return;
+    }
+    setSelectedFile(file);
+    setErrorMsg(null);
+  }
+
   function handleConfirm() {
     if (!selectedFile) {
       setErrorMsg("Anexe a evidência antes de confirmar.");
@@ -47,12 +54,7 @@ export default function ConcludeActivityModal({
 
     onSubmit({
       approvalNote: text.trim() ? text.trim() : null,
-      approvalEvidence: {
-        fileName: selectedFile.name,
-        sizeLabel: formatFileSize(selectedFile.size),
-        uploadedBy: currentUserName,
-        uploadedAt: toLocalIsoString(new Date()),
-      },
+      approvalEvidence: buildEvidenceMetadata(selectedFile, currentUserName),
     });
     resetAndHide();
   }
@@ -105,8 +107,7 @@ export default function ConcludeActivityModal({
             setDragOver(false);
             const file = event.dataTransfer.files[0];
             if (file) {
-              setSelectedFile(file);
-              setErrorMsg(null);
+              selectFile(file);
             }
           }}
         >
@@ -116,7 +117,7 @@ export default function ConcludeActivityModal({
           </NavIcon>
           <span>
             {selectedFile
-              ? `${selectedFile.name} (${formatFileSize(selectedFile.size)})`
+              ? `${selectedFile.name} (${formatEvidenceFileSize(selectedFile.size)})`
               : "Clique ou arraste o arquivo de evidência"}
           </span>
         </div>
@@ -128,8 +129,7 @@ export default function ConcludeActivityModal({
           onChange={(event) => {
             const file = event.target.files?.[0];
             if (file) {
-              setSelectedFile(file);
-              setErrorMsg(null);
+              selectFile(file);
             }
             event.target.value = "";
           }}

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import Modal from "../common/Modal";
 import NavIcon from "../common/NavIcon";
-import { toLocalIsoString } from "../../utils/activityIndicators";
+import { buildEvidenceMetadata, formatEvidenceFileSize, getEvidenceFileError } from "../../utils/evidenceFiles";
 import type { ProposeSolutionInput } from "../../types/issue";
 
 interface ProposeSolutionModalProps {
@@ -9,10 +9,6 @@ interface ProposeSolutionModalProps {
   onHide: () => void;
   currentUserName: string;
   onSubmit: (input: ProposeSolutionInput) => void;
-}
-
-function formatFileSize(sizeBytes: number): string {
-  return `${Math.ceil(sizeBytes / 1024)} KB`;
 }
 
 export default function ProposeSolutionModal({ show, onHide, currentUserName, onSubmit }: ProposeSolutionModalProps) {
@@ -30,6 +26,17 @@ export default function ProposeSolutionModal({ show, onHide, currentUserName, on
     onHide();
   }
 
+  function selectFile(file: File) {
+    const error = getEvidenceFileError(file);
+    if (error) {
+      setSelectedFile(null);
+      setErrorMsg(error);
+      return;
+    }
+    setSelectedFile(file);
+    setErrorMsg(null);
+  }
+
   function handleConfirm() {
     if (!text.trim()) {
       setErrorMsg("Preencha a solução proposta antes de continuar.");
@@ -38,14 +45,7 @@ export default function ProposeSolutionModal({ show, onHide, currentUserName, on
 
     onSubmit({
       proposedSolution: text.trim(),
-      solutionAttachment: selectedFile
-        ? {
-            fileName: selectedFile.name,
-            sizeLabel: formatFileSize(selectedFile.size),
-            uploadedBy: currentUserName,
-            uploadedAt: toLocalIsoString(new Date()),
-          }
-        : null,
+      solutionAttachment: selectedFile ? buildEvidenceMetadata(selectedFile, currentUserName) : null,
     });
     resetAndHide();
   }
@@ -102,7 +102,7 @@ export default function ProposeSolutionModal({ show, onHide, currentUserName, on
             event.preventDefault();
             setDragOver(false);
             const file = event.dataTransfer.files[0];
-            if (file) setSelectedFile(file);
+            if (file) selectFile(file);
           }}
         >
           <NavIcon>
@@ -111,7 +111,7 @@ export default function ProposeSolutionModal({ show, onHide, currentUserName, on
           </NavIcon>
           <span>
             {selectedFile
-              ? `${selectedFile.name} (${formatFileSize(selectedFile.size)})`
+              ? `${selectedFile.name} (${formatEvidenceFileSize(selectedFile.size)})`
               : "Clique ou arraste um print/arquivo (opcional)"}
           </span>
         </div>
@@ -122,7 +122,7 @@ export default function ProposeSolutionModal({ show, onHide, currentUserName, on
           style={{ display: "none" }}
           onChange={(event) => {
             const file = event.target.files?.[0];
-            if (file) setSelectedFile(file);
+            if (file) selectFile(file);
             event.target.value = "";
           }}
         />

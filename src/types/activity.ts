@@ -10,6 +10,11 @@ export interface ActivityAttachment {
   sizeLabel: string;
   uploadedBy: string;
   uploadedAt: string;
+  contentType?: string;
+  storagePath?: string;
+  url?: string;
+  urlExpiresAt?: string;
+  file?: File;
 }
 
 export interface Activity {
@@ -29,7 +34,6 @@ export interface Activity {
   predecessors: string[];
   retestCount: number;
   issueCount: number;
-  wbs: string;
   area: string;
   system: string;
   transaction: string;
@@ -53,7 +57,6 @@ export interface NewActivityInput {
   plannedStart: string;
   plannedEnd: string;
   predecessors: string[];
-  wbs: string;
   area: string;
   system: string;
   transaction: string;

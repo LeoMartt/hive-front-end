@@ -19,17 +19,24 @@ export const issuesApi = {
   },
 
   async create(projectId: string, input: NewIssueInput): Promise<Issue> {
-    const { data } = await httpClient.post(`/projects/${projectId}/issues/`, {
-      title: input.title,
-      description: input.description,
-      type: input.type,
-      impeditiva: input.impeditiva,
-      impact: input.impact,
-      impactNote: input.impactNote,
-      dev: input.dev,
-      relatedActivityId: input.relatedActivityId,
-      openingAttachment: input.openingAttachment,
-    });
+    const formData = new FormData();
+    formData.append("title", input.title);
+    formData.append("description", input.description);
+    formData.append("type", input.type);
+    formData.append("impeditiva", String(input.impeditiva));
+    formData.append("impact", input.impact);
+    formData.append("impactNote", input.impactNote);
+    formData.append("dev", input.dev);
+    formData.append("relatedActivityId", input.relatedActivityId);
+    if (input.openingAttachment) {
+      const { file, ...openingAttachment } = input.openingAttachment;
+      formData.append("openingAttachment", JSON.stringify(openingAttachment));
+      if (file) {
+        formData.append("openingFile", file);
+      }
+    }
+
+    const { data } = await httpClient.post(`/projects/${projectId}/issues/`, formData);
     return issueSchema.parse(data);
   },
 
@@ -41,9 +48,19 @@ export const issuesApi = {
   },
 
   async proposeSolution(projectId: string, issueId: string, input: ProposeSolutionInput): Promise<Issue> {
+    const formData = new FormData();
+    formData.append("proposedSolution", input.proposedSolution);
+    if (input.solutionAttachment) {
+      const { file, ...solutionAttachment } = input.solutionAttachment;
+      formData.append("solutionAttachment", JSON.stringify(solutionAttachment));
+      if (file) {
+        formData.append("solutionFile", file);
+      }
+    }
+
     const { data } = await httpClient.post(
       `/projects/${projectId}/issues/${issueUrlId(issueId)}/propose-solution/`,
-      input,
+      formData,
     );
     return issueSchema.parse(data);
   },

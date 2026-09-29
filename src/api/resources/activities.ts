@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { httpClient } from "../client";
 import { activitySchema } from "../schemas/activity";
-import type { Activity, NewActivityInput } from "../../types/activity";
+import type { Activity, ConcludeActivityInput, NewActivityInput } from "../../types/activity";
+
+const activityImportResponseSchema = z.object({
+  created: z.number(),
+  activities: z.array(activitySchema),
+});
 
 function activityUrlId(activityId: string): number {
   const normalized = activityId.trim().toUpperCase().replace(/^ATV-/, "");
@@ -30,17 +35,33 @@ export const activitiesApi = {
       area: input.area,
       system: input.system,
       transaction: input.transaction,
-      wbs: input.wbs,
       expectedResult: input.expectedResult,
       notes: input.notes,
     });
     return activitySchema.parse(data);
   },
 
-  async complete(projectId: string, activityId: string, approvalNote: string | null): Promise<Activity> {
+  async importFile(projectId: string, file: File): Promise<{ created: number; activities: Activity[] }> {
+    const formData = new FormData();
+    formData.append("file", file);
+    const { data } = await httpClient.post(`/projects/${projectId}/activities/import/`, formData);
+    return activityImportResponseSchema.parse(data);
+  },
+
+  async complete(projectId: string, activityId: string, input: ConcludeActivityInput): Promise<Activity> {
+    const formData = new FormData();
+    if (input.approvalNote) {
+      formData.append("approvalNote", input.approvalNote);
+    }
+    const { file, ...approvalEvidence } = input.approvalEvidence;
+    formData.append("approvalEvidence", JSON.stringify(approvalEvidence));
+    if (file) {
+      formData.append("approvalFile", file);
+    }
+
     const { data } = await httpClient.post(
       `/projects/${projectId}/activities/${activityUrlId(activityId)}/complete/`,
-      { approvalNote },
+      formData,
     );
     return activitySchema.parse(data);
   },

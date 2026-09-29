@@ -22,7 +22,6 @@ interface NewActivityFormState {
   plannedStart: string;
   plannedEnd: string;
   predecessors: string;
-  wbs: string;
   area: string;
   system: string;
   transaction: string;
@@ -41,7 +40,6 @@ function createEmptyState(): NewActivityFormState {
     plannedStart: "",
     plannedEnd: "",
     predecessors: "",
-    wbs: "",
     area: "",
     system: "",
     transaction: "",
@@ -114,7 +112,6 @@ export default function NewActivityModal({
         .split(";")
         .map((id) => id.trim())
         .filter(Boolean),
-      wbs: state.wbs.trim(),
       area: state.area.trim(),
       system: state.system.trim(),
       transaction: state.transaction.trim(),
@@ -303,19 +300,6 @@ export default function NewActivityModal({
 
       <div className="form-row">
         <div className="form-group">
-          <label className="form-label" htmlFor="new-activity-wbs">
-            WBS <span className="optional">(opcional)</span>
-          </label>
-          <input
-            className="form-input"
-            type="text"
-            id="new-activity-wbs"
-            placeholder="Ex: 1.2.3"
-            value={state.wbs}
-            onChange={(event) => updateField("wbs", event.target.value)}
-          />
-        </div>
-        <div className="form-group">
           <label className="form-label" htmlFor="new-activity-area">
             Área <span className="optional">(opcional)</span>
           </label>
@@ -328,9 +312,6 @@ export default function NewActivityModal({
             onChange={(event) => updateField("area", event.target.value)}
           />
         </div>
-      </div>
-
-      <div className="form-row">
         <div className="form-group">
           <label className="form-label" htmlFor="new-activity-sistema">
             Sistema <span className="optional">(opcional)</span>

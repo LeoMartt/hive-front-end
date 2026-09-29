@@ -7,6 +7,11 @@ export interface IssueAttachment {
   sizeLabel: string;
   uploadedBy: string;
   uploadedAt: string;
+  contentType?: string;
+  storagePath?: string;
+  url?: string;
+  urlExpiresAt?: string;
+  file?: File;
 }
 
 export interface Issue {

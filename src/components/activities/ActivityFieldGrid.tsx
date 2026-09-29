@@ -41,10 +41,6 @@ export default function ActivityFieldGrid({ activity }: ActivityFieldGridProps) 
           {activity.predecessors.length === 0 ? "—" : activity.predecessors.join(", ")}
         </div>
       </div>
-      <div className="field">
-        <div className="field-label">WBS</div>
-        <div className="field-value mono">{activity.wbs || "—"}</div>
-      </div>
 
       <div className="field">
         <div className="field-label">Área</div>

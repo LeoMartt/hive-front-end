@@ -6,6 +6,10 @@ const activityAttachmentSchema = z.object({
   sizeLabel: z.string(),
   uploadedBy: z.string(),
   uploadedAt: z.string(),
+  contentType: z.string().optional(),
+  storagePath: z.string().optional(),
+  url: z.string().optional(),
+  urlExpiresAt: z.string().optional(),
 });
 
 export const activitySchema = z.object({
@@ -25,7 +29,6 @@ export const activitySchema = z.object({
   predecessors: z.array(z.string()),
   retestCount: z.number(),
   issueCount: z.number(),
-  wbs: z.string(),
   area: z.string(),
   system: z.string(),
   transaction: z.string(),

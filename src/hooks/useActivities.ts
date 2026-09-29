@@ -37,7 +37,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: [],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.1.1.1",
     area: "Fiscal",
     system: "SAP S/4HANA",
     transaction: "VF01",
@@ -70,7 +69,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: ["ATV-1001"],
     retestCount: 0,
     issueCount: 1,
-    wbs: "1.1.1.2",
     area: "Fiscal",
     system: "SAP S/4HANA",
     transaction: "VF04",
@@ -96,7 +94,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: ["ATV-1001"],
     retestCount: 1,
     issueCount: 2,
-    wbs: "1.1.1.3",
     area: "Fiscal",
     system: "SAP S/4HANA",
     transaction: "VF11",
@@ -129,7 +126,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: ["ATV-1002"],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.1.1.4",
     area: "Fiscal",
     system: "SAP S/4HANA",
     transaction: "J1B3",
@@ -155,7 +151,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: [],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.1.2.1",
     area: "Tesouraria",
     system: "SAP S/4HANA",
     transaction: "F110",
@@ -188,7 +183,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: ["ATV-1005"],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.1.2.2",
     area: "Tesouraria",
     system: "SAP S/4HANA",
     transaction: "FF67",
@@ -221,7 +215,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: [],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.1.2.3",
     area: "Tesouraria",
     system: "SAP S/4HANA",
     transaction: "FCH8",
@@ -247,7 +240,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: [],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.1.2.4",
     area: "Tesouraria",
     system: "SAP S/4HANA",
     transaction: "FB03",
@@ -273,7 +265,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: ["ATV-1006"],
     retestCount: 2,
     issueCount: 3,
-    wbs: "1.1.2.5",
     area: "Tesouraria",
     system: "SAP S/4HANA",
     transaction: "F-28",
@@ -301,7 +292,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: [],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.2.1.1",
     area: "Cadastro",
     system: "SAP S/4HANA",
     transaction: "XD01",
@@ -339,7 +329,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: [],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.2.1.2",
     area: "Cadastro",
     system: "SAP S/4HANA",
     transaction: "FD01",
@@ -377,7 +366,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: ["ATV-1010"],
     retestCount: 0,
     issueCount: 1,
-    wbs: "1.2.1.3",
     area: "Cadastro",
     system: "SAP S/4HANA",
     transaction: "CV01N",
@@ -403,7 +391,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: ["ATV-1012"],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.2.1.4",
     area: "Cadastro",
     system: "SAP S/4HANA",
     transaction: "SIGN01",
@@ -429,7 +416,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: [],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.2.2.1",
     area: "Cadastro",
     system: "SAP S/4HANA",
     transaction: "XD03",
@@ -455,7 +441,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: ["ATV-1014"],
     retestCount: 3,
     issueCount: 1,
-    wbs: "1.2.2.2",
     area: "Cadastro",
     system: "SAP S/4HANA",
     transaction: "XD02",
@@ -481,7 +466,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: [],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.2.2.3",
     area: "Cadastro",
     system: "SAP S/4HANA",
     transaction: "XD05",
@@ -507,7 +491,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: [],
     retestCount: 1,
     issueCount: 0,
-    wbs: "1.2.2.4",
     area: "Cadastro",
     system: "SAP S/4HANA",
     transaction: "XD99",
@@ -545,7 +528,6 @@ const INITIAL_ACTIVITIES: Activity[] = [
     predecessors: ["ATV-1013"],
     retestCount: 0,
     issueCount: 0,
-    wbs: "1.2.1.5",
     area: "Cadastro",
     system: "SAP S/4HANA",
     transaction: "SO10",
@@ -568,6 +550,7 @@ interface UseActivitiesResult {
   rejectActivity: (activityId: string, input: RejectActivityInput) => void;
   bulkConcludeActivities: (activityIds: string[], input: ConcludeActivityInput) => void;
   cancelActivities: (activityIds: string[]) => void;
+  importActivities: (file: File) => Promise<number>;
 }
 
 export function useActivities(projectId: string): UseActivitiesResult {
@@ -653,7 +636,6 @@ export function useActivities(projectId: string): UseActivitiesResult {
         predecessors: input.predecessors,
         retestCount: 0,
         issueCount: 0,
-        wbs: input.wbs,
         area: input.area,
         system: input.system,
         transaction: input.transaction,
@@ -673,7 +655,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
   // própria (isso vive na UI).
   function concludeActivity(activityId: string, input: ConcludeActivityInput): void {
     if (!useMocks) {
-      void activitiesApi.complete(projectId, activityId, input.approvalNote).then(
+      void activitiesApi.complete(projectId, activityId, input).then(
         (updatedActivity) =>
           setActivities((prev) =>
             prev.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity)),
@@ -732,7 +714,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
   // (ActivitiesTable), não aqui — mesma convenção dos outros mutators deste hook.
   function bulkConcludeActivities(activityIds: string[], input: ConcludeActivityInput): void {
     if (!useMocks) {
-      void Promise.all(activityIds.map((activityId) => activitiesApi.complete(projectId, activityId, input.approvalNote))).then(
+      void Promise.all(activityIds.map((activityId) => activitiesApi.complete(projectId, activityId, input))).then(
         (updatedActivities) => {
           const byId = new Map(updatedActivities.map((activity) => [activity.id, activity]));
           setActivities((prev) => prev.map((activity) => byId.get(activity.id) ?? activity));
@@ -776,6 +758,21 @@ export function useActivities(projectId: string): UseActivitiesResult {
     );
   }
 
+  async function importActivities(file: File): Promise<number> {
+    if (useMocks) return 0;
+
+    try {
+      const response = await activitiesApi.importFile(projectId, file);
+      setActivities((prev) => [...prev, ...response.activities]);
+      setError(null);
+      return response.created;
+    } catch (err) {
+      const normalized = err instanceof ApiError ? err : normalizeError(err);
+      setError(normalized);
+      throw normalized;
+    }
+  }
+
   return {
     activities,
     stats,
@@ -786,5 +783,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
     rejectActivity,
     bulkConcludeActivities,
     cancelActivities,
+    importActivities,
   };
 }
+
