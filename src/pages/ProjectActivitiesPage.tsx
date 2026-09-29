@@ -41,7 +41,7 @@ function createEmptyFilters(): ActivityFiltersState {
 export default function ProjectActivitiesPage() {
   const { id } = useParams();
   const projectId = id ?? "";
-  const { activities, stats, loading, error, createActivity, bulkConcludeActivities, cancelActivities } =
+  const { activities, stats, loading, error, createActivity, bulkConcludeActivities, cancelActivities, importActivities } =
     useActivities(projectId);
   const { projects } = useProjects();
   const { name: currentUserName } = useCurrentUser();
@@ -268,6 +268,8 @@ export default function ProjectActivitiesPage() {
         onHide={() => setShowImportModal(false)}
         team={currentProject?.team ?? []}
         onImport={handleImportActivities}
+        onImportFile={importActivities}
+        useBackendImport={!useMocks}
       />
     </div>
   );

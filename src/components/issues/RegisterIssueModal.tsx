@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import Modal from "../common/Modal";
 import NavIcon from "../common/NavIcon";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
-import { toLocalIsoString } from "../../utils/activityIndicators";
+import { buildEvidenceMetadata, formatEvidenceFileSize, getEvidenceFileError } from "../../utils/evidenceFiles";
 import { ISSUE_TYPE_LABELS, ISSUE_IMPACT_LABELS } from "../../utils/issueIndicators";
 import type { IssueType, IssueImpact, NewIssueInput } from "../../types/issue";
 import type { Activity } from "../../types/activity";
@@ -59,10 +59,6 @@ const ISSUE_TYPE_OPTIONS: IssueType[] = [
 
 const ISSUE_IMPACT_OPTIONS: IssueImpact[] = ["muito_alto", "alto", "medio", "baixo"];
 
-function formatFileSize(sizeBytes: number): string {
-  return `${Math.ceil(sizeBytes / 1024)} KB`;
-}
-
 export default function RegisterIssueModal({
   show,
   onHide,
@@ -90,6 +86,17 @@ export default function RegisterIssueModal({
 
   function updateField<K extends keyof RegisterIssueFormState>(key: K, value: RegisterIssueFormState[K]) {
     setState((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function selectFile(file: File) {
+    const error = getEvidenceFileError(file);
+    if (error) {
+      setSelectedFile(null);
+      setState((prev) => ({ ...prev, errorMsg: error }));
+      return;
+    }
+    setSelectedFile(file);
+    setState((prev) => ({ ...prev, errorMsg: null }));
   }
 
   function handleConfirm() {
@@ -120,14 +127,7 @@ export default function RegisterIssueModal({
       dev: state.dev,
       area: linkedActivity?.area ?? "",
       relatedActivityId: linkedActivity?.id ?? "",
-      openingAttachment: selectedFile
-        ? {
-            fileName: selectedFile.name,
-            sizeLabel: formatFileSize(selectedFile.size),
-            uploadedBy: currentUserName,
-            uploadedAt: toLocalIsoString(new Date()),
-          }
-        : null,
+      openingAttachment: selectedFile ? buildEvidenceMetadata(selectedFile, currentUserName) : null,
     });
     resetAndHide();
   }
@@ -284,7 +284,7 @@ export default function RegisterIssueModal({
             event.preventDefault();
             setDragOver(false);
             const file = event.dataTransfer.files[0];
-            if (file) setSelectedFile(file);
+            if (file) selectFile(file);
           }}
         >
           <NavIcon>
@@ -292,7 +292,9 @@ export default function RegisterIssueModal({
             <path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
           </NavIcon>
           <span>
-            {selectedFile ? `${selectedFile.name} (${formatFileSize(selectedFile.size)})` : "Clique ou arraste um arquivo"}
+            {selectedFile
+              ? `${selectedFile.name} (${formatEvidenceFileSize(selectedFile.size)})`
+              : "Clique ou arraste um arquivo"}
           </span>
         </div>
         <input
@@ -302,7 +304,7 @@ export default function RegisterIssueModal({
           style={{ display: "none" }}
           onChange={(event) => {
             const file = event.target.files?.[0];
-            if (file) setSelectedFile(file);
+            if (file) selectFile(file);
             event.target.value = "";
           }}
         />

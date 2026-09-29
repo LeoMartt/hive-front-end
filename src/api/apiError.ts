@@ -38,6 +38,15 @@ interface ErrorEnvelope {
   };
 }
 
+function directDjangoMessage(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const body = data as Record<string, unknown>;
+  if (typeof body.detail === "string") return body.detail;
+  if (typeof body.file === "string") return body.file;
+  if (Array.isArray(body.rows)) return "Arquivo possui linhas inválidas.";
+  return null;
+}
+
 function messageForStatus(status: number): string {
   if (status === 401) return "Sessão expirada. Faça login novamente.";
   if (status === 403) return "Você não tem permissão para esta ação.";
@@ -62,11 +71,12 @@ export function normalizeError(err: unknown): ApiError {
     if (err.response) {
       const body = err.response.data as ErrorEnvelope | undefined;
       const status = err.response.status;
+      const directMessage = directDjangoMessage(err.response.data);
       return new ApiError({
         status,
         code: body?.error?.code ?? `HTTP_${status}`,
-        message: body?.error?.message ?? messageForStatus(status),
-        details: body?.error?.details,
+        message: body?.error?.message ?? directMessage ?? messageForStatus(status),
+        details: body?.error?.details ?? err.response.data,
         traceId: body?.error?.traceId,
       });
     }

@@ -2,7 +2,7 @@ import { ACTIVITY_STATUS_LABELS, formatActivityDate } from "./activityIndicators
 import type { Activity } from "../types/activity";
 
 export const ACTIVITY_EXPORT_COLUMN_WIDTHS: number[] = [
-  10, 34, 16, 22, 12, 12, 14, 14, 16, 12, 12, 16, 12, 14, 14, 14, 30, 30, 8,
+  10, 34, 16, 22, 12, 12, 14, 14, 16, 12, 12, 16, 14, 14, 14, 30, 30, 8,
 ];
 
 export function buildActivityExportRows(activities: Activity[]): Record<string, string>[] {
@@ -19,7 +19,6 @@ export function buildActivityExportRows(activities: Activity[]): Record<string, 
     "Início Real": formatActivityDate(activity.actualStart),
     "Conclusão Real": formatActivityDate(activity.actualEnd),
     Predecessores: activity.predecessors.length > 0 ? activity.predecessors.join(", ") : "—",
-    WBS: activity.wbs,
     Área: activity.area,
     Sistema: activity.system,
     Transação: activity.transaction,

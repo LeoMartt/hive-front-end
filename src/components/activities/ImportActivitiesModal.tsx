@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import Modal from "../common/Modal";
 import NavIcon from "../common/NavIcon";
+import { ApiError } from "../../api/apiError";
 import { parseActivityImportRows, downloadActivityImportTemplate } from "../../utils/activityImport";
 import type { NewActivityInput } from "../../types/activity";
 import type { TeamMember } from "../../types/project";
@@ -11,6 +12,8 @@ interface ImportActivitiesModalProps {
   onHide: () => void;
   team: TeamMember[];
   onImport: (inputs: NewActivityInput[]) => void;
+  onImportFile: (file: File) => Promise<number>;
+  useBackendImport: boolean;
 }
 
 interface ImportResult {
@@ -22,10 +25,27 @@ interface ImportResult {
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 function isAcceptedExtension(fileName: string): boolean {
-  return /\.(xlsx|xls)$/i.test(fileName);
+  return /\.(xlsx|csv)$/i.test(fileName);
 }
 
-export default function ImportActivitiesModal({ show, onHide, team, onImport }: ImportActivitiesModalProps) {
+function extractImportErrors(error: unknown): string[] {
+  if (!(error instanceof ApiError)) return [];
+  const details = error.details;
+  if (!details || typeof details !== "object") return [];
+  const body = details as Record<string, unknown>;
+  if (Array.isArray(body.rows)) return body.rows.map(String);
+  if (typeof body.file === "string") return [body.file];
+  return [];
+}
+
+export default function ImportActivitiesModal({
+  show,
+  onHide,
+  team,
+  onImport,
+  onImportFile,
+  useBackendImport,
+}: ImportActivitiesModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
@@ -43,7 +63,7 @@ export default function ImportActivitiesModal({ show, onHide, team, onImport }: 
   function handleFileSelected(file: File) {
     if (!isAcceptedExtension(file.name)) {
       setSelectedFile(null);
-      setResult({ success: false, summary: "Formato de arquivo não suportado. Envie um .xlsx ou .xls.", errors: [] });
+      setResult({ success: false, summary: "Formato de arquivo não suportado. Envie um .xlsx ou .csv.", errors: [] });
       return;
     }
     if (file.size > MAX_FILE_SIZE_BYTES) {
@@ -59,6 +79,17 @@ export default function ImportActivitiesModal({ show, onHide, team, onImport }: 
     if (!selectedFile) return;
     setImporting(true);
     try {
+      if (useBackendImport) {
+        const created = await onImportFile(selectedFile);
+        setResult({
+          success: true,
+          summary: `${created} atividade(s) importada(s) com sucesso.`,
+          errors: [],
+        });
+        setSelectedFile(null);
+        return;
+      }
+
       const buffer = await selectedFile.arrayBuffer();
       const workbook = XLSX.read(buffer, { type: "array", cellDates: true });
       const firstSheetName = workbook.SheetNames[0];
@@ -77,11 +108,11 @@ export default function ImportActivitiesModal({ show, onHide, team, onImport }: 
         errors,
       });
       setSelectedFile(null);
-    } catch {
+    } catch (error) {
       setResult({
         success: false,
-        summary: "Não foi possível ler o arquivo. Confirme se é um .xlsx válido, seguindo o modelo.",
-        errors: [],
+        summary: error instanceof ApiError ? error.message : "Não foi possível ler o arquivo. Confirme se é um .xlsx ou .csv válido, seguindo o modelo.",
+        errors: extractImportErrors(error),
       });
     } finally {
       setImporting(false);
@@ -94,8 +125,8 @@ export default function ImportActivitiesModal({ show, onHide, team, onImport }: 
         Importar atividades em massa
       </div>
       <div className="modal-subtitle">
-        Envie a planilha (.xlsx) com a carga de atividades. Predecessores devem referenciar IDs já existentes no
-        sistema (ex: ATV-1042).
+        Envie a planilha (.xlsx ou .csv) com a carga de atividades. Predecessores devem referenciar o Id lista
+        sequencial temporário do próprio arquivo.
       </div>
 
       <button type="button" className="btn btn-sm" style={{ marginBottom: 14 }} onClick={downloadActivityImportTemplate}>
@@ -110,32 +141,32 @@ export default function ImportActivitiesModal({ show, onHide, team, onImport }: 
         <summary>Ver descrição dos campos da carga</summary>
         <div className="import-ref-list">
           <div>
-            <b>Nome</b> — nome da atividade (obrigatório).
+            <b>Atividade nome</b> — nome da atividade (obrigatório).
           </div>
           <div>
-            <b>Módulo</b> — nível 1 da hierarquia (obrigatório).
+            <b>Modulo</b> — nível 1 da hierarquia (obrigatório).
           </div>
           <div>
             <b>Processo</b> — nível 2 da hierarquia, dentro do módulo (obrigatório).
           </div>
           <div>
-            <b>Tester</b> — precisa bater com um nome do time do projeto com papel Tester (obrigatório).
+            <b>Tester email</b> — e-mail de usuário com papel Tester no projeto (obrigatório).
           </div>
           <div>
-            <b>Desenvolvedor</b> — precisa bater com um nome do time do projeto com papel Desenvolvedor (obrigatório).
+            <b>Dev email</b> — e-mail de usuário com papel Desenvolvedor no projeto (obrigatório).
           </div>
           <div>
-            <b>Início Planejado</b> — data planejada de início (DD/MM/AAAA ou célula de data do Excel).
+            <b>Data inicio planejado</b> — data planejada de início (DD/MM/AAAA ou AAAA-MM-DD).
           </div>
           <div>
-            <b>Conclusão Planejada</b> — data planejada de conclusão (DD/MM/AAAA ou célula de data do Excel).
+            <b>Data final planejada</b> — data planejada de conclusão (DD/MM/AAAA ou AAAA-MM-DD).
           </div>
           <div>
-            <b>Predecessores</b> — IDs de atividades já existentes das quais esta depende, separados por ";"
-            (opcional; ex.: ATV-1042; ATV-1050).
+            <b>Id lista sequencial (temporario)</b> — código interno da própria planilha, usado para resolver
+            predecessores.
           </div>
           <div>
-            <b>WBS</b> — código da estrutura analítica do projeto (opcional).
+            <b>Predecessores</b> — Ids temporários da própria planilha, separados por ";" ou "," (opcional).
           </div>
           <div>
             <b>Área</b> — área de negócio envolvida (opcional).
@@ -190,14 +221,14 @@ export default function ImportActivitiesModal({ show, onHide, team, onImport }: 
           <span>
             {selectedFile
               ? `${selectedFile.name} (${Math.ceil(selectedFile.size / 1024)} KB)`
-              : "Clique ou arraste o arquivo .xlsx da carga"}
+              : "Clique ou arraste o arquivo .xlsx ou .csv da carga"}
           </span>
         </div>
         <input
           ref={fileInputRef}
           id="import-activities-file-input"
           type="file"
-          accept=".xlsx,.xls"
+          accept=".xlsx,.csv"
           style={{ display: "none" }}
           onChange={(event) => {
             const file = event.target.files?.[0];

@@ -6,6 +6,10 @@ const issueAttachmentSchema = z.object({
   sizeLabel: z.string(),
   uploadedBy: z.string(),
   uploadedAt: z.string(),
+  contentType: z.string().optional(),
+  storagePath: z.string().optional(),
+  url: z.string().optional(),
+  urlExpiresAt: z.string().optional(),
 });
 
 export const issueSchema = z.object({

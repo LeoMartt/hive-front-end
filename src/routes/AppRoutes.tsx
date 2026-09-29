@@ -24,7 +24,7 @@ export default function AppRoutes() {
           <Route path="dashboard" element={<ProjectDashboardPage />} />
           <Route path="atividades" element={<ProjectActivitiesPage />} />
           <Route path="atividades/:activityId" element={<ActivityDetailPage />} />
-          <Route path="estrutura" element={<PlaceholderPage title="A estrutura (WBS) do projeto" />} />
+          <Route path="estrutura" element={<PlaceholderPage title="A estrutura do projeto" />} />
           <Route path="issues" element={<ProjectIssuesPage />} />
           <Route path="issues/:issueId" element={<IssueDetailPage />} />
           <Route path="config" element={<ProjectConfigPage />} />

@@ -9,15 +9,15 @@ export interface ActivityImportResult {
 }
 
 const HEADER_ALIASES = {
-  name: ["Nome"],
-  module: ["Módulo", "Modulo"],
+  name: ["Atividade nome", "Atividade", "Nome"],
+  module: ["Modulo", "Módulo"],
   process: ["Processo"],
-  tester: ["Tester"],
-  dev: ["Desenvolvedor", "Dev"],
-  plannedStart: ["Início Planejado", "Inicio Planejado"],
-  plannedEnd: ["Conclusão Planejada", "Conclusao Planejada"],
+  tester: ["Tester email", "Tester"],
+  dev: ["Dev email", "Desenvolvedor email", "Desenvolvedor", "Dev"],
+  plannedStart: ["Data inicio planejado", "Data início planejado", "Início Planejado", "Inicio Planejado"],
+  plannedEnd: ["Data final planejada", "Data final planejado", "Conclusão Planejada", "Conclusao Planejada"],
+  temporaryId: ["Id lista sequencial (temporario)", "Id lista sequencial (temporário)", "Id lista sequencial", "Id temporario"],
   predecessors: ["Predecessores"],
-  wbs: ["WBS"],
   area: ["Área", "Area"],
   system: ["Sistema"],
   transaction: ["Transação", "Transacao"],
@@ -61,10 +61,13 @@ function parseImportDate(value: unknown): string | null {
   return toLocalIsoString(date);
 }
 
-function resolvePersonName(raw: string, candidates: TeamMember[]): string | null {
+function resolvePerson(raw: string, candidates: TeamMember[]): TeamMember | null {
   if (!raw) return null;
-  const match = candidates.find((member) => member.name.toLowerCase() === raw.toLowerCase());
-  return match ? match.name : null;
+  return (
+    candidates.find((member) => member.email?.toLowerCase() === raw.toLowerCase()) ??
+    candidates.find((member) => member.name.toLowerCase() === raw.toLowerCase()) ??
+    null
+  );
 }
 
 export function parseActivityImportRows(rows: Record<string, unknown>[], team: TeamMember[]): ActivityImportResult {
@@ -87,11 +90,11 @@ export function parseActivityImportRows(rows: Record<string, unknown>[], team: T
     if (!process) problems.push("processo vazio");
 
     const testerRaw = getField(row, HEADER_ALIASES.tester);
-    const tester = resolvePersonName(testerRaw, testers);
+    const tester = resolvePerson(testerRaw, testers);
     if (!tester) problems.push(`tester "${testerRaw}" não reconhecido`);
 
     const devRaw = getField(row, HEADER_ALIASES.dev);
-    const dev = resolvePersonName(devRaw, devs);
+    const dev = resolvePerson(devRaw, devs);
     if (!dev) problems.push(`desenvolvedor "${devRaw}" não reconhecido`);
 
     const plannedStart = parseImportDate(getRawField(row, HEADER_ALIASES.plannedStart));
@@ -99,6 +102,9 @@ export function parseActivityImportRows(rows: Record<string, unknown>[], team: T
 
     const plannedEnd = parseImportDate(getRawField(row, HEADER_ALIASES.plannedEnd));
     if (!plannedEnd) problems.push("conclusão planejada inválida");
+
+    const temporaryId = getField(row, HEADER_ALIASES.temporaryId);
+    if (!temporaryId) problems.push("id lista sequencial vazio");
 
     if (problems.length > 0) {
       errors.push(`Linha ${lineNo}: ${problems.join("; ")}.`);
@@ -111,15 +117,16 @@ export function parseActivityImportRows(rows: Record<string, unknown>[], team: T
       process,
       // tester/dev/plannedStart/plannedEnd já são garantidamente não-nulos aqui — se algum
       // fosse null, a linha já teria caído em `problems` e retornado acima.
-      tester: tester!,
-      dev: dev!,
+      testerId: tester!.id,
+      tester: tester!.name,
+      developerId: dev!.id,
+      dev: dev!.name,
       plannedStart: plannedStart!,
       plannedEnd: plannedEnd!,
       predecessors: getField(row, HEADER_ALIASES.predecessors)
-        .split(";")
+        .split(/[;,]/)
         .map((id) => id.trim())
         .filter(Boolean),
-      wbs: getField(row, HEADER_ALIASES.wbs),
       area: getField(row, HEADER_ALIASES.area),
       system: getField(row, HEADER_ALIASES.system),
       transaction: getField(row, HEADER_ALIASES.transaction),
@@ -132,34 +139,34 @@ export function parseActivityImportRows(rows: Record<string, unknown>[], team: T
 }
 
 const TEMPLATE_HEADERS = [
-  "Nome",
-  "Módulo",
+  "Modulo",
   "Processo",
-  "Tester",
-  "Desenvolvedor",
-  "Início Planejado",
-  "Conclusão Planejada",
+  "Atividade nome",
+  "Tester email",
+  "Dev email",
+  "Data inicio planejado",
+  "Data final planejada",
+  "Id lista sequencial (temporario)",
   "Predecessores",
-  "WBS",
-  "Área",
   "Sistema",
+  "Area",
   "Transação",
   "Resultado Esperado",
   "Observações",
 ];
 
 const TEMPLATE_EXAMPLE_ROW = [
-  "Validar cálculo de crédito ICMS",
   "Faturamento",
   "Apuração de ICMS",
-  "Nome do tester do projeto",
-  "Nome do desenvolvedor do projeto",
+  "Validar cálculo de crédito ICMS",
+  "tester@empresa.com",
+  "dev@empresa.com",
   "02/07/2026",
   "18/07/2026",
+  "1",
   "",
-  "1.2.3",
-  "Fiscal",
   "SAP ECC",
+  "Fiscal",
   "FB60",
   "Sistema calcula o crédito corretamente",
   "",

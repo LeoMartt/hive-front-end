@@ -62,7 +62,7 @@ Para usar esse fluxo, seu Claude Code precisa ter o plugin `superpowers` instala
 **Ainda placeholder** ("Em construção", sem spec/plano ainda):
 - `/projetos/:id/atividades/:activityId` — detalhe de atividade
 - `/projetos/:id/issues/:issueId` — detalhe de issue
-- `/projetos/:id/estrutura` — WBS do projeto
+- `/projetos/:id/estrutura` — estrutura do projeto
 - `/projetos/:id/config` — Papéis & Configuração (incluiria limiares de aging hoje fixos em `issueIndicators.ts`)
 
 Cada um desses é candidato ao mesmo ciclo brainstorm → spec → plano → implementação.
