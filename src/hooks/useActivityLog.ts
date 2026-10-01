@@ -1,86 +1,65 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import type { LogEntry } from "../types/activityLog";
+import type { Activity } from "../types/activity";
+import type { Issue } from "../types/issue";
+import { ACTIVITY_STATUS_LABELS } from "../utils/activityIndicators";
+import { ISSUE_STATUS_LABELS } from "../utils/issueIndicators";
 
-function minutesAgo(minutes: number): string {
-  return new Date(Date.now() - minutes * 60000).toISOString();
+function activityTimestamp(activity: Activity): string {
+  return activity.updatedAt ?? activity.createdAt ?? activity.actualEnd ?? activity.actualStart ?? activity.plannedEnd;
 }
 
-const INITIAL_LOG_ENTRIES: LogEntry[] = [
-  {
-    id: "log-1",
-    icon: "block",
-    refId: "ATV-1009",
-    refName: "Testar integração com banco emissor",
-    text: "mudou de Liberado para Bloqueado (2º reteste)",
-    authorInitials: "RL",
-    authorName: "R. Lima",
-    at: minutesAgo(12),
-  },
-  {
-    id: "log-2",
-    icon: "issue",
-    refId: "ISS-0294",
-    refName: "Segunda ocorrência de timeout no CNAB 240 aguardando análise",
-    text: "registrada como impeditiva",
-    authorInitials: "GD",
-    authorName: "G. Def.",
-    at: minutesAgo(38),
-  },
-  {
-    id: "log-3",
-    icon: "done",
-    refId: "ATV-1017",
-    refName: "Testar atualização cadastral em massa",
-    text: "aprovada com evidência — Concluído",
-    authorInitials: "CP",
-    authorName: "C. Prado",
-    at: minutesAgo(60),
-  },
-  {
-    id: "log-4",
-    icon: "issue",
-    refId: "ISS-0298",
-    refName: "Upload de documentos falha para arquivos acima de 10MB",
-    text: "mudou de Em análise para Solução proposta",
-    authorInitials: "JP",
-    authorName: "J. Prado",
-    at: minutesAgo(80),
-  },
-  {
-    id: "log-5",
-    icon: "status",
-    refId: "ATV-1012",
-    refName: "Validar upload de documentos",
-    text: "mudou de Aguardando para Liberado",
-    authorInitials: "RS",
-    authorName: "Rafael Souza",
-    at: minutesAgo(120),
-  },
-  {
-    id: "log-6",
-    icon: "block",
-    refId: "ISS-0296",
-    refName: "Ambiente sem massa de dados de fornecedores",
-    text: "aberta há 6 dias segue Em análise — SLA em risco",
-    authorInitials: "GD",
-    authorName: "G. Def.",
-    at: minutesAgo(180),
-  },
-  {
-    id: "log-7",
-    icon: "done",
-    refId: "ATV-1010",
-    refName: "Testar cadastro de cliente PJ",
-    text: "marcada como Concluída após reteste aprovado",
-    authorInitials: "MT",
-    authorName: "M. Torres",
-    at: minutesAgo(300),
-  },
-];
+function issueTimestamp(issue: Issue): string {
+  return issue.updatedAt ?? issue.solutionProposedAt ?? issue.analysisStartedAt ?? issue.resolvedAt ?? issue.openedAt;
+}
 
-export function useActivityLog(projectId: string): LogEntry[] {
-  // Log estático — não há modelo de auditoria/histórico real ainda.
-  void projectId;
-  const [entries] = useState<LogEntry[]>(INITIAL_LOG_ENTRIES);
-  return entries;
+function activityIcon(activity: Activity): LogEntry["icon"] {
+  if (activity.status === "concluido") return "done";
+  if (activity.status === "bloqueado" || activity.status === "cancelado") return "block";
+  return "status";
+}
+
+function activityText(activity: Activity): string {
+  const label = ACTIVITY_STATUS_LABELS[activity.status];
+  if (activity.status === "concluido") return "marcada como Concluído";
+  if (activity.status === "bloqueado") return `status atual ${label}`;
+  return `status atual ${label}`;
+}
+
+function issueText(issue: Issue): string {
+  const label = ISSUE_STATUS_LABELS[issue.status];
+  if (issue.status === "concluida") return "marcada como Concluída";
+  if (issue.impeditiva && issue.status !== "cancelada") return `impeditiva com status ${label}`;
+  return `status atual ${label}`;
+}
+
+export function useActivityLog(activities: Activity[], issues: Issue[]): LogEntry[] {
+  return useMemo(() => {
+    const activityEntries: LogEntry[] = activities.map((activity) => ({
+      id: `activity-${activity.id}`,
+      icon: activityIcon(activity),
+      refId: activity.id,
+      refName: activity.name,
+      text: activityText(activity),
+      authorInitials: "",
+      authorName: activity.tester,
+      at: activityTimestamp(activity),
+    }));
+
+    const issueEntries: LogEntry[] = issues.map((issue) => ({
+      id: `issue-${issue.id}`,
+      icon: issue.impeditiva ? "block" : "issue",
+      refId: issue.id,
+      refName: issue.title,
+      text: issueText(issue),
+      authorInitials: "",
+      authorName: issue.tester,
+      at: issueTimestamp(issue),
+    }));
+
+    return [...activityEntries, ...issueEntries]
+      .filter((entry) => !Number.isNaN(new Date(entry.at).getTime()))
+      .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+      .slice(0, 7);
+  }, [activities, issues]);
 }

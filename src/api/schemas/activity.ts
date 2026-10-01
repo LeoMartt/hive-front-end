@@ -38,4 +38,6 @@ export const activitySchema = z.object({
   approvalEvidence: activityAttachmentSchema.nullable(),
   approvalNote: z.string().nullable(),
   rejectedAt: z.string().nullable(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 }) satisfies z.ZodType<Activity>;

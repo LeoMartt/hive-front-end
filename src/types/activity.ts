@@ -43,6 +43,8 @@ export interface Activity {
   approvalEvidence: ActivityAttachment | null;
   approvalNote: string | null;
   rejectedAt: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface NewActivityInput {

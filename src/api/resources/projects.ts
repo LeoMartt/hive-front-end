@@ -54,4 +54,11 @@ export const projectsApi = {
   async removeMembership(projectId: string, membershipId: string): Promise<void> {
     await httpClient.delete(`/projects/${projectId}/memberships/${membershipId}/`);
   },
+
+  async downloadAuditPackage(projectId: string): Promise<Blob> {
+    const { data } = await httpClient.get(`/projects/${projectId}/audit-export/`, {
+      responseType: "blob",
+    });
+    return data;
+  },
 };
