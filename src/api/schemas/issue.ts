@@ -33,4 +33,6 @@ export const issueSchema = z.object({
   solutionProposedAt: z.string().nullable(),
   openingAttachment: issueAttachmentSchema.nullable(),
   solutionAttachment: issueAttachmentSchema.nullable(),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
 }) satisfies z.ZodType<Issue>;

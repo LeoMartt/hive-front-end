@@ -7,6 +7,10 @@ import { normalizeError } from "./apiError";
 type RetriableConfig = InternalAxiosRequestConfig & { __retried?: boolean };
 
 httpClient.interceptors.request.use(async (config) => {
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+    delete config.headers["content-type"];
+  }
   const token = await getApiToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;

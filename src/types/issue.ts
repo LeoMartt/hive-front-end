@@ -35,6 +35,8 @@ export interface Issue {
   solutionProposedAt: string | null;
   openingAttachment: IssueAttachment | null;
   solutionAttachment: IssueAttachment | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface NewIssueInput {

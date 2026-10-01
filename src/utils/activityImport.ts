@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import { toLocalIsoString } from "./activityIndicators";
+import { downloadBlob } from "./downloadBlob";
 import type { NewActivityInput } from "../types/activity";
 import type { TeamMember } from "../types/project";
 
@@ -177,5 +178,9 @@ export function downloadActivityImportTemplate(): void {
   ws["!cols"] = TEMPLATE_HEADERS.map(() => ({ wch: 20 }));
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Modelo");
-  XLSX.writeFile(wb, "hive_modelo_importacao_atividades.xlsx");
+  const output = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  downloadBlob(
+    new Blob([output], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }),
+    "hive_modelo_importacao_atividades.xlsx",
+  );
 }
