@@ -58,6 +58,7 @@ export default function ActivitiesTable({
 
   // Descarta seleções de atividades que saíram da lista filtrada ou deixaram de ser elegíveis.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedIds((prev) => {
       const selectable = new Set(selectableIds);
       const next = new Set([...prev].filter((id) => selectable.has(id)));

@@ -11,6 +11,7 @@ export default function ConfigAttachmentsPanel() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDraft({
       anexoMaxMb: config.anexoMaxMb,
       evidenciaObrigatoriaAtividade: config.evidenciaObrigatoriaAtividade,

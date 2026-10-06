@@ -36,6 +36,7 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDraft(config);
     setSaved(false);
   }, [config]);

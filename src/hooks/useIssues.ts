@@ -398,6 +398,7 @@ export function useIssues(projectId: string): UseIssuesResult {
     if (useMocks || !projectId) return;
 
     let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
 
