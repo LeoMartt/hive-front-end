@@ -6,24 +6,29 @@ export const ACTIVITY_EXPORT_COLUMN_WIDTHS: number[] = [
 ];
 
 export function buildActivityExportRows(activities: Activity[]): Record<string, string>[] {
+  const textOrDash = (value: string | null | undefined): string => {
+    const text = (value ?? "").trim();
+    return text || "—";
+  };
+
   return activities.map((activity) => ({
     ID: activity.id,
-    Nome: activity.name,
-    Módulo: activity.module,
-    Processo: activity.process,
+    Nome: textOrDash(activity.name),
+    Módulo: textOrDash(activity.module),
+    Processo: textOrDash(activity.process),
     Status: ACTIVITY_STATUS_LABELS[activity.status],
-    Tester: activity.tester,
-    Desenvolvedor: activity.dev,
+    Tester: textOrDash(activity.tester),
+    Desenvolvedor: textOrDash(activity.dev),
     "Início Planejado": formatActivityDate(activity.plannedStart),
     "Conclusão Planejada": formatActivityDate(activity.plannedEnd),
     "Início Real": formatActivityDate(activity.actualStart),
     "Conclusão Real": formatActivityDate(activity.actualEnd),
     Predecessores: activity.predecessors.length > 0 ? activity.predecessors.join(", ") : "—",
-    Área: activity.area,
-    Sistema: activity.system,
-    Transação: activity.transaction,
-    "Resultado Esperado": activity.expectedResult,
-    Observações: activity.notes ?? "—",
+    Área: textOrDash(activity.area),
+    Sistema: textOrDash(activity.system),
+    Transação: textOrDash(activity.transaction),
+    "Resultado Esperado": textOrDash(activity.expectedResult),
+    Observações: textOrDash(activity.notes),
     Reteste: activity.retestCount > 0 ? `${activity.retestCount}×` : "—",
   }));
 }

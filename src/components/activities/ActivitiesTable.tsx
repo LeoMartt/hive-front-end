@@ -4,7 +4,6 @@ import ActivityGroupRows from "./ActivityGroupRows";
 import ConcludeActivityModal from "./ConcludeActivityModal";
 import CancelActivitiesModal from "./CancelActivitiesModal";
 import EmptyState from "../common/EmptyState";
-import SortIcon from "../common/SortIcon";
 import { groupByModuleProcess, groupByStatus, groupByTester } from "../../utils/groupActivities";
 import { isBulkApprovable, isBulkSelectable } from "../../utils/activityIndicators";
 import type { Activity, ActivityGroupMode, ConcludeActivityInput } from "../../types/activity";
@@ -135,10 +134,26 @@ export default function ActivitiesTable({
         </div>
       )}
       <div className="table-wrap dense">
-        <table>
+        <table className={`activities-data-table activities-data-table-${groupMode}`}>
+          <colgroup>
+            <col className="activity-col-select" />
+            <col className="activity-col-toggle" />
+            <col className="activity-col-name" />
+            <col className="activity-col-id" />
+            <col className="activity-col-status" />
+            <col className="activity-col-person" />
+            <col className="activity-col-person" />
+            <col className="activity-col-date" />
+            <col className="activity-col-date" />
+            <col className="activity-col-date" />
+            <col className="activity-col-date" />
+            <col className="activity-col-predecessors" />
+            <col className="activity-col-retest" />
+            <col className="activity-col-issues" />
+          </colgroup>
           <thead>
             <tr>
-              <th style={{ width: 26 }}>
+              <th className="activity-select-header">
                 <input
                   ref={selectAllRef}
                   type="checkbox"
@@ -147,43 +162,18 @@ export default function ActivitiesTable({
                   onChange={(event) => toggleAll(event.target.checked)}
                 />
               </th>
-              <th style={{ width: 26 }}></th>
-              <th>
-                Nome{" "}
-                <span className="sort-icon">
-                  <SortIcon />
-                </span>
-              </th>
-              <th>ID</th>
-              <th>
-                Status{" "}
-                <span className="sort-icon">
-                  <SortIcon />
-                </span>
-              </th>
-              <th>Tester</th>
-              <th>Dev</th>
-              <th>
-                Início plan.{" "}
-                <span className="sort-icon">
-                  <SortIcon />
-                </span>
-              </th>
-              <th>
-                Conclusão plan.{" "}
-                <span className="sort-icon">
-                  <SortIcon />
-                </span>
-              </th>
-              <th>Início real</th>
-              <th>Conclusão real</th>
-              <th>Predec.</th>
-              <th className="text-center">
-                Reteste{" "}
-                <span className="sort-icon">
-                  <SortIcon />
-                </span>
-              </th>
+              <th className="activity-toggle-header"></th>
+              <th className="activity-header-left activity-header-name">Nome</th>
+              <th className="activity-header-id">ID</th>
+              <th className="activity-header-center">Status</th>
+              <th className="activity-header-person">Tester</th>
+              <th className="activity-header-person">Dev</th>
+              <th className="activity-header-center">Início plan.</th>
+              <th className="activity-header-center">Conclusão plan.</th>
+              <th className="activity-header-center">Início real</th>
+              <th className="activity-header-center">Conclusão real</th>
+              <th className="activity-header-center">Predec.</th>
+              <th className="text-center">Reteste</th>
               <th className="text-center">Issues</th>
             </tr>
           </thead>

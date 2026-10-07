@@ -603,12 +603,12 @@ export function useActivities(projectId: string): UseActivitiesResult {
   // A validação de campo obrigatório vive no modal (camada de UI).
   function createActivity(input: NewActivityInput): void {
     if (!useMocks) {
-      if (!input.nodeId || !input.testerId || !input.developerId) {
+      if (!input.module.trim() || !input.testerId || !input.developerId) {
         setError(
           new ApiError({
             status: null,
             code: "INVALID_ACTIVITY_INPUT",
-            message: "Selecione módulo/processo, tester e desenvolvedor válidos.",
+            message: "Informe módulo/processo, tester e desenvolvedor válidos.",
           }),
         );
         return;

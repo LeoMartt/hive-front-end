@@ -7,6 +7,7 @@ import IssueAttachmentsPanel from "../components/issues/IssueAttachmentsPanel";
 import ProposeSolutionModal from "../components/issues/ProposeSolutionModal";
 import { useIssues } from "../hooks/useIssues";
 import { useActivities } from "../hooks/useActivities";
+import { useProjects } from "../hooks/useProjects";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useGoBack } from "../hooks/useGoBack";
 import { deriveIssueAuditTrail } from "../utils/issueAuditTrail";
@@ -16,8 +17,10 @@ export default function IssueDetailPage() {
   const projectId = id ?? "";
   const { issues, startAnalysis, proposeSolution, cancelIssue } = useIssues(projectId);
   const { activities } = useActivities(projectId);
-  const { name: currentUserName } = useCurrentUser();
+  const { projects } = useProjects();
+  const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
   const issue = issues.find((item) => item.id === issueId);
+  const currentProject = projects.find((project) => project.id === projectId);
   const goBack = useGoBack(`/projetos/${projectId}/issues`);
   const [showProposeSolutionModal, setShowProposeSolutionModal] = useState(false);
 
@@ -34,6 +37,21 @@ export default function IssueDetailPage() {
 
   const relatedActivity = activities.find((item) => item.id === issue.relatedActivityId) ?? null;
   const auditEntries = deriveIssueAuditTrail(issue);
+  const currentMember = currentProject?.team.find(
+    (member) =>
+      member.id === currentUserId ||
+      (currentUserEmail !== undefined && member.email?.toLowerCase() === currentUserEmail.toLowerCase()) ||
+      member.name === currentUserName,
+  );
+  const isGestor = currentMember?.role === "Gestor de Projetos";
+  const isIssueDev =
+    issue.developerId === currentUserId ||
+    issue.developerId === currentMember?.id ||
+    issue.dev === currentUserName ||
+    issue.dev === currentUserEmail;
+  const canStartAnalysis = issue.status === "aberta" && isIssueDev;
+  const canProposeSolution = issue.status === "em_analise" && isIssueDev;
+  const canCancelIssue = issue.status === "em_analise" && (isIssueDev || isGestor);
 
   return (
     <div>
@@ -64,7 +82,7 @@ export default function IssueDetailPage() {
             </div>
           )}
 
-          {issue.status === "aberta" && (
+          {canStartAnalysis && (
             <button
               type="button"
               className="btn btn-primary"
@@ -74,7 +92,7 @@ export default function IssueDetailPage() {
               Iniciar análise
             </button>
           )}
-          {issue.status === "em_analise" && (
+          {canProposeSolution && (
             <button
               type="button"
               className="btn btn-primary"
@@ -84,19 +102,19 @@ export default function IssueDetailPage() {
               Propor solução
             </button>
           )}
-          {issue.status !== "concluida" && issue.status !== "cancelada" && (
+
+          <IssueFieldGrid issue={issue} />
+          <IssueAuditTrail entries={auditEntries} />
+          {canCancelIssue && (
             <button
               type="button"
               className="btn btn-danger"
-              style={{ width: "100%", justifyContent: "center", marginBottom: 20 }}
+              style={{ width: "100%", justifyContent: "center", marginTop: 20 }}
               onClick={() => cancelIssue(issue.id)}
             >
               Cancelar issue
             </button>
           )}
-
-          <IssueFieldGrid issue={issue} />
-          <IssueAuditTrail entries={auditEntries} />
         </div>
 
         <div className="activity-side">

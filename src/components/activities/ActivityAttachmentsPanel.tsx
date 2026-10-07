@@ -1,4 +1,5 @@
 import type { Activity, ActivityAttachment } from "../../types/activity";
+import { downloadEvidenceAttachment } from "../../utils/evidenceDownload";
 
 function attachIconLabel(fileName: string): string {
   return fileName.split(".").pop()?.toUpperCase() ?? "";
@@ -20,7 +21,13 @@ function AttachmentRow({ attachment }: { attachment: ActivityAttachment }) {
           {attachment.sizeLabel} · enviado por {attachment.uploadedBy}
         </span>
       </div>
-      <button type="button" className="attach-dl" title="Baixar anexo">
+      <button
+        type="button"
+        className="attach-dl"
+        title={attachment.url || attachment.file ? "Baixar anexo" : "Anexo sem link de download"}
+        disabled={!attachment.url && !attachment.file}
+        onClick={() => void downloadEvidenceAttachment(attachment)}
+      >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
           <path d="M12 3v12m0 0-4-4m4 4 4-4" />
           <path d="M4 17v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3" />
