@@ -13,6 +13,44 @@ interface ActivityGroupRowsProps {
   onToggleSelect: (id: string) => void;
 }
 
+function GroupSummary({
+  done,
+  total,
+  late,
+  percent,
+}: {
+  done: number;
+  total: number;
+  late: number;
+  percent: number;
+}) {
+  if (total === 0) {
+    return (
+      <div className="group-rollup">
+        <span className="rc" style={{ color: "var(--text-faint)" }}>
+          Sem atividades ativas
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="group-rollup">
+      <span className="rc">
+        {done}/{total} concluídas
+      </span>
+      <div className="mini-progress">
+        <div className="mini-progress-fill" style={{ width: `${percent}%` }} />
+      </div>
+      {late > 0 && (
+        <span className="rc rc-late">
+          {late} atrasada{late > 1 ? "s" : ""}
+        </span>
+      )}
+    </div>
+  );
+}
+
 export default function ActivityGroupRows({
   groups,
   projectId,
@@ -45,29 +83,11 @@ export default function ActivityGroupRows({
               <td className="activity-group-toggle-icon">
                 <TreeToggleIcon expanded={isExpanded} />
               </td>
-              <td colSpan={2}>
-                <b>{group.label}</b>
-              </td>
-              <td colSpan={10}>
-                {total === 0 ? (
-                  <span className="rc" style={{ color: "var(--text-faint)" }}>
-                    Sem atividades ativas
-                  </span>
-                ) : (
-                  <div className="group-rollup">
-                    <span className="rc">
-                      {done}/{total} concluídas
-                    </span>
-                    <div className="mini-progress">
-                      <div className="mini-progress-fill" style={{ width: `${percent}%` }} />
-                    </div>
-                    {late > 0 && (
-                      <span className="rc rc-late">
-                        {late} atrasada{late > 1 ? "s" : ""}
-                      </span>
-                    )}
-                  </div>
-                )}
+              <td colSpan={12}>
+                <div className="activity-group-summary">
+                  <b>{group.label}</b>
+                  <GroupSummary done={done} total={total} late={late} percent={percent} />
+                </div>
               </td>
             </tr>
             {isExpanded &&

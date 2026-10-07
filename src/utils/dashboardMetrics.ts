@@ -30,7 +30,7 @@ export function computeIndicators(activities: Activity[]): DashboardIndicators {
     (activity) => activity.actualEnd !== null && activity.actualEnd.slice(0, 10) <= activity.plannedEnd.slice(0, 10)
   ).length;
   const noRetest = concluded.filter((activity) => activity.retestCount === 0).length;
-  const backlogCount = active.filter((activity) => activity.status === "aguardando").length;
+  const backlogCount = active.filter((activity) => ["aguardando", "liberado"].includes(activity.status)).length;
 
   return {
     pace: concluded.length === 0 ? null : Math.round((onTime / concluded.length) * 100),

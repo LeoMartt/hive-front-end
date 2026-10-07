@@ -1,6 +1,5 @@
 import IssueRow from "./IssueRow";
 import EmptyState from "../common/EmptyState";
-import SortIcon from "../common/SortIcon";
 import { useProjectAgingThresholds } from "../../hooks/useProjectAgingThresholds";
 import type { Issue } from "../../types/issue";
 
@@ -28,55 +27,15 @@ export default function IssuesTable({ issues, projectId }: IssuesTableProps) {
       <table>
         <thead>
           <tr>
-            <th>
-              ID{" "}
-              <span className="sort-icon">
-                <SortIcon />
-              </span>
-            </th>
-            <th>
-              Título{" "}
-              <span className="sort-icon">
-                <SortIcon />
-              </span>
-            </th>
-            <th>
-              Tipo{" "}
-              <span className="sort-icon">
-                <SortIcon />
-              </span>
-            </th>
-            <th>
-              Impacto{" "}
-              <span className="sort-icon">
-                <SortIcon />
-              </span>
-            </th>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Tipo</th>
+            <th>Impacto</th>
             <th>Impeditivo</th>
-            <th>
-              Atividade{" "}
-              <span className="sort-icon">
-                <SortIcon />
-              </span>
-            </th>
-            <th>
-              Dev{" "}
-              <span className="sort-icon">
-                <SortIcon />
-              </span>
-            </th>
-            <th>
-              Status{" "}
-              <span className="sort-icon">
-                <SortIcon />
-              </span>
-            </th>
-            <th>
-              Aging{" "}
-              <span className="sort-icon">
-                <SortIcon />
-              </span>
-            </th>
+            <th>Atividade</th>
+            <th>Dev</th>
+            <th>Status</th>
+            <th>Aging</th>
           </tr>
         </thead>
         <tbody>

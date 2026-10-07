@@ -18,6 +18,7 @@ export default function ActivityGroupToggle({ mode, onChange }: ActivityGroupTog
   return (
     <Dropdown
       menuClassName="multi-select-menu"
+      closeOnMenuClick={false}
       toggle={({ toggle }) => (
         <button type="button" id="group-toggle" className="multi-select-toggle" onClick={toggle}>
           Agrupar: {activeLabel}

@@ -23,7 +23,9 @@ export interface Issue {
   impact: IssueImpact;
   area: string;
   tester: string;
+  testerId?: string;
   dev: string;
+  developerId?: string;
   relatedActivityId: string;
   cascadeActivityIds: string[];
   openedAt: string;

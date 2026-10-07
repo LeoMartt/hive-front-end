@@ -1,10 +1,46 @@
 import type { Activity, ActivityFiltersState } from "../types/activity";
 import { isOverdue } from "./activityIndicators";
 
+export interface CurrentUserMatcher {
+  name: string;
+  id?: string;
+  email?: string;
+}
+
+function normalizeText(value: string | undefined): string {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function namesMatch(personName: string, currentUserName: string): boolean {
+  const person = normalizeText(personName);
+  const current = normalizeText(currentUserName);
+  if (!person || !current) return false;
+  if (person === current) return true;
+
+  const currentTokens = current.split(/\s+/).filter((token) => token.length > 1);
+  return currentTokens.length > 0 && currentTokens.every((token) => person.includes(token));
+}
+
+function belongsToCurrentUser(activity: Activity, currentUser: CurrentUserMatcher): boolean {
+  const normalizedEmail = currentUser.email?.toLowerCase();
+  return (
+    activity.testerId === currentUser.id ||
+    activity.developerId === currentUser.id ||
+    (normalizedEmail !== undefined &&
+      (activity.testerId?.toLowerCase() === normalizedEmail || activity.developerId?.toLowerCase() === normalizedEmail)) ||
+    namesMatch(activity.tester, currentUser.name) ||
+    namesMatch(activity.dev, currentUser.name)
+  );
+}
+
 export function filterActivities(
   activities: Activity[],
   filters: ActivityFiltersState,
-  currentUserName: string
+  currentUser: CurrentUserMatcher
 ): Activity[] {
   const query = filters.search.trim().toLowerCase();
 
@@ -23,11 +59,15 @@ export function filterActivities(
     if (filters.devs.length > 0 && !filters.devs.includes(activity.dev)) {
       return false;
     }
-    if (filters.plannedEndFrom && activity.plannedEnd.slice(0, 10) < filters.plannedEndFrom) {
-      return false;
-    }
-    if (filters.plannedEndTo && activity.plannedEnd.slice(0, 10) > filters.plannedEndTo) {
-      return false;
+    if (filters.dateRangeEnabled) {
+      const plannedStart = activity.plannedStart.slice(0, 10);
+      const plannedEnd = activity.plannedEnd.slice(0, 10);
+      if (filters.plannedEndFrom && plannedEnd < filters.plannedEndFrom) {
+        return false;
+      }
+      if (filters.plannedEndTo && plannedStart > filters.plannedEndTo) {
+        return false;
+      }
     }
     if (filters.retestBuckets.length > 0) {
       const bucket = activity.retestCount >= 3 ? 3 : activity.retestCount;
@@ -39,7 +79,7 @@ export function filterActivities(
     if (filters.processes.length > 0 && !filters.processes.includes(activity.process)) {
       return false;
     }
-    if (filters.onlyMine && activity.tester !== currentUserName && activity.dev !== currentUserName) {
+    if (filters.onlyMine && !belongsToCurrentUser(activity, currentUser)) {
       return false;
     }
     if (filters.onlyOverdue && !isOverdue(activity)) {

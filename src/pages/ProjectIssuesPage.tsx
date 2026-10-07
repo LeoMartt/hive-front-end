@@ -14,14 +14,61 @@ import { sortIssuesByPriority } from "../utils/issueIndicators";
 import { buildIssueExportRows, ISSUE_EXPORT_COLUMN_WIDTHS } from "../utils/issueExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
 
+interface CurrentIssueUser {
+  name: string;
+  id?: string;
+  email?: string;
+}
+
+function normalizeLookupValue(value: string | undefined): string {
+  return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function namesMatch(personName: string | undefined, currentUserName: string | undefined): boolean {
+  const person = normalizeLookupValue(personName);
+  const current = normalizeLookupValue(currentUserName);
+  if (!person || !current) return false;
+  if (person === current) return true;
+
+  const personTokens = person.split(/\s+/).filter((token) => token.length > 1);
+  const currentTokens = current.split(/\s+/).filter((token) => token.length > 1);
+
+  return (
+    (currentTokens.length > 0 && currentTokens.every((token) => person.includes(token))) ||
+    (personTokens.length > 0 && personTokens.every((token) => current.includes(token)))
+  );
+}
+
+function personMatchesCurrentUser(personName: string, personId: string | undefined, currentUser: CurrentIssueUser): boolean {
+  const normalizedPersonId = personId?.toLowerCase();
+  const normalizedCurrentId = currentUser.id?.toLowerCase();
+  const normalizedCurrentEmail = currentUser.email?.toLowerCase();
+
+  return (
+    (normalizedCurrentId !== undefined && normalizedPersonId === normalizedCurrentId) ||
+    (normalizedCurrentEmail !== undefined && normalizedPersonId === normalizedCurrentEmail) ||
+    namesMatch(personName, currentUser.name)
+  );
+}
+
 export default function ProjectIssuesPage() {
   const { id } = useParams();
   const projectId = id ?? "";
   const { issues, createIssue } = useIssues(projectId);
   const { activities } = useActivities(projectId);
   const { projects } = useProjects();
-  const { name: currentUserName } = useCurrentUser();
+  const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === projectId);
+  const currentMember = currentProject?.team.find(
+    (member) =>
+      member.id === currentUserId ||
+      (currentUserEmail !== undefined && member.email?.toLowerCase() === currentUserEmail.toLowerCase()) ||
+      namesMatch(member.name, currentUserName),
+  );
 
   const [statusFilter, setStatusFilter] = useState<IssueStatusFilter>("todas");
   const [openedByMe, setOpenedByMe] = useState(false);
@@ -31,13 +78,33 @@ export default function ProjectIssuesPage() {
   const orderedIssues = useMemo(() => sortIssuesByPriority(issues), [issues]);
 
   const filteredIssues = useMemo(() => {
+    const currentIssueUser: CurrentIssueUser = {
+      name: currentMember?.name ?? currentUserName,
+      email: currentMember?.email ?? currentUserEmail,
+      id: currentMember?.id ?? currentUserId,
+    };
     return orderedIssues.filter((issue) => {
       if (statusFilter !== "todas" && issue.status !== statusFilter) return false;
-      if (openedByMe && issue.tester !== currentUserName) return false;
-      if (assignedToMe && issue.dev !== currentUserName) return false;
+      if (openedByMe && !personMatchesCurrentUser(issue.tester, issue.testerId, currentIssueUser)) {
+        return false;
+      }
+      if (assignedToMe && !personMatchesCurrentUser(issue.dev, issue.developerId, currentIssueUser)) {
+        return false;
+      }
       return true;
     });
-  }, [orderedIssues, statusFilter, openedByMe, assignedToMe, currentUserName]);
+  }, [
+    assignedToMe,
+    currentMember?.email,
+    currentMember?.id,
+    currentMember?.name,
+    currentUserEmail,
+    currentUserId,
+    currentUserName,
+    openedByMe,
+    orderedIssues,
+    statusFilter,
+  ]);
 
   const {
     label: exportIssuesLabel,

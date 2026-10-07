@@ -16,7 +16,9 @@ interface NewActivityModalProps {
 interface NewActivityFormState {
   name: string;
   moduleNodeId: string;
+  moduleName: string;
   processNodeId: string;
+  processName: string;
   testerId: string;
   developerId: string;
   plannedStart: string;
@@ -34,7 +36,9 @@ function createEmptyState(): NewActivityFormState {
   return {
     name: "",
     moduleNodeId: "",
+    moduleName: "",
     processNodeId: "",
+    processName: "",
     testerId: "",
     developerId: "",
     plannedStart: "",
@@ -79,14 +83,16 @@ export default function NewActivityModal({
   function handleConfirm() {
     const selectedModule = hierarchyNodes.find((node) => node.id === state.moduleNodeId) ?? null;
     const selectedProcess = hierarchyNodes.find((node) => node.id === state.processNodeId) ?? null;
+    const moduleName = (selectedModule?.name ?? state.moduleName).trim();
+    const processName = (selectedProcess?.name ?? state.processName).trim();
     const selectedTester = team.find((member) => member.id === state.testerId) ?? null;
     const selectedDeveloper = team.find((member) => member.id === state.developerId) ?? null;
     const selectedNode = projectMode === "cutover" ? selectedModule : selectedProcess;
 
     const missing: string[] = [];
     if (!state.name.trim()) missing.push("Nome da atividade");
-    if (!selectedModule) missing.push("Módulo");
-    if (projectMode === "uat" && !selectedProcess) missing.push("Processo");
+    if (!moduleName) missing.push("Módulo");
+    if (projectMode === "uat" && !processName) missing.push("Processo");
     if (!selectedTester?.id) missing.push("Tester");
     if (!selectedDeveloper?.id) missing.push("Desenvolvedor");
     if (!state.plannedStart.trim()) missing.push("Início planejado");
@@ -96,12 +102,19 @@ export default function NewActivityModal({
       setState((prev) => ({ ...prev, errorMsg: `Preencha os campos obrigatórios: ${missing.join(", ")}.` }));
       return;
     }
+    if (state.plannedStart > state.plannedEnd) {
+      setState((prev) => ({
+        ...prev,
+        errorMsg: "A conclusão planejada não pode ser anterior ao início planejado.",
+      }));
+      return;
+    }
 
     onCreate({
       name: state.name.trim(),
       nodeId: selectedNode?.id,
-      module: selectedModule?.name ?? "",
-      process: selectedProcess?.name ?? "",
+      module: moduleName,
+      process: projectMode === "cutover" ? "" : processName,
       testerId: selectedTester?.id,
       tester: selectedTester?.name ?? "",
       developerId: selectedDeveloper?.id,
@@ -124,7 +137,11 @@ export default function NewActivityModal({
   const testers = team.filter((member) => member.role === "Tester");
   const devs = team.filter((member) => member.role === "Desenvolvedor");
   const modules = hierarchyNodes.filter((node) => node.level === 1);
-  const processes = hierarchyNodes.filter((node) => node.level === 2 && node.parentId === state.moduleNodeId);
+  const matchedModule =
+    modules.find((node) => node.id === state.moduleNodeId) ??
+    modules.find((node) => node.name.toLowerCase() === state.moduleName.trim().toLowerCase()) ??
+    null;
+  const processes = hierarchyNodes.filter((node) => node.level === 2 && node.parentId === matchedModule?.id);
 
   return (
     <Modal open={show} onClose={resetAndHide} wide labelledBy="new-activity-modal-title">
@@ -156,47 +173,50 @@ export default function NewActivityModal({
           <label className="form-label" htmlFor="new-activity-module">
             Módulo
           </label>
-          <select
+          <input
             className="form-input"
             id="new-activity-module"
-            value={state.moduleNodeId}
+            list="new-activity-module-options"
+            placeholder="Selecione ou digite um novo módulo"
+            value={state.moduleName}
             onChange={(event) => {
-              updateField("moduleNodeId", event.target.value);
+              const value = event.target.value;
+              const match = modules.find((node) => node.name.toLowerCase() === value.trim().toLowerCase());
+              updateField("moduleName", value);
+              updateField("moduleNodeId", match?.id ?? "");
               updateField("processNodeId", "");
+              updateField("processName", "");
             }}
-          >
-            <option value="">Selecione…</option>
+          />
+          <datalist id="new-activity-module-options">
             {modules.map((node) => (
-              <option key={node.id} value={node.id}>
-                {node.name}
-              </option>
+              <option key={node.id} value={node.name} />
             ))}
-          </select>
+          </datalist>
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="new-activity-process">
             Processo
           </label>
-          <select
+          <input
             className="form-input"
             id="new-activity-process"
-            value={state.processNodeId}
-            onChange={(event) => updateField("processNodeId", event.target.value)}
-            disabled={projectMode === "cutover" || !state.moduleNodeId}
-          >
-            {projectMode === "cutover" ? (
-              <option value="">Cutover usa apenas módulo</option>
-            ) : (
-              <>
-                <option value="">Selecione…</option>
-                {processes.map((node) => (
-                  <option key={node.id} value={node.id}>
-                    {node.name}
-                  </option>
-                ))}
-              </>
-            )}
-          </select>
+            list="new-activity-process-options"
+            placeholder={projectMode === "cutover" ? "Cutover usa apenas módulo" : "Selecione ou digite um novo processo"}
+            value={projectMode === "cutover" ? "" : state.processName}
+            onChange={(event) => {
+              const value = event.target.value;
+              const match = processes.find((node) => node.name.toLowerCase() === value.trim().toLowerCase());
+              updateField("processName", value);
+              updateField("processNodeId", match?.id ?? "");
+            }}
+            disabled={projectMode === "cutover" || !state.moduleName.trim()}
+          />
+          <datalist id="new-activity-process-options">
+            {processes.map((node) => (
+              <option key={node.id} value={node.name} />
+            ))}
+          </datalist>
         </div>
       </div>
 

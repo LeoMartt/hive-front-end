@@ -162,7 +162,6 @@ export default function ActivityDetailPage() {
         currentUserName={currentUserName}
         submitLabel={registerIssueMode === "reject" ? "Reprovar e criar issue" : "Criar"}
         title={registerIssueMode === "reject" ? "Rejeitar atividade" : "Registrar issue"}
-        forceImpeditiva={registerIssueMode === "reject"}
         onCreate={(input) => {
           createIssue(input);
           if (registerIssueMode === "reject" && useMocks) {

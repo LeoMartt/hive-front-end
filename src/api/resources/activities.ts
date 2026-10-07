@@ -26,6 +26,8 @@ export const activitiesApi = {
   async create(projectId: string, input: NewActivityInput): Promise<Activity> {
     const { data } = await httpClient.post(`/projects/${projectId}/activities/`, {
       nodeId: input.nodeId,
+      module: input.module,
+      process: input.process,
       name: input.name,
       testerId: input.testerId,
       developerId: input.developerId,

@@ -16,35 +16,33 @@ interface ActivityTreeRowsProps {
   onToggleSelect: (id: string) => void;
 }
 
-function RollupCell({ activities }: { activities: Activity[] }) {
+function GroupSummary({ activities }: { activities: Activity[] }) {
   const { done, total, late, percent } = computeGroupRollup(activities);
 
   if (total === 0) {
     return (
-      <td colSpan={10}>
+      <div className="group-rollup">
         <span className="rc" style={{ color: "var(--text-faint)" }}>
           Sem atividades ativas
         </span>
-      </td>
+      </div>
     );
   }
 
   return (
-    <td colSpan={10}>
-      <div className="group-rollup">
-        <span className="rc">
-          {done}/{total} concluídas
-        </span>
-        <div className="mini-progress">
-          <div className="mini-progress-fill" style={{ width: `${percent}%` }} />
-        </div>
-        {late > 0 && (
-          <span className="rc rc-late">
-            {late} atrasada{late > 1 ? "s" : ""}
-          </span>
-        )}
+    <div className="group-rollup">
+      <span className="rc">
+        {done}/{total} concluídas
+      </span>
+      <div className="mini-progress">
+        <div className="mini-progress-fill" style={{ width: `${percent}%` }} />
       </div>
-    </td>
+      {late > 0 && (
+        <span className="rc rc-late">
+          {late} atrasada{late > 1 ? "s" : ""}
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -83,12 +81,16 @@ export default function ActivityTreeRows({
                 <TreeToggleIcon expanded={isExpanded} />
               </td>
               <td>
-                <div className="cell-name" title={moduleGroup.module}>
-                  <b className="cell-name-text">{moduleGroup.module}</b>
+                <div className="activity-group-summary">
+                  <div className="cell-name" title={moduleGroup.module}>
+                    <b className="cell-name-text">{moduleGroup.module}</b>
+                  </div>
                 </div>
               </td>
-              <td className="mono"></td>
-              <RollupCell activities={activitiesInModule} />
+              <td className="activity-group-empty-cell"></td>
+              <td colSpan={10} className="activity-group-rollup-cell">
+                <GroupSummary activities={activitiesInModule} />
+              </td>
             </tr>
             {isExpanded &&
               moduleGroup.processes.map((processGroup) => {
@@ -114,15 +116,19 @@ export default function ActivityTreeRows({
                         <TreeToggleIcon expanded={isProcessExpanded} />
                       </td>
                       <td>
-                        <div className="cell-name" style={{ paddingLeft: 18 }} title={processGroup.process}>
-                          <span className="lvl">
-                            <TreeConnectorIcon />
-                          </span>
-                          <span className="cell-name-text">{processGroup.process}</span>
+                        <div className="activity-group-summary">
+                          <div className="cell-name" style={{ paddingLeft: 18 }} title={processGroup.process}>
+                            <span className="lvl">
+                              <TreeConnectorIcon />
+                            </span>
+                            <span className="cell-name-text">{processGroup.process}</span>
+                          </div>
                         </div>
                       </td>
-                      <td className="mono"></td>
-                      <RollupCell activities={processGroup.activities} />
+                      <td className="activity-group-empty-cell"></td>
+                      <td colSpan={10} className="activity-group-rollup-cell">
+                        <GroupSummary activities={processGroup.activities} />
+                      </td>
                     </tr>
                     {isProcessExpanded &&
                       processGroup.activities.map((activity) => (

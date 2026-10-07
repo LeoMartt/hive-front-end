@@ -21,6 +21,17 @@ export function toLocalIsoString(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
+export function parseLocalDate(value: string | null): Date | null {
+  if (!value) return null;
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  if (dateOnly) {
+    const [, year, month, day] = dateOnly;
+    return new Date(Number(year), Number(month) - 1, Number(day));
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function isOverdue(activity: Activity): boolean {
   if (activity.status === "concluido" || activity.status === "cancelado") return false;
   const today = toLocalIsoString(new Date()).slice(0, 10);
@@ -28,8 +39,8 @@ export function isOverdue(activity: Activity): boolean {
 }
 
 export function formatActivityDate(isoDate: string | null): string {
-  if (!isoDate) return "—";
-  return new Date(isoDate).toLocaleDateString("pt-BR");
+  const date = parseLocalDate(isoDate);
+  return date ? date.toLocaleDateString("pt-BR") : "—";
 }
 
 export function retestPillClass(retestCount: number): string {

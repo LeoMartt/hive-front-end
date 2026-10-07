@@ -15,7 +15,7 @@ import { ApiError, normalizeError } from "../api/apiError";
 import { hierarchyApi } from "../api/resources/hierarchy";
 import { useMocks } from "../config/env";
 import { filterActivities } from "../utils/filterActivities";
-import { groupByModuleProcess } from "../utils/groupActivities";
+import { groupByModuleProcess, groupByStatus, groupByTester } from "../utils/groupActivities";
 import { buildActivityExportRows, ACTIVITY_EXPORT_COLUMN_WIDTHS } from "../utils/activityExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
 import type { ActivityFiltersState, ActivityGroupMode, NewActivityInput } from "../types/activity";
@@ -44,8 +44,15 @@ export default function ProjectActivitiesPage() {
   const { activities, stats, loading, error, createActivity, bulkConcludeActivities, cancelActivities, importActivities } =
     useActivities(projectId);
   const { projects } = useProjects();
-  const { name: currentUserName } = useCurrentUser();
+  const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === projectId);
+  const currentMember = currentProject?.team.find(
+    (member) =>
+      member.id === currentUserId ||
+      (currentUserEmail !== undefined && member.email?.toLowerCase() === currentUserEmail.toLowerCase()) ||
+      member.name === currentUserName,
+  );
+  const canManageProject = currentMember?.role === "Gestor de Projetos";
   const [hierarchyNodes, setHierarchyNodes] = useState<HierarchyNode[]>([]);
   const [hierarchyError, setHierarchyError] = useState<ApiError | null>(null);
 
@@ -72,22 +79,45 @@ export default function ProjectActivitiesPage() {
   const [expandedModules, setExpandedModules] = useState<Set<string>>(new Set());
   // Processos nascem expandidos (igual ao mockup): guardamos só os que foram recolhidos.
   const [collapsedProcesses, setCollapsedProcesses] = useState<Set<string>>(new Set());
-  // Grupos de "Por Tester"/"Por Status" nascem recolhidos, igual a Módulo na Árvore.
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
-
-  function setGroupMode(mode: ActivityGroupMode) {
-    setGroupModeState(mode);
-    setExpandedGroups(new Set());
-  }
 
   function updateFilters(partial: Partial<ActivityFiltersState>) {
     setFilters((prev) => ({ ...prev, ...partial }));
   }
 
   const filteredActivities = useMemo(
-    () => filterActivities(activities, filters, currentUserName),
-    [activities, filters, currentUserName]
+    () =>
+      filterActivities(activities, filters, {
+        name: currentMember?.name ?? currentUserName,
+        email: currentMember?.email ?? currentUserEmail,
+        id: currentMember?.id ?? currentUserId,
+      }),
+    [activities, currentMember?.email, currentMember?.id, currentMember?.name, currentUserEmail, currentUserId, currentUserName, filters]
   );
+
+  const moduleGroups = useMemo(() => groupByModuleProcess(filteredActivities), [filteredActivities]);
+  const testerGroups = useMemo(() => groupByTester(filteredActivities), [filteredActivities]);
+  const statusGroups = useMemo(() => groupByStatus(filteredActivities), [filteredActivities]);
+
+  function setGroupMode(mode: ActivityGroupMode) {
+    setGroupModeState(mode);
+    if (mode === "tester") {
+      setExpandedGroups(new Set(testerGroups.map((group) => group.key)));
+    } else if (mode === "status") {
+      setExpandedGroups(new Set(statusGroups.map((group) => group.key)));
+    } else {
+      setExpandedGroups(new Set());
+    }
+  }
+
+  useEffect(() => {
+    if (groupMode === "tester") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setExpandedGroups(new Set(testerGroups.map((group) => group.key)));
+    } else if (groupMode === "status") {
+      setExpandedGroups(new Set(statusGroups.map((group) => group.key)));
+    }
+  }, [groupMode, statusGroups, testerGroups]);
 
   const {
     label: exportActivitiesLabel,
@@ -159,7 +189,6 @@ export default function ProjectActivitiesPage() {
     });
   }
 
-  const moduleGroups = useMemo(() => groupByModuleProcess(filteredActivities), [filteredActivities]);
   const allModulesExpanded = moduleGroups.length > 0 && moduleGroups.every((group) => expandedModules.has(group.module));
 
   function toggleAllModules() {
@@ -197,12 +226,20 @@ export default function ProjectActivitiesPage() {
               exportActivitiesLabel
             )}
           </button>
-          <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setShowImportModal(true)}>
-            Importar em massa
-          </button>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowNewActivityModal(true)}>
-            + Nova atividade
-          </button>
+          {canManageProject && (
+            <>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => setShowImportModal(true)}
+              >
+                Importar em massa
+              </button>
+              <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowNewActivityModal(true)}>
+                + Nova atividade
+              </button>
+            </>
+          )}
         </div>
       </div>
 

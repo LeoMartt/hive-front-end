@@ -17,7 +17,6 @@ interface RegisterIssueModalProps {
   currentUserName: string;
   submitLabel?: string;
   title?: string;
-  forceImpeditiva?: boolean;
   onCreate: (input: NewIssueInput) => void;
 }
 
@@ -68,7 +67,6 @@ export default function RegisterIssueModal({
   currentUserName,
   submitLabel,
   title,
-  forceImpeditiva = false,
   onCreate,
 }: RegisterIssueModalProps) {
   const { config } = useProjectConfig();
@@ -105,7 +103,7 @@ export default function RegisterIssueModal({
     if (!state.description.trim()) missing.push("Descrição da issue");
     if (!currentActivity && !state.relatedActivityId) missing.push("Atividade vinculada");
     if (!state.dev) missing.push("Desenvolvedor responsável");
-    const impeditiva = forceImpeditiva || state.impeditiva;
+    const impeditiva = state.impeditiva;
     if (impeditiva && config.evidenciaObrigatoriaIssue && !selectedFile) {
       missing.push("Anexo (evidência obrigatória para issues impeditivas)");
     }
@@ -217,8 +215,7 @@ export default function RegisterIssueModal({
           <select
             className="form-input"
             id="register-issue-impeditivo"
-            value={forceImpeditiva || state.impeditiva ? "sim" : "nao"}
-            disabled={forceImpeditiva}
+            value={state.impeditiva ? "sim" : "nao"}
             onChange={(event) => updateField("impeditiva", event.target.value === "sim")}
           >
             <option value="sim">Sim</option>
