@@ -353,6 +353,7 @@ export default function NewActivityModal({
             className="form-input"
             type="text"
             id="new-activity-transacao"
+            maxLength={1000}
             placeholder="Ex: FB60"
             value={state.transaction}
             onChange={(event) => updateField("transaction", event.target.value)}
