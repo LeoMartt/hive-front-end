@@ -60,12 +60,11 @@ export function filterActivities(
       return false;
     }
     if (filters.dateRangeEnabled) {
-      const plannedStart = activity.plannedStart.slice(0, 10);
       const plannedEnd = activity.plannedEnd.slice(0, 10);
       if (filters.plannedEndFrom && plannedEnd < filters.plannedEndFrom) {
         return false;
       }
-      if (filters.plannedEndTo && plannedStart > filters.plannedEndTo) {
+      if (filters.plannedEndTo && plannedEnd > filters.plannedEndTo) {
         return false;
       }
     }

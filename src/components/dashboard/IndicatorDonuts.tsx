@@ -7,21 +7,26 @@ interface DonutProps {
 }
 
 function Donut({ value, color, label }: DonutProps) {
-  const percent = value ?? 0;
+  const radius = 15.9;
+  const circumference = 2 * Math.PI * radius;
+  const percent = Math.min(100, Math.max(0, value ?? 0));
+  const isComplete = percent >= 100;
+  const dashOffset = circumference * (1 - percent / 100);
   return (
     <div className="donut-item">
       <svg width="128" height="128" viewBox="0 0 42 42" aria-hidden="true">
-        <circle cx="21" cy="21" r="15.9" fill="none" stroke="#E4E5E1" strokeWidth={5} />
+        <circle cx="21" cy="21" r={radius} fill="none" stroke="#EEF0EC" strokeWidth={5} />
         <circle
           cx="21"
           cy="21"
-          r="15.9"
+          r={radius}
           fill="none"
           stroke={color}
           strokeWidth={5}
-          strokeDasharray={`${percent} 100`}
-          strokeDashoffset={25}
-          strokeLinecap="round"
+          strokeDasharray={circumference}
+          strokeDashoffset={isComplete ? 0 : dashOffset}
+          strokeLinecap={isComplete ? "butt" : "round"}
+          transform="rotate(-90 21 21)"
         />
       </svg>
       <div className="dv">{value === null ? "—" : `${value}%`}</div>

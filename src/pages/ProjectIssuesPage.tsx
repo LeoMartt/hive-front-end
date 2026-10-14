@@ -13,34 +13,12 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { sortIssuesByPriority } from "../utils/issueIndicators";
 import { buildIssueExportRows, ISSUE_EXPORT_COLUMN_WIDTHS } from "../utils/issueExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
+import { getCurrentUserMemberships, membershipsAllowAssignedIssues, membershipsAllowIssueCreation, namesMatch } from "../utils/projectAccess";
 
 interface CurrentIssueUser {
   name: string;
   id?: string;
   email?: string;
-}
-
-function normalizeLookupValue(value: string | undefined): string {
-  return (value ?? "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-}
-
-function namesMatch(personName: string | undefined, currentUserName: string | undefined): boolean {
-  const person = normalizeLookupValue(personName);
-  const current = normalizeLookupValue(currentUserName);
-  if (!person || !current) return false;
-  if (person === current) return true;
-
-  const personTokens = person.split(/\s+/).filter((token) => token.length > 1);
-  const currentTokens = current.split(/\s+/).filter((token) => token.length > 1);
-
-  return (
-    (currentTokens.length > 0 && currentTokens.every((token) => person.includes(token))) ||
-    (personTokens.length > 0 && personTokens.every((token) => current.includes(token)))
-  );
 }
 
 function personMatchesCurrentUser(personName: string, personId: string | undefined, currentUser: CurrentIssueUser): boolean {
@@ -63,12 +41,14 @@ export default function ProjectIssuesPage() {
   const { projects } = useProjects();
   const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === projectId);
-  const currentMember = currentProject?.team.find(
-    (member) =>
-      member.id === currentUserId ||
-      (currentUserEmail !== undefined && member.email?.toLowerCase() === currentUserEmail.toLowerCase()) ||
-      namesMatch(member.name, currentUserName),
-  );
+  const currentMemberships = getCurrentUserMemberships(currentProject?.team ?? [], {
+    id: currentUserId,
+    email: currentUserEmail,
+    name: currentUserName,
+  });
+  const currentMember = currentMemberships[0];
+  const canCreateIssue = membershipsAllowIssueCreation(currentMemberships);
+  const canViewAssignedIssues = membershipsAllowAssignedIssues(currentMemberships);
 
   const [statusFilter, setStatusFilter] = useState<IssueStatusFilter>("todas");
   const [openedByMe, setOpenedByMe] = useState(false);
@@ -85,16 +65,18 @@ export default function ProjectIssuesPage() {
     };
     return orderedIssues.filter((issue) => {
       if (statusFilter !== "todas" && issue.status !== statusFilter) return false;
-      if (openedByMe && !personMatchesCurrentUser(issue.tester, issue.testerId, currentIssueUser)) {
+      if (canCreateIssue && openedByMe && !personMatchesCurrentUser(issue.tester, issue.testerId, currentIssueUser)) {
         return false;
       }
-      if (assignedToMe && !personMatchesCurrentUser(issue.dev, issue.developerId, currentIssueUser)) {
+      if (canViewAssignedIssues && assignedToMe && !personMatchesCurrentUser(issue.dev, issue.developerId, currentIssueUser)) {
         return false;
       }
       return true;
     });
   }, [
     assignedToMe,
+    canCreateIssue,
+    canViewAssignedIssues,
     currentMember?.email,
     currentMember?.id,
     currentMember?.name,
@@ -152,9 +134,11 @@ export default function ProjectIssuesPage() {
               exportIssuesLabel
             )}
           </button>
-          <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowRegisterIssueModal(true)}>
-            + Registrar issue
-          </button>
+          {canCreateIssue && (
+            <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowRegisterIssueModal(true)}>
+              + Registrar issue
+            </button>
+          )}
         </div>
       </div>
 
@@ -163,22 +147,24 @@ export default function ProjectIssuesPage() {
       <div className="activities-toolbar">
         <IssueStatusPills counts={statusCounts} active={statusFilter} onSelect={setStatusFilter} />
         <div className="activities-toolbar-group">
-          <label
-            className={`toggle-pill${openedByMe ? " toggle-pill-active" : ""}`}
-            htmlFor="issues-opened-by-me-toggle"
-          >
-            <span className="switch">
-              <input
-                type="checkbox"
-                id="issues-opened-by-me-toggle"
-                checked={openedByMe}
-                onChange={(event) => setOpenedByMe(event.target.checked)}
-              />
-              <span className="track" />
-            </span>
-            Issues abertas por mim
-          </label>
-          <label
+          {canCreateIssue && (
+            <label
+              className={`toggle-pill${openedByMe ? " toggle-pill-active" : ""}`}
+              htmlFor="issues-opened-by-me-toggle"
+            >
+              <span className="switch">
+                <input
+                  type="checkbox"
+                  id="issues-opened-by-me-toggle"
+                  checked={openedByMe}
+                  onChange={(event) => setOpenedByMe(event.target.checked)}
+                />
+                <span className="track" />
+              </span>
+              Issues abertas por mim
+            </label>
+          )}
+          {canViewAssignedIssues && <label
             className={`toggle-pill${assignedToMe ? " toggle-pill-active" : ""}`}
             htmlFor="issues-assigned-to-me-toggle"
           >
@@ -192,20 +178,22 @@ export default function ProjectIssuesPage() {
               <span className="track" />
             </span>
             Issues comigo
-          </label>
+          </label>}
         </div>
       </div>
 
       <IssuesTable issues={filteredIssues} projectId={projectId} />
 
-      <RegisterIssueModal
-        show={showRegisterIssueModal}
-        onHide={() => setShowRegisterIssueModal(false)}
-        team={currentProject?.team ?? []}
-        activities={activities}
-        currentUserName={currentUserName}
-        onCreate={createIssue}
-      />
+      {canCreateIssue && (
+        <RegisterIssueModal
+          show={showRegisterIssueModal}
+          onHide={() => setShowRegisterIssueModal(false)}
+          team={currentProject?.team ?? []}
+          activities={activities}
+          currentUserName={currentUserName}
+          onCreate={createIssue}
+        />
+      )}
     </div>
   );
 }

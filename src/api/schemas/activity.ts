@@ -40,4 +40,5 @@ export const activitySchema = z.object({
   rejectedAt: z.string().nullable(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
+  auditTrail: z.array(z.object({ at: z.string(), text: z.string() })).optional(),
 }) satisfies z.ZodType<Activity>;
