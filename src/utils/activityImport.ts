@@ -107,6 +107,9 @@ export function parseActivityImportRows(rows: Record<string, unknown>[], team: T
     const temporaryId = getField(row, HEADER_ALIASES.temporaryId);
     if (!temporaryId) problems.push("id lista sequencial vazio");
 
+    const transaction = getField(row, HEADER_ALIASES.transaction);
+    if (transaction.length > 1000) problems.push("Transação deve ter no máximo 1000 caracteres");
+
     if (problems.length > 0) {
       errors.push(`Linha ${lineNo}: ${problems.join("; ")}.`);
       return;
@@ -130,7 +133,7 @@ export function parseActivityImportRows(rows: Record<string, unknown>[], team: T
         .filter(Boolean),
       area: getField(row, HEADER_ALIASES.area),
       system: getField(row, HEADER_ALIASES.system),
-      transaction: getField(row, HEADER_ALIASES.transaction),
+      transaction,
       expectedResult: getField(row, HEADER_ALIASES.expectedResult),
       notes: getField(row, HEADER_ALIASES.notes) || null,
     });
