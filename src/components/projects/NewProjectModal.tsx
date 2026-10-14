@@ -4,10 +4,11 @@ import CloseIcon from "../common/CloseIcon";
 import { getInitials } from "../../utils/initials";
 import Avatar from "../common/Avatar";
 import { useGraphUserSearch } from "../../hooks/useGraphUserSearch";
-import type { NewProjectInput, ProjectMode, TeamMember, UserRole } from "../../types/project";
+import type { NewProjectInput, Project, ProjectMode, TeamMember, UserRole } from "../../types/project";
 
 interface NewProjectModalProps {
   show: boolean;
+  existingProjects: Project[];
   onHide: () => void;
   onCreate: (input: NewProjectInput) => void;
 }
@@ -41,7 +42,11 @@ function createEmptyState(): NewProjectFormState {
   };
 }
 
-export default function NewProjectModal({ show, onHide, onCreate }: NewProjectModalProps) {
+function normalizeProjectName(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+export default function NewProjectModal({ show, existingProjects, onHide, onCreate }: NewProjectModalProps) {
   const [state, setState] = useState<NewProjectFormState>(createEmptyState);
   const search = useGraphUserSearch();
 
@@ -52,7 +57,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
   }
 
   function handleModeChange(mode: ProjectMode) {
-    setState((prev) => ({ ...prev, mode, levelNames: LEVEL_DEFAULTS[mode] }));
+    setState((prev) => ({ ...prev, mode, levelNames: LEVEL_DEFAULTS[mode], errorMsg: null }));
   }
 
   function handleLevelNameChange(index: number, value: string) {
@@ -103,8 +108,21 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
   }
 
   function handleConfirm() {
+    const name = state.name.trim();
+    const duplicateProject = existingProjects.some(
+      (project) => project.mode === state.mode && normalizeProjectName(project.name) === normalizeProjectName(name),
+    );
+
+    if (duplicateProject) {
+      setState((prev) => ({
+        ...prev,
+        errorMsg: `Já existe um projeto ${state.mode === "uat" ? "UAT" : "Cutover"} ativo com esse nome.`,
+      }));
+      return;
+    }
+
     onCreate({
-      name: state.name,
+      name,
       description: state.description,
       mode: state.mode,
       hierarchyLevels: state.levelNames.map((level, index) => level.trim() || `Nível ${index + 1}`),
@@ -132,7 +150,7 @@ export default function NewProjectModal({ show, onHide, onCreate }: NewProjectMo
           type="text"
           placeholder="Ex.: CRM Homologação Comercial"
           value={state.name}
-          onChange={(event) => setState((prev) => ({ ...prev, name: event.target.value }))}
+          onChange={(event) => setState((prev) => ({ ...prev, name: event.target.value, errorMsg: null }))}
         />
       </div>
 

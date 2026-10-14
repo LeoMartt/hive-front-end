@@ -45,6 +45,7 @@ export interface Activity {
   rejectedAt: string | null;
   createdAt?: string;
   updatedAt?: string;
+  auditTrail?: { at: string; text: string }[];
 }
 
 export interface NewActivityInput {

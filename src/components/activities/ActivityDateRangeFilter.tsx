@@ -18,6 +18,16 @@ export default function ActivityDateRangeFilter({ enabled, from, to, onChange }:
     }
   }
 
+  function handleFromChange(value: string) {
+    const plannedEndFrom = value || null;
+    onChange({ plannedEndFrom, dateRangeEnabled: Boolean(plannedEndFrom || to) });
+  }
+
+  function handleToChange(value: string) {
+    const plannedEndTo = value || null;
+    onChange({ plannedEndTo, dateRangeEnabled: Boolean(from || plannedEndTo) });
+  }
+
   return (
     <Dropdown
       closeOnMenuClick={false}
@@ -55,9 +65,8 @@ export default function ActivityDateRangeFilter({ enabled, from, to, onChange }:
           <input
             type="date"
             className="filter-date-input"
-            disabled={!enabled}
             value={from ?? ""}
-            onChange={(event) => onChange({ plannedEndFrom: event.target.value || null })}
+            onChange={(event) => handleFromChange(event.target.value)}
             aria-label="Conclusão planejada a partir de"
           />
         </div>
@@ -66,14 +75,13 @@ export default function ActivityDateRangeFilter({ enabled, from, to, onChange }:
           <input
             type="date"
             className="filter-date-input"
-            disabled={!enabled}
             value={to ?? ""}
-            onChange={(event) => onChange({ plannedEndTo: event.target.value || null })}
+            onChange={(event) => handleToChange(event.target.value)}
             aria-label="Conclusão planejada até"
           />
         </div>
       </div>
-      {!enabled && <div className="date-range-hint">Desativado: mostra todas as datas</div>}
+      {!enabled && <div className="date-range-hint">Selecione uma data para ativar o filtro.</div>}
     </Dropdown>
   );
 }

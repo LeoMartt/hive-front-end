@@ -83,6 +83,7 @@ export default function ProjectsPage() {
 
       <NewProjectModal
         show={showNewProjectModal}
+        existingProjects={projects}
         onHide={() => setShowNewProjectModal(false)}
         onCreate={createProject}
       />

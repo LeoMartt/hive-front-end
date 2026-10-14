@@ -4,6 +4,11 @@ import type { Issue } from "../types/issue";
 
 export const ISSUE_EXPORT_COLUMN_WIDTHS: number[] = [10, 40, 14, 16, 12, 14, 44, 14, 14, 18, 14, 44, 12, 12, 12];
 
+function getIssueClosedAt(issue: Issue): string | null {
+  if (issue.status === "solucao_proposta") return issue.solutionProposedAt || null;
+  return issue.resolvedAt || issue.solutionProposedAt || null;
+}
+
 export function buildIssueExportRows(issues: Issue[]): Record<string, string>[] {
   const textOrDash = (value: string | null | undefined): string => {
     const text = (value ?? "").trim();
@@ -24,7 +29,7 @@ export function buildIssueExportRows(issues: Issue[]): Record<string, string>[] 
     Status: ISSUE_STATUS_LABELS[issue.status],
     "Solução proposta": textOrDash(issue.proposedSolution),
     "Aberta em": formatActivityDate(issue.openedAt),
-    "Encerrada em": formatActivityDate(issue.resolvedAt),
+    "Encerrada em": formatActivityDate(getIssueClosedAt(issue)),
     "Aging (dias)": String(computeIssueAgingDays(issue)),
   }));
 }

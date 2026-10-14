@@ -16,6 +16,7 @@ import { useMocks } from "../config/env";
 import { useGoBack } from "../hooks/useGoBack";
 import { retestPillClass } from "../utils/activityIndicators";
 import { deriveActivityAuditTrail } from "../utils/activityAuditTrail";
+import { getCurrentUserMemberships, membershipsAllowIssueCreation } from "../utils/projectAccess";
 
 export default function ActivityDetailPage() {
   const { id, activityId } = useParams();
@@ -23,9 +24,15 @@ export default function ActivityDetailPage() {
   const { activities, loading, error, concludeActivity, rejectActivity } = useActivities(projectId);
   const { issues, createIssue, resolveIssuesForActivity } = useIssues(projectId);
   const { projects } = useProjects();
-  const { name: currentUserName } = useCurrentUser();
+  const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === projectId);
   const activity = activities.find((item) => item.id === activityId);
+  const currentMemberships = getCurrentUserMemberships(currentProject?.team ?? [], {
+    id: currentUserId,
+    email: currentUserEmail,
+    name: currentUserName,
+  });
+  const canCreateIssue = membershipsAllowIssueCreation(currentMemberships);
   const goBack = useGoBack(`/projetos/${projectId}/atividades`);
   const [showRegisterIssueModal, setShowRegisterIssueModal] = useState(false);
   const [registerIssueMode, setRegisterIssueMode] = useState<"register" | "reject">("register");
@@ -60,7 +67,7 @@ export default function ActivityDetailPage() {
     );
   }
 
-  const auditEntries = deriveActivityAuditTrail(activity);
+  const auditEntries = deriveActivityAuditTrail(activity, issues);
 
   // Calculado independente do status — usado tanto pro painel "Predecessor" (só quando
   // aguardando) quanto pelos anexos herdados (só quando bloqueado, ver
@@ -100,7 +107,7 @@ export default function ActivityDetailPage() {
             <div className="info-banner">✅ Atividade concluída. Nenhuma ação pendente.</div>
           )}
 
-          {activity.status === "bloqueado" && (
+          {activity.status === "bloqueado" && canCreateIssue && (
             <button
               type="button"
               className="btn"
@@ -123,17 +130,19 @@ export default function ActivityDetailPage() {
               >
                 Concluir atividade
               </button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                style={{ flex: 1, justifyContent: "center" }}
-                onClick={() => {
-                  setRegisterIssueMode("reject");
-                  setShowRegisterIssueModal(true);
-                }}
-              >
-                Rejeitar atividade
-              </button>
+              {canCreateIssue && (
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  style={{ flex: 1, justifyContent: "center" }}
+                  onClick={() => {
+                    setRegisterIssueMode("reject");
+                    setShowRegisterIssueModal(true);
+                  }}
+                >
+                  Rejeitar atividade
+                </button>
+              )}
             </div>
           )}
 
@@ -153,22 +162,24 @@ export default function ActivityDetailPage() {
         </div>
       </div>
 
-      <RegisterIssueModal
-        show={showRegisterIssueModal}
-        onHide={() => setShowRegisterIssueModal(false)}
-        team={currentProject?.team ?? []}
-        activities={activities}
-        currentActivity={activity}
-        currentUserName={currentUserName}
-        submitLabel={registerIssueMode === "reject" ? "Reprovar e criar issue" : "Criar"}
-        title={registerIssueMode === "reject" ? "Rejeitar atividade" : "Registrar issue"}
-        onCreate={(input) => {
-          createIssue(input);
-          if (registerIssueMode === "reject" && useMocks) {
-            rejectActivity(activity.id, { reason: input.description, evidence: input.openingAttachment });
-          }
-        }}
-      />
+      {canCreateIssue && (
+        <RegisterIssueModal
+          show={showRegisterIssueModal}
+          onHide={() => setShowRegisterIssueModal(false)}
+          team={currentProject?.team ?? []}
+          activities={activities}
+          currentActivity={activity}
+          currentUserName={currentUserName}
+          submitLabel={registerIssueMode === "reject" ? "Reprovar e criar issue" : "Criar"}
+          title={registerIssueMode === "reject" ? "Rejeitar atividade" : "Registrar issue"}
+          onCreate={(input) => {
+            createIssue(input);
+            if (registerIssueMode === "reject" && useMocks) {
+              rejectActivity(activity.id, { reason: input.description, evidence: input.openingAttachment });
+            }
+          }}
+        />
+      )}
 
       <ConcludeActivityModal
         show={showConcludeModal}

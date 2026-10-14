@@ -63,7 +63,14 @@ export default function CurvaSChart({ data }: CurvaSChartProps) {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (context) => `${context.dataset.label}: ${context.parsed.y}%`,
+              label: (context) => {
+                const count =
+                  context.datasetIndex === 0
+                    ? data.plannedCounts[context.dataIndex]
+                    : data.realizedCounts[context.dataIndex];
+                const countLabel = count === null || count === undefined ? "sem dado" : `${count} atividades`;
+                return `${context.dataset.label}: ${context.parsed.y}% (${countLabel})`;
+              },
             },
           },
         },

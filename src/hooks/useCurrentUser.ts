@@ -15,7 +15,8 @@ interface CurrentUser {
 export function useCurrentUser(): CurrentUser {
   const { accounts } = useMsal();
   const account = accounts[0];
-  const [apiUser, setApiUser] = useState<CurrentUser | null>(null);
+  const accountKey = account?.homeAccountId;
+  const [apiUser, setApiUser] = useState<(CurrentUser & { accountKey?: string }) | null>(null);
 
   useEffect(() => {
     if (useMocks) return;
@@ -25,6 +26,7 @@ export function useCurrentUser(): CurrentUser {
       .then((user) => {
         if (cancelled) return;
         setApiUser({
+          accountKey,
           name: user.nome ? shortName(user.nome) : user.email,
           role: "Usuário",
           id: user.entra_object_id ?? user.id,
@@ -38,9 +40,9 @@ export function useCurrentUser(): CurrentUser {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [accountKey]);
 
-  if (apiUser) return apiUser;
+  if (apiUser && apiUser.accountKey === accountKey) return apiUser;
 
   return {
     name: account?.name ? shortName(account.name) : "Usuário",
