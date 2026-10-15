@@ -7,6 +7,7 @@ import { ISSUE_TYPE_LABELS, ISSUE_IMPACT_LABELS } from "../../utils/issueIndicat
 import type { IssueType, IssueImpact, NewIssueInput } from "../../types/issue";
 import type { Activity } from "../../types/activity";
 import type { TeamMember } from "../../types/project";
+import { normalizeError } from "../../api/apiError";
 
 interface RegisterIssueModalProps {
   show: boolean;
@@ -17,7 +18,7 @@ interface RegisterIssueModalProps {
   currentUserName: string;
   submitLabel?: string;
   title?: string;
-  onCreate: (input: NewIssueInput) => void;
+  onCreate: (input: NewIssueInput) => void | Promise<void>;
 }
 
 interface RegisterIssueFormState {
@@ -38,7 +39,7 @@ function createEmptyState(): RegisterIssueFormState {
     title: "",
     description: "",
     type: "requisito",
-    impeditiva: false,
+    impeditiva: true,
     impact: "medio",
     impactNote: "",
     dev: "",
@@ -73,6 +74,7 @@ export default function RegisterIssueModal({
   const [state, setState] = useState<RegisterIssueFormState>(createEmptyState);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function resetAndHide() {
@@ -97,7 +99,8 @@ export default function RegisterIssueModal({
     setState((prev) => ({ ...prev, errorMsg: null }));
   }
 
-  function handleConfirm() {
+  async function handleConfirm() {
+    if (submitting) return;
     const missing: string[] = [];
     if (!state.title.trim()) missing.push("Título da issue");
     if (!state.description.trim()) missing.push("Descrição da issue");
@@ -114,26 +117,34 @@ export default function RegisterIssueModal({
 
     const linkedActivity = currentActivity ?? activities.find((activity) => activity.id === state.relatedActivityId);
 
-    onCreate({
-      title: state.title.trim(),
-      description: state.description.trim(),
-      type: state.type,
-      impeditiva,
-      impact: state.impact,
-      impactNote: state.impactNote.trim(),
-      tester: currentUserName,
-      dev: state.dev,
-      area: linkedActivity?.area ?? "",
-      relatedActivityId: linkedActivity?.id ?? "",
-      openingAttachment: selectedFile ? buildEvidenceMetadata(selectedFile, currentUserName) : null,
-    });
-    resetAndHide();
+    setSubmitting(true);
+    setState((prev) => ({ ...prev, errorMsg: null }));
+    try {
+      await onCreate({
+        title: state.title.trim(),
+        description: state.description.trim(),
+        type: state.type,
+        impeditiva,
+        impact: state.impact,
+        impactNote: state.impactNote.trim(),
+        tester: currentUserName,
+        dev: state.dev,
+        area: linkedActivity?.area ?? "",
+        relatedActivityId: linkedActivity?.id ?? "",
+        openingAttachment: selectedFile ? buildEvidenceMetadata(selectedFile, currentUserName) : null,
+      });
+      resetAndHide();
+    } catch (err) {
+      setState((prev) => ({ ...prev, errorMsg: normalizeError(err).message }));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   const devs = team.filter((member) => member.role === "Desenvolvedor");
 
   return (
-    <Modal open={show} onClose={resetAndHide} labelledBy="register-issue-modal-title">
+    <Modal open={show} onClose={() => { if (!submitting) resetAndHide(); }} labelledBy="register-issue-modal-title">
       <div className="modal-title" id="register-issue-modal-title">
         {title ?? "Registrar issue"}
       </div>
@@ -336,11 +347,11 @@ export default function RegisterIssueModal({
       </div>
 
       <div className="modal-actions">
-        <button type="button" className="btn" onClick={resetAndHide}>
+        <button type="button" className="btn" onClick={resetAndHide} disabled={submitting}>
           Cancelar
         </button>
-        <button type="button" className="btn btn-primary" onClick={handleConfirm}>
-          {submitLabel ?? "Criar"}
+        <button type="button" className="btn btn-primary" onClick={handleConfirm} disabled={submitting}>
+          {submitting ? "Criando..." : submitLabel ?? "Criar"}
         </button>
       </div>
     </Modal>

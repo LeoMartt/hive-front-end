@@ -37,7 +37,7 @@ export default function ProjectIssuesPage() {
   const { id } = useParams();
   const projectId = id ?? "";
   const { issues, createIssue } = useIssues(projectId);
-  const { activities } = useActivities(projectId);
+  const { activities, refreshActivity } = useActivities(projectId);
   const { projects } = useProjects();
   const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === projectId);
@@ -191,7 +191,10 @@ export default function ProjectIssuesPage() {
           team={currentProject?.team ?? []}
           activities={activities}
           currentUserName={currentUserName}
-          onCreate={createIssue}
+          onCreate={async (input) => {
+            await createIssue(input);
+            await refreshActivity(input.relatedActivityId);
+          }}
         />
       )}
     </div>

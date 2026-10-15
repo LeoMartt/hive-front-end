@@ -21,6 +21,7 @@ interface ActivitiesTableProps {
   currentUserName: string;
   onBulkApprove: (activityIds: string[], input: ConcludeActivityInput) => void;
   onBulkCancel: (activityIds: string[]) => void;
+  canApproveActivity: (activity: Activity) => boolean;
 }
 
 export default function ActivitiesTable({
@@ -36,6 +37,7 @@ export default function ActivitiesTable({
   currentUserName,
   onBulkApprove,
   onBulkCancel,
+  canApproveActivity,
 }: ActivitiesTableProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBulkApproveModal, setShowBulkApproveModal] = useState(false);
@@ -67,6 +69,7 @@ export default function ActivitiesTable({
   }, [activities]);
 
   const selectedActivities = activities.filter((activity) => selectedIds.has(activity.id));
+  const canApproveSelection = selectedActivities.length > 0 && selectedActivities.every(canApproveActivity);
   const canBulkApprove = selectedActivities.length > 1 && selectedActivities.every(isBulkApprovable);
 
   function toggleOne(id: string) {
@@ -109,7 +112,7 @@ export default function ActivitiesTable({
           </span>
           <div className="sel-actions">
             {/* No mockup, aprovação em massa só faz sentido com 2+ atividades selecionadas. */}
-            {selectedActivities.length > 1 && (
+            {selectedActivities.length > 1 && canApproveSelection && (
               <button
                 type="button"
                 className="btn btn-primary btn-sm"
@@ -117,7 +120,7 @@ export default function ActivitiesTable({
                 title={
                   canBulkApprove
                     ? undefined
-                    : "Só é possível aprovar em massa atividades em execução ou liberadas."
+                    : "Só é possível aprovar em massa atividades liberadas."
                 }
                 onClick={() => setShowBulkApproveModal(true)}
               >
@@ -214,7 +217,7 @@ export default function ActivitiesTable({
         </table>
       </div>
 
-      <ConcludeActivityModal
+      {canApproveSelection && <ConcludeActivityModal
         show={showBulkApproveModal}
         onHide={() => setShowBulkApproveModal(false)}
         currentUserName={currentUserName}
@@ -224,7 +227,7 @@ export default function ActivitiesTable({
           onBulkApprove(Array.from(selectedIds), input);
           clearSelection();
         }}
-      />
+      />}
 
       <CancelActivitiesModal
         show={showCancelModal}

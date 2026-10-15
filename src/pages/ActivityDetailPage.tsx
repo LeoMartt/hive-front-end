@@ -16,12 +16,12 @@ import { useMocks } from "../config/env";
 import { useGoBack } from "../hooks/useGoBack";
 import { retestPillClass } from "../utils/activityIndicators";
 import { deriveActivityAuditTrail } from "../utils/activityAuditTrail";
-import { getCurrentUserMemberships, membershipsAllowIssueCreation } from "../utils/projectAccess";
+import { canConcludeActivity, getCurrentUserMemberships, membershipsAllowIssueCreation } from "../utils/projectAccess";
 
 export default function ActivityDetailPage() {
   const { id, activityId } = useParams();
   const projectId = id ?? "";
-  const { activities, loading, error, concludeActivity, rejectActivity } = useActivities(projectId);
+  const { activities, loading, error, concludeActivity, rejectActivity, refreshActivity } = useActivities(projectId);
   const { issues, createIssue, resolveIssuesForActivity } = useIssues(projectId);
   const { projects } = useProjects();
   const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
@@ -68,6 +68,11 @@ export default function ActivityDetailPage() {
   }
 
   const auditEntries = deriveActivityAuditTrail(activity, issues);
+  const canCompleteActivity = canConcludeActivity(currentMemberships, activity, {
+    id: currentUserId,
+    email: currentUserEmail,
+    name: currentUserName,
+  });
 
   // Calculado independente do status — usado tanto pro painel "Predecessor" (só quando
   // aguardando) quanto pelos anexos herdados (só quando bloqueado, ver
@@ -120,16 +125,16 @@ export default function ActivityDetailPage() {
               Registrar nova issue
             </button>
           )}
-          {activity.status === "liberado" && (
+          {activity.status === "liberado" && (canCompleteActivity || canCreateIssue) && (
             <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-              <button
+              {canCompleteActivity && <button
                 type="button"
                 className="btn btn-primary"
                 style={{ flex: 1, justifyContent: "center" }}
                 onClick={() => setShowConcludeModal(true)}
               >
                 Concluir atividade
-              </button>
+              </button>}
               {canCreateIssue && (
                 <button
                   type="button"
@@ -172,8 +177,9 @@ export default function ActivityDetailPage() {
           currentUserName={currentUserName}
           submitLabel={registerIssueMode === "reject" ? "Reprovar e criar issue" : "Criar"}
           title={registerIssueMode === "reject" ? "Rejeitar atividade" : "Registrar issue"}
-          onCreate={(input) => {
-            createIssue(input);
+          onCreate={async (input) => {
+            await createIssue(input);
+            await refreshActivity(input.relatedActivityId);
             if (registerIssueMode === "reject" && useMocks) {
               rejectActivity(activity.id, { reason: input.description, evidence: input.openingAttachment });
             }
@@ -181,7 +187,7 @@ export default function ActivityDetailPage() {
         />
       )}
 
-      <ConcludeActivityModal
+      {canCompleteActivity && <ConcludeActivityModal
         show={showConcludeModal}
         onHide={() => setShowConcludeModal(false)}
         currentUserName={currentUserName}
@@ -189,7 +195,7 @@ export default function ActivityDetailPage() {
           concludeActivity(activity.id, input);
           resolveIssuesForActivity(activity.id);
         }}
-      />
+      />}
     </div>
   );
 }

@@ -18,6 +18,7 @@ import { filterActivities } from "../utils/filterActivities";
 import { groupByModuleProcess, groupByStatus, groupByTester } from "../utils/groupActivities";
 import { buildActivityExportRows, ACTIVITY_EXPORT_COLUMN_WIDTHS } from "../utils/activityExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
+import { canConcludeActivity, getCurrentUserMemberships } from "../utils/projectAccess";
 import type { ActivityFiltersState, ActivityGroupMode, NewActivityInput } from "../types/activity";
 import type { HierarchyNode } from "../types/project";
 
@@ -53,6 +54,11 @@ export default function ProjectActivitiesPage() {
       member.name === currentUserName,
   );
   const canManageProject = currentMember?.role === "Gestor de Projetos";
+  const currentMemberships = getCurrentUserMemberships(currentProject?.team ?? [], {
+    id: currentUserId,
+    email: currentUserEmail,
+    name: currentUserName,
+  });
   const [hierarchyNodes, setHierarchyNodes] = useState<HierarchyNode[]>([]);
   const [hierarchyError, setHierarchyError] = useState<ApiError | null>(null);
 
@@ -289,6 +295,11 @@ export default function ProjectActivitiesPage() {
         currentUserName={currentUserName}
         onBulkApprove={bulkConcludeActivities}
         onBulkCancel={cancelActivities}
+        canApproveActivity={(activity) => canConcludeActivity(currentMemberships, activity, {
+          id: currentUserId,
+          email: currentUserEmail,
+          name: currentUserName,
+        })}
       />
 
       <NewActivityModal
