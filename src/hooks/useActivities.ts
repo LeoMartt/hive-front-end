@@ -551,6 +551,7 @@ interface UseActivitiesResult {
   bulkConcludeActivities: (activityIds: string[], input: ConcludeActivityInput) => void;
   cancelActivities: (activityIds: string[]) => void;
   importActivities: (file: File) => Promise<number>;
+  refreshActivity: (activityId: string) => Promise<void>;
 }
 
 export function useActivities(projectId: string): UseActivitiesResult {
@@ -759,6 +760,17 @@ export function useActivities(projectId: string): UseActivitiesResult {
     );
   }
 
+  async function refreshActivity(activityId: string): Promise<void> {
+    if (useMocks) return;
+    try {
+      const updatedActivity = await activitiesApi.get(projectId, activityId);
+      setActivities((prev) => prev.map((activity) => activity.id === updatedActivity.id ? updatedActivity : activity));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof ApiError ? err : normalizeError(err));
+    }
+  }
+
   async function importActivities(file: File): Promise<number> {
     if (useMocks) return 0;
 
@@ -785,6 +797,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
     bulkConcludeActivities,
     cancelActivities,
     importActivities,
+    refreshActivity,
   };
 }
 

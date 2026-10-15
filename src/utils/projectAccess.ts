@@ -1,4 +1,5 @@
 import type { TeamMember } from "../types/project";
+import type { Activity } from "../types/activity";
 
 export interface CurrentUserAccess {
   id?: string;
@@ -58,4 +59,15 @@ export function membershipsAllowIssueCreation(memberships: TeamMember[]): boolea
 
 export function membershipsAllowAssignedIssues(memberships: TeamMember[]): boolean {
   return memberships.some((member) => member.role === "Gestor de Projetos" || member.role === "Desenvolvedor");
+}
+
+export function canConcludeActivity(memberships: TeamMember[], activity: Activity, currentUser: CurrentUserAccess): boolean {
+  if (memberships.some((member) => member.role === "Gestor de Projetos")) return true;
+  const testerMemberships = memberships.filter((member) => member.role === "Tester");
+  if (testerMemberships.length === 0) return false;
+  if (activity.testerId) {
+    const identities = [currentUser.id, currentUser.email, ...testerMemberships.flatMap((member) => [member.id, member.email])];
+    return identities.some((id) => Boolean(id) && id?.toLowerCase() === activity.testerId?.toLowerCase());
+  }
+  return testerMemberships.some((member) => namesMatch(activity.tester, member.name));
 }

@@ -81,10 +81,13 @@ export function normalizeError(err: unknown): ApiError {
       });
     }
     // sem response => rede, DNS, CORS, timeout
+    const isTimeout = err.code === "ECONNABORTED" || err.code === "ETIMEDOUT";
     return new ApiError({
       status: null,
-      code: err.code === "ECONNABORTED" ? "TIMEOUT" : "NETWORK_ERROR",
-      message: "Sem resposta do servidor. Verifique a conexão.",
+      code: isTimeout ? "TIMEOUT" : "NETWORK_ERROR",
+      message: isTimeout
+        ? "O servidor excedeu o tempo de resposta. O processamento pode continuar. Confira os dados antes de tentar novamente."
+        : "Sem resposta do servidor. Verifique a conexão.",
       isNetwork: true,
     });
   }

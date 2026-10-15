@@ -18,6 +18,11 @@ function activityUrlId(activityId: string): number {
 }
 
 export const activitiesApi = {
+  async get(projectId: string, activityId: string): Promise<Activity> {
+    const { data } = await httpClient.get(`/projects/${projectId}/activities/${activityUrlId(activityId)}/`);
+    return activitySchema.parse(data);
+  },
+
   async list(projectId: string): Promise<Activity[]> {
     const { data } = await httpClient.get(`/projects/${projectId}/activities/`);
     return z.array(activitySchema).parse(data);
@@ -46,7 +51,9 @@ export const activitiesApi = {
   async importFile(projectId: string, file: File): Promise<{ created: number; activities: Activity[] }> {
     const formData = new FormData();
     formData.append("file", file);
-    const { data } = await httpClient.post(`/projects/${projectId}/activities/import/`, formData);
+    const { data } = await httpClient.post(`/projects/${projectId}/activities/import/`, formData, {
+      timeout: 180_000,
+    });
     return activityImportResponseSchema.parse(data);
   },
 

@@ -382,7 +382,7 @@ interface UseIssuesResult {
   stats: IssueStats;
   loading: boolean;
   error: ApiError | null;
-  createIssue: (input: NewIssueInput) => void;
+  createIssue: (input: NewIssueInput) => Promise<void>;
   startAnalysis: (issueId: string) => void;
   proposeSolution: (issueId: string, input: ProposeSolutionInput) => void;
   cancelIssue: (issueId: string) => void;
@@ -455,12 +455,17 @@ export function useIssues(projectId: string): UseIssuesResult {
 
   // Append direto, sem validação própria — mesmo padrão de createActivity em
   // useActivities.ts. A validação de campo obrigatório vive no modal (camada de UI).
-  function createIssue(input: NewIssueInput): void {
+  async function createIssue(input: NewIssueInput): Promise<void> {
     if (!useMocks) {
-      void issuesApi.create(projectId, input).then(
-        (createdIssue) => setIssues((prev) => [...prev, createdIssue]),
-        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
-      );
+      try {
+        const createdIssue = await issuesApi.create(projectId, input);
+        setIssues((prev) => [...prev, createdIssue]);
+        setError(null);
+      } catch (err) {
+        const normalized = err instanceof ApiError ? err : normalizeError(err);
+        setError(normalized);
+        throw normalized;
+      }
       return;
     }
 
