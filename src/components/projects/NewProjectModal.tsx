@@ -1,4 +1,5 @@
 import { useState } from "react";
+import LoadingState from "../common/LoadingState";
 import Modal from "../common/Modal";
 import CloseIcon from "../common/CloseIcon";
 import { getInitials } from "../../utils/initials";
@@ -238,7 +239,7 @@ export default function NewProjectModal({ show, existingProjects, onHide, onCrea
             {showUserDropdown && (
               <div className="user-dropdown">
                 {search.searchLoading && (
-                  <div className="user-dropdown-loading">Buscando…</div>
+                  <LoadingState compact />
                 )}
                 {!search.searchLoading && search.searchResults.length === 0 && (
                   <div className="user-dropdown-empty">Nenhum usuário encontrado.</div>

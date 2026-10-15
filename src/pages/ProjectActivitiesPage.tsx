@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import LoadingState from "../components/common/LoadingState";
 import { useParams } from "react-router";
 import ActivityStatChips, { type ActivityStatChipKey } from "../components/activities/ActivityStatChips";
 import ActivityFiltersBar from "../components/activities/ActivityFiltersBar";
@@ -251,7 +252,7 @@ export default function ProjectActivitiesPage() {
 
       <ActivityStatChips stats={stats} activeChip={activeChip} onSelect={handleChipSelect} />
 
-      {loading && <div className="info-banner">Carregando atividades...</div>}
+      {loading && <LoadingState />}
       {error && <div className="error-banner">{error.message}</div>}
       {hierarchyError && <div className="error-banner">{hierarchyError.message}</div>}
 
@@ -282,7 +283,7 @@ export default function ProjectActivitiesPage() {
         </div>
       </div>
 
-      <ActivitiesTable
+      {!loading && <ActivitiesTable
         activities={filteredActivities}
         projectId={projectId}
         groupMode={groupMode}
@@ -300,7 +301,7 @@ export default function ProjectActivitiesPage() {
           email: currentUserEmail,
           name: currentUserName,
         })}
-      />
+      />}
 
       <NewActivityModal
         show={showNewActivityModal}

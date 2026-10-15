@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
+import LoadingState from "../components/common/LoadingState";
 import { useParams } from "react-router";
 import IssueStatusBadge from "../components/issues/IssueStatusBadge";
 import IssueFieldGrid from "../components/issues/IssueFieldGrid";
@@ -15,7 +17,7 @@ import { deriveIssueAuditTrail } from "../utils/issueAuditTrail";
 export default function IssueDetailPage() {
   const { id, issueId } = useParams();
   const projectId = id ?? "";
-  const { issues, startAnalysis, proposeSolution, cancelIssue } = useIssues(projectId);
+  const { issues, loading, error, startAnalysis, proposeSolution, cancelIssue } = useIssues(projectId);
   const { activities } = useActivities(projectId);
   const { projects } = useProjects();
   const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
@@ -23,6 +25,9 @@ export default function IssueDetailPage() {
   const currentProject = projects.find((project) => project.id === projectId);
   const goBack = useGoBack(`/projetos/${projectId}/issues`);
   const [showProposeSolutionModal, setShowProposeSolutionModal] = useState(false);
+
+  if (loading) return <LoadingState />;
+  if (error) return <div className="error-banner" role="alert">{error.message}</div>;
 
   if (!issue) {
     return (
@@ -56,7 +61,7 @@ export default function IssueDetailPage() {
   return (
     <div>
       <button type="button" className="btn btn-sm" onClick={goBack} style={{ marginBottom: 10 }}>
-        ← Voltar
+        <ArrowLeft size={16} aria-hidden="true" /> Voltar
       </button>
 
       <div className="activity-layout">

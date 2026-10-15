@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import LoadingState from "../components/common/LoadingState";
 import StatCard from "../components/common/StatCard";
 import ProjectsToolbar, { type ProjectsTabFilter } from "../components/projects/ProjectsToolbar";
 import ProjectsTable from "../components/projects/ProjectsTable";
@@ -70,7 +71,7 @@ export default function ProjectsPage() {
           </button>
         </div>
       ) : loading ? (
-        <div className="page-state">Carregando projetos…</div>
+        <LoadingState />
       ) : (
         <ProjectsTable projects={filteredProjects} onOpenTeam={setTeamModalMembers} />
       )}

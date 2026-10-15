@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Check } from "lucide-react";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
 import { useProjects } from "../../hooks/useProjects";
 import type { AgingThresholds, ProjectConfig } from "../../types/projectConfig";
@@ -178,7 +179,7 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
       <button type="button" className="btn btn-primary btn-sm" disabled={!canSave} onClick={handleSave}>
         Salvar limiares
       </button>
-      {saved && <span className="saved-msg">Limiares atualizados ✓</span>}
+      {saved && <span className="saved-msg"><Check className="inline-status-icon" size={14} aria-hidden="true" />Limiares atualizados</span>}
     </div>
   );
 }

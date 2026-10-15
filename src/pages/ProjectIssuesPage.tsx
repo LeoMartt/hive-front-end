@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import LoadingState from "../components/common/LoadingState";
 import { useParams } from "react-router";
 import IssuesKpiCards from "../components/issues/IssuesKpiCards";
 import IssueStatusPills, { type IssueStatusFilter } from "../components/issues/IssueStatusPills";
@@ -36,7 +37,7 @@ function personMatchesCurrentUser(personName: string, personId: string | undefin
 export default function ProjectIssuesPage() {
   const { id } = useParams();
   const projectId = id ?? "";
-  const { issues, createIssue } = useIssues(projectId);
+  const { issues, loading, error, createIssue } = useIssues(projectId);
   const { activities, refreshActivity } = useActivities(projectId);
   const { projects } = useProjects();
   const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
@@ -182,7 +183,7 @@ export default function ProjectIssuesPage() {
         </div>
       </div>
 
-      <IssuesTable issues={filteredIssues} projectId={projectId} />
+      {loading ? <LoadingState /> : error ? <div className="error-banner" role="alert">{error.message}</div> : <IssuesTable issues={filteredIssues} projectId={projectId} />}
 
       {canCreateIssue && (
         <RegisterIssueModal
