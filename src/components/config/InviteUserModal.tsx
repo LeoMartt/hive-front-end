@@ -1,4 +1,5 @@
 import { useState } from "react";
+import LoadingState from "../common/LoadingState";
 import Modal from "../common/Modal";
 import { useGraphUserSearch } from "../../hooks/useGraphUserSearch";
 import { getInitials } from "../../utils/initials";
@@ -84,7 +85,7 @@ export default function InviteUserModal({ show, onHide, currentTeam, onInvite }:
           />
           {showUserDropdown && (
             <div className="user-dropdown">
-              {search.searchLoading && <div className="user-dropdown-loading">Buscando…</div>}
+              {search.searchLoading && <LoadingState compact />}
               {!search.searchLoading && search.searchResults.length === 0 && (
                 <div className="user-dropdown-empty">Nenhum usuário encontrado.</div>
               )}

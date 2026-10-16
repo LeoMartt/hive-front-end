@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Check } from "lucide-react";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
 
 export default function ConfigAttachmentsPanel() {
@@ -84,7 +85,7 @@ export default function ConfigAttachmentsPanel() {
       <button type="button" className="btn btn-primary btn-sm" onClick={handleSave}>
         Salvar limite
       </button>
-      {saved && <span className="saved-msg">Limite atualizado ✓</span>}
+      {saved && <span className="saved-msg"><Check className="inline-status-icon" size={14} aria-hidden="true" />Limite atualizado</span>}
     </div>
   );
 }

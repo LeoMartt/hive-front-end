@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { ArrowLeft, CircleCheck, Clock3 } from "lucide-react";
+import LoadingState from "../components/common/LoadingState";
 import { useParams } from "react-router";
 import ActivityStatusBadge from "../components/activities/ActivityStatusBadge";
 import ActivityFieldGrid from "../components/activities/ActivityFieldGrid";
@@ -39,12 +41,7 @@ export default function ActivityDetailPage() {
   const [showConcludeModal, setShowConcludeModal] = useState(false);
 
   if (loading) {
-    return (
-      <div className="empty-state">
-        <div className="empty-title">Carregando atividade</div>
-        <div className="empty-desc">Buscando os dados atualizados no backend.</div>
-      </div>
-    );
+    return <LoadingState />;
   }
 
   if (error) {
@@ -84,7 +81,7 @@ export default function ActivityDetailPage() {
   return (
     <div>
       <button type="button" className="btn btn-sm" onClick={goBack} style={{ marginBottom: 10 }}>
-        ← Voltar para Atividades
+        <ArrowLeft size={16} aria-hidden="true" /> Voltar para Atividades
       </button>
 
       <div className="activity-layout">
@@ -104,12 +101,12 @@ export default function ActivityDetailPage() {
 
           {showPredecessorPanel && predecessorActivity && (
             <div className="info-banner">
-              ⏳ Aguardando conclusão do predecessor <b>{predecessorActivity.id}</b> para liberar o início desta
+              <Clock3 className="inline-status-icon" size={16} aria-hidden="true" /> Aguardando conclusão do predecessor <b>{predecessorActivity.id}</b> para liberar o início desta
               atividade.
             </div>
           )}
           {activity.status === "concluido" && (
-            <div className="info-banner">✅ Atividade concluída. Nenhuma ação pendente.</div>
+            <div className="info-banner"><CircleCheck className="inline-status-icon" size={16} aria-hidden="true" />Atividade concluída. Nenhuma ação pendente.</div>
           )}
 
           {activity.status === "bloqueado" && canCreateIssue && (

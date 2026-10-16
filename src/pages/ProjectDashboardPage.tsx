@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import LoadingState from "../components/common/LoadingState";
 import { useParams } from "react-router";
 import DashboardActivitiesBlock from "../components/dashboard/DashboardActivitiesBlock";
 import DashboardIssuesBlock from "../components/dashboard/DashboardIssuesBlock";
@@ -34,8 +35,8 @@ export default function ProjectDashboardPage() {
   const [auditLabel, setAuditLabel] = useState("Gerar auditoria");
   const [auditLoading, setAuditLoading] = useState(false);
 
-  const { activities, stats } = useActivities(projectId);
-  const { issues, stats: issueStats } = useIssues(projectId);
+  const { activities, stats, loading: activitiesLoading, error: activitiesError } = useActivities(projectId);
+  const { issues, stats: issueStats, loading: issuesLoading, error: issuesError } = useIssues(projectId);
   const logEntries = useActivityLog(activities, issues);
   const curvaS = useCurvaSData(activities);
 
@@ -60,6 +61,10 @@ export default function ProjectDashboardPage() {
       setAuditLoading(false);
     }
   }
+
+  if (activitiesLoading || issuesLoading) return <LoadingState />;
+  const dataError = activitiesError ?? issuesError;
+  if (dataError) return <div className="error-banner" role="alert">{dataError.message}</div>;
 
   return (
     <div>
