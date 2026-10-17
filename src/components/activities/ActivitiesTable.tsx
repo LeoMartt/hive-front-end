@@ -4,6 +4,7 @@ import ActivityGroupRows from "./ActivityGroupRows";
 import ConcludeActivityModal from "./ConcludeActivityModal";
 import CancelActivitiesModal from "./CancelActivitiesModal";
 import EmptyState from "../common/EmptyState";
+import LoadingState from "../common/LoadingState";
 import { groupByModuleProcess, groupByStatus, groupByTester } from "../../utils/groupActivities";
 import { isBulkApprovable, isBulkSelectable } from "../../utils/activityIndicators";
 import type { Activity, ActivityGroupMode, ConcludeActivityInput } from "../../types/activity";
@@ -22,6 +23,8 @@ interface ActivitiesTableProps {
   onBulkApprove: (activityIds: string[], input: ConcludeActivityInput) => void;
   onBulkCancel: (activityIds: string[]) => void;
   canApproveActivity: (activity: Activity) => boolean;
+  canCancelActivities: boolean;
+  loading?: boolean;
 }
 
 export default function ActivitiesTable({
@@ -38,6 +41,8 @@ export default function ActivitiesTable({
   onBulkApprove,
   onBulkCancel,
   canApproveActivity,
+  canCancelActivities,
+  loading = false,
 }: ActivitiesTableProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBulkApproveModal, setShowBulkApproveModal] = useState(false);
@@ -46,7 +51,11 @@ export default function ActivitiesTable({
 
   // Só atividades elegíveis (nem concluído, nem cancelado) entram na seleção via
   // "selecionar tudo" — elas nem têm checkbox próprio na linha (ver ActivityRow).
-  const selectableIds = activities.filter(isBulkSelectable).map((activity) => activity.id);
+  function canSelectActivity(activity: Activity) {
+    return isBulkSelectable(activity) && (canCancelActivities || canApproveActivity(activity));
+  }
+  const selectableIds = activities.filter(canSelectActivity).map((activity) => activity.id);
+  const selectableKey = selectableIds.join(";");
   const selectedSelectableCount = selectableIds.filter((id) => selectedIds.has(id)).length;
   const allSelected = selectableIds.length > 0 && selectedSelectableCount === selectableIds.length;
   const someSelected = selectedSelectableCount > 0 && !allSelected;
@@ -66,9 +75,9 @@ export default function ActivitiesTable({
       return next.size === prev.size ? prev : next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activities]);
+  }, [selectableKey]);
 
-  const selectedActivities = activities.filter((activity) => selectedIds.has(activity.id));
+  const selectedActivities = activities.filter((activity) => selectedIds.has(activity.id) && canSelectActivity(activity));
   const canApproveSelection = selectedActivities.length > 0 && selectedActivities.every(canApproveActivity);
   const canBulkApprove = selectedActivities.length > 1 && selectedActivities.every(isBulkApprovable);
 
@@ -92,9 +101,9 @@ export default function ActivitiesTable({
     setSelectedIds(new Set());
   }
 
-  if (activities.length === 0) {
+  if (!loading && activities.length === 0) {
     return (
-      <div className="table-wrap dense">
+      <div className="table-wrap dense activities-table-wrap">
         <EmptyState
           title="Nenhuma atividade encontrada"
           description="Ajuste os filtros para encontrar a atividade que procura."
@@ -105,7 +114,7 @@ export default function ActivitiesTable({
 
   return (
     <>
-      {selectedIds.size > 0 && (
+      {!loading && selectedActivities.length > 0 && (
         <div className="selection-bar">
           <span className="sel-count">
             <b>{selectedIds.size}</b> atividade(s) selecionada(s)
@@ -127,17 +136,17 @@ export default function ActivitiesTable({
                 Aprovação em Massa
               </button>
             )}
-            <button type="button" className="btn btn-danger btn-sm" onClick={() => setShowCancelModal(true)}>
+            {canCancelActivities && <button type="button" className="btn btn-danger btn-sm" onClick={() => setShowCancelModal(true)}>
               Cancelar selecionadas
-            </button>
+            </button>}
             <button type="button" className="btn btn-sm btn-ghost" onClick={clearSelection}>
               Limpar seleção
             </button>
           </div>
         </div>
       )}
-      <div className="table-wrap dense">
-        <table className={`activities-data-table activities-data-table-${groupMode}`}>
+      <div className="table-wrap dense activities-table-wrap">
+        <table className={`activities-data-table activities-data-table-${groupMode}`} aria-busy={loading}>
           <colgroup>
             <col className="activity-col-select" />
             <col className="activity-col-toggle" />
@@ -157,13 +166,13 @@ export default function ActivitiesTable({
           <thead>
             <tr>
               <th className="activity-select-header">
-                <input
+                {!loading && selectableIds.length > 0 && <input
                   ref={selectAllRef}
                   type="checkbox"
                   aria-label="Selecionar todas as atividades visíveis"
                   checked={allSelected}
                   onChange={(event) => toggleAll(event.target.checked)}
-                />
+                />}
               </th>
               <th className="activity-toggle-header"></th>
               <th className="activity-header-left activity-header-name">Nome</th>
@@ -181,9 +190,15 @@ export default function ActivitiesTable({
             </tr>
           </thead>
           <tbody>
-            {groupMode === "tree" && (
+            {loading && (
+              <tr className="activities-loading-row">
+                <td colSpan={14} className="activities-loading-cell"><LoadingState compact /></td>
+              </tr>
+            )}
+            {!loading && groupMode === "tree" && (
               <ActivityTreeRows
                 groups={groupByModuleProcess(activities)}
+                canSelectActivity={canSelectActivity}
                 projectId={projectId}
                 expandedModules={expandedModules}
                 onToggleModule={onToggleModule}
@@ -193,9 +208,10 @@ export default function ActivitiesTable({
                 onToggleSelect={toggleOne}
               />
             )}
-            {groupMode === "tester" && (
+            {!loading && groupMode === "tester" && (
               <ActivityGroupRows
                 groups={groupByTester(activities)}
+                canSelectActivity={canSelectActivity}
                 projectId={projectId}
                 expandedGroups={expandedGroups}
                 onToggleGroup={onToggleGroup}
@@ -203,9 +219,10 @@ export default function ActivitiesTable({
                 onToggleSelect={toggleOne}
               />
             )}
-            {groupMode === "status" && (
+            {!loading && groupMode === "status" && (
               <ActivityGroupRows
                 groups={groupByStatus(activities)}
+                canSelectActivity={canSelectActivity}
                 projectId={projectId}
                 expandedGroups={expandedGroups}
                 onToggleGroup={onToggleGroup}
@@ -224,21 +241,21 @@ export default function ActivitiesTable({
         title={`Aprovar ${selectedActivities.length} atividade(s) selecionada(s)`}
         subtitle="Uma única evidência será aplicada a todas as atividades selecionadas do lote."
         onSubmit={(input) => {
-          onBulkApprove(Array.from(selectedIds), input);
+          onBulkApprove(selectedActivities.map((activity) => activity.id), input);
           clearSelection();
         }}
       />}
 
-      <CancelActivitiesModal
+      {canCancelActivities && <CancelActivitiesModal
         show={showCancelModal}
         count={selectedIds.size}
         onHide={() => setShowCancelModal(false)}
         onConfirm={() => {
-          onBulkCancel(Array.from(selectedIds));
+          onBulkCancel(selectedActivities.map((activity) => activity.id));
           setShowCancelModal(false);
           clearSelection();
         }}
-      />
+      />}
     </>
   );
 }

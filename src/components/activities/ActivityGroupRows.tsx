@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import ActivityRow from "./ActivityRow";
 import TreeToggleIcon from "../common/TreeToggleIcon";
 import { computeGroupRollup } from "../../utils/activityIndicators";
-import type { FlatActivityGroup } from "../../types/activity";
+import type { Activity, FlatActivityGroup } from "../../types/activity";
 
 interface ActivityGroupRowsProps {
   groups: FlatActivityGroup[];
@@ -11,6 +11,7 @@ interface ActivityGroupRowsProps {
   onToggleGroup: (groupKey: string) => void;
   selectedIds: Set<string>;
   onToggleSelect: (id: string) => void;
+  canSelectActivity: (activity: Activity) => boolean;
 }
 
 function GroupSummary({
@@ -58,6 +59,7 @@ export default function ActivityGroupRows({
   onToggleGroup,
   selectedIds,
   onToggleSelect,
+  canSelectActivity,
 }: ActivityGroupRowsProps) {
   return (
     <>
@@ -95,6 +97,7 @@ export default function ActivityGroupRows({
                 <ActivityRow
                   key={activity.id}
                   activity={activity}
+                  canSelect={canSelectActivity(activity)}
                   projectId={projectId}
                   showBreadcrumb
                   checked={selectedIds.has(activity.id)}

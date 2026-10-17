@@ -4,6 +4,7 @@ import { ApiError, normalizeError } from "../api/apiError";
 import { activitiesApi } from "../api/resources/activities";
 import { useMocks } from "../config/env";
 import { isOverdue, toLocalIsoString } from "../utils/activityIndicators";
+import { releaseReadyActivities } from "../utils/activityDependencies";
 
 function isoDaysFromNow(days: number): string {
   const date = new Date();
@@ -648,7 +649,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
         approvalNote: null,
         rejectedAt: null,
       };
-      return [...prev, newActivity];
+      return releaseReadyActivities([...prev, newActivity]);
     });
   }
 
@@ -658,17 +659,14 @@ export function useActivities(projectId: string): UseActivitiesResult {
   function concludeActivity(activityId: string, input: ConcludeActivityInput): void {
     if (!useMocks) {
       void activitiesApi.complete(projectId, activityId, input).then(
-        (updatedActivity) =>
-          setActivities((prev) =>
-            prev.map((activity) => (activity.id === updatedActivity.id ? updatedActivity : activity)),
-          ),
+        () => refreshActivities(),
         (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
       );
       return;
     }
 
     setActivities((prev) =>
-      prev.map((activity) =>
+      releaseReadyActivities(prev.map((activity) =>
         activity.id === activityId
           ? {
               ...activity,
@@ -678,7 +676,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
               approvalEvidence: input.approvalEvidence,
             }
           : activity
-      )
+      ))
     );
   }
 
@@ -717,10 +715,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
   function bulkConcludeActivities(activityIds: string[], input: ConcludeActivityInput): void {
     if (!useMocks) {
       void Promise.all(activityIds.map((activityId) => activitiesApi.complete(projectId, activityId, input))).then(
-        (updatedActivities) => {
-          const byId = new Map(updatedActivities.map((activity) => [activity.id, activity]));
-          setActivities((prev) => prev.map((activity) => byId.get(activity.id) ?? activity));
-        },
+        () => refreshActivities(),
         (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
       );
       return;
@@ -728,7 +723,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
 
     const idSet = new Set(activityIds);
     setActivities((prev) =>
-      prev.map((activity) =>
+      releaseReadyActivities(prev.map((activity) =>
         idSet.has(activity.id)
           ? {
               ...activity,
@@ -738,17 +733,14 @@ export function useActivities(projectId: string): UseActivitiesResult {
               approvalEvidence: input.approvalEvidence,
             }
           : activity
-      )
+      ))
     );
   }
 
   function cancelActivities(activityIds: string[]): void {
     if (!useMocks) {
       void Promise.all(activityIds.map((activityId) => activitiesApi.cancel(projectId, activityId))).then(
-        (cancelledActivities) => {
-          const byId = new Map(cancelledActivities.map((activity) => [activity.id, activity]));
-          setActivities((prev) => prev.map((activity) => byId.get(activity.id) ?? activity));
-        },
+        () => refreshActivities(),
         (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
       );
       return;
@@ -756,8 +748,17 @@ export function useActivities(projectId: string): UseActivitiesResult {
 
     const idSet = new Set(activityIds);
     setActivities((prev) =>
-      prev.map((activity) => (idSet.has(activity.id) ? { ...activity, status: "cancelado" } : activity))
+      releaseReadyActivities(prev.map((activity) => (idSet.has(activity.id) ? { ...activity, status: "cancelado" } : activity)))
     );
+  }
+
+  async function refreshActivities(): Promise<void> {
+    try {
+      setActivities(await activitiesApi.list(projectId));
+      setError(null);
+    } catch (err) {
+      setError(err instanceof ApiError ? err : normalizeError(err));
+    }
   }
 
   async function refreshActivity(activityId: string): Promise<void> {

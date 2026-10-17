@@ -1,19 +1,96 @@
 @use "colors" as c;
 
-// Aba "Usuários": tabela à esquerda, matriz de permissões à direita
+.config-edit-fields {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.config-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.config-transition-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  .toggle-pill { min-width: 0; }
+}
+
+// A matriz precede as pessoas; ambas usam a largura disponivel.
 .config-users-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 28px;
   align-items: start;
 
-  // Itens de grid têm min-width:auto implícito, que usa o tamanho mínimo do conteúdo —
-  // a tabela da matriz de permissões tem min-width:760px (mesma regra de toda tabela do
-  // projeto, em _table.scss), então sem isso a coluna "explode" a grid e empurra a
-  // página inteira para rolagem horizontal, em vez de deixar o .table-wrap interno
-  // (que já tem overflow-x:auto) rolar sozinho.
   > * {
     min-width: 0;
+  }
+}
+
+.project-config-page {
+  min-width: 0;
+
+  .config-permission-table table,
+  .config-people-table table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 0;
+  }
+  .config-permission-table th:first-child { width: 64%; }
+  .config-people-table th:first-child { width: 45%; }
+  .config-people-table th:last-child { width: 56px; }
+  .config-permission-table th,
+  .config-permission-table td,
+  .config-people-table th,
+  .config-people-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+  .config-permission-table th { letter-spacing: 0; }
+  .config-people-table .activity-badge {
+    max-width: 100%;
+    white-space: normal;
+  }
+  .config-limiares-grid .field-value {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .config-limiares-grid input[type="number"] {
+    width: 100px;
+    max-width: 100%;
+    box-sizing: border-box;
+    border: 1px solid c.$border-strong;
+    border-radius: 6px;
+    padding: 8px 10px;
+    background-color: c.$bg-alt;
+    color: c.$text;
+    font: inherit;
+    &:focus-visible {
+      outline: 2px solid c.$yellow-deep;
+      outline-offset: 2px;
+    }
+  }
+}
+
+@media (max-width: 600px) {
+  .project-config-page {
+    .config-permission-table th:first-child { width: 46%; }
+    .config-permission-table th,
+    .config-permission-table td,
+    .config-people-table th,
+    .config-people-table td { padding: 10px 6px; font-size: 11px; }
+    .config-limiares-grid .field-row { grid-template-columns: minmax(0, 1fr); }
+    .config-limiares-grid .toggle-pill { white-space: normal; }
   }
 }
 
@@ -59,11 +136,49 @@
   margin-left: 6px;
 }
 
-// Confirmacao ao lado do botao Salvar.
-.saved-msg {
-  margin-left: 10px;
-  font-size: 11.5px;
-  color: c.$green;
+.save-notification {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+  padding: 14px 16px;
+  border: 1px solid c.$border;
+  border-left: 3px solid c.$green;
+  border-radius: 6px;
+  background-color: c.$surface;
+  color: c.$text;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12);
+  font-size: 13px;
+  font-weight: 600;
+  animation: save-notification-enter 160ms ease-out;
+  > svg { color: c.$green; flex-shrink: 0; }
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-left: 8px;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 4px;
+    color: c.$text-dim;
+    &:hover { background-color: c.$bg-alt; }
+  }
+}
+
+@keyframes save-notification-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .save-notification { animation: none; }
 }
 
 @media (max-width: 900px) {

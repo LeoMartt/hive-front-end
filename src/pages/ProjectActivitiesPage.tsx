@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import LoadingState from "../components/common/LoadingState";
 import { useParams } from "react-router";
 import ActivityStatChips, { type ActivityStatChipKey } from "../components/activities/ActivityStatChips";
 import ActivityFiltersBar from "../components/activities/ActivityFiltersBar";
@@ -19,7 +18,7 @@ import { filterActivities } from "../utils/filterActivities";
 import { groupByModuleProcess, groupByStatus, groupByTester } from "../utils/groupActivities";
 import { buildActivityExportRows, ACTIVITY_EXPORT_COLUMN_WIDTHS } from "../utils/activityExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
-import { canConcludeActivity, getCurrentUserMemberships } from "../utils/projectAccess";
+import { canConcludeActivity, getCurrentUserMemberships, membershipsAllowProjectManagement } from "../utils/projectAccess";
 import type { ActivityFiltersState, ActivityGroupMode, NewActivityInput } from "../types/activity";
 import type { HierarchyNode } from "../types/project";
 
@@ -48,19 +47,17 @@ export default function ProjectActivitiesPage() {
   const { projects } = useProjects();
   const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === projectId);
-  const currentMember = currentProject?.team.find(
-    (member) =>
-      member.id === currentUserId ||
-      (currentUserEmail !== undefined && member.email?.toLowerCase() === currentUserEmail.toLowerCase()) ||
-      member.name === currentUserName,
-  );
-  const canManageProject = currentMember?.role === "Gestor de Projetos";
   const currentMemberships = getCurrentUserMemberships(currentProject?.team ?? [], {
     id: currentUserId,
     email: currentUserEmail,
     name: currentUserName,
   });
   const [hierarchyNodes, setHierarchyNodes] = useState<HierarchyNode[]>([]);
+  const currentMember = currentMemberships[0];
+  const canManageProject = membershipsAllowProjectManagement(currentMemberships);
+  const canViewOwnActivities = currentMemberships.some((member) =>
+    member.role === "Gestor de Projetos" || member.role === "Tester",
+  );
   const [hierarchyError, setHierarchyError] = useState<ApiError | null>(null);
 
   useEffect(() => {
@@ -94,12 +91,12 @@ export default function ProjectActivitiesPage() {
 
   const filteredActivities = useMemo(
     () =>
-      filterActivities(activities, filters, {
+      filterActivities(activities, { ...filters, onlyMine: canViewOwnActivities && filters.onlyMine }, {
         name: currentMember?.name ?? currentUserName,
         email: currentMember?.email ?? currentUserEmail,
         id: currentMember?.id ?? currentUserId,
       }),
-    [activities, currentMember?.email, currentMember?.id, currentMember?.name, currentUserEmail, currentUserId, currentUserName, filters]
+    [activities, canViewOwnActivities, currentMember?.email, currentMember?.id, currentMember?.name, currentUserEmail, currentUserId, currentUserName, filters]
   );
 
   const moduleGroups = useMemo(() => groupByModuleProcess(filteredActivities), [filteredActivities]);
@@ -252,7 +249,6 @@ export default function ProjectActivitiesPage() {
 
       <ActivityStatChips stats={stats} activeChip={activeChip} onSelect={handleChipSelect} />
 
-      {loading && <LoadingState />}
       {error && <div className="error-banner">{error.message}</div>}
       {hierarchyError && <div className="error-banner">{hierarchyError.message}</div>}
 
@@ -267,7 +263,7 @@ export default function ProjectActivitiesPage() {
             </button>
           )}
         </div>
-        <div className="activities-toolbar-group">
+        {canViewOwnActivities && <div className="activities-toolbar-group">
           <label className={`toggle-pill${filters.onlyMine ? " toggle-pill-active" : ""}`} htmlFor="only-mine-toggle">
             <span className="switch">
               <input
@@ -280,11 +276,12 @@ export default function ProjectActivitiesPage() {
             </span>
             Minhas atividades
           </label>
-        </div>
+        </div>}
       </div>
 
-      {!loading && <ActivitiesTable
+      <ActivitiesTable
         activities={filteredActivities}
+        loading={loading}
         projectId={projectId}
         groupMode={groupMode}
         expandedModules={expandedModules}
@@ -296,30 +293,31 @@ export default function ProjectActivitiesPage() {
         currentUserName={currentUserName}
         onBulkApprove={bulkConcludeActivities}
         onBulkCancel={cancelActivities}
+        canCancelActivities={canManageProject}
         canApproveActivity={(activity) => canConcludeActivity(currentMemberships, activity, {
           id: currentUserId,
           email: currentUserEmail,
           name: currentUserName,
         })}
-      />}
+      />
 
-      <NewActivityModal
+      {canManageProject && <NewActivityModal
         show={showNewActivityModal}
         onHide={() => setShowNewActivityModal(false)}
         team={currentProject?.team ?? []}
         hierarchyNodes={hierarchyNodes}
         projectMode={currentProject?.mode ?? null}
         onCreate={createActivity}
-      />
+      />}
 
-      <ImportActivitiesModal
+      {canManageProject && <ImportActivitiesModal
         show={showImportModal}
         onHide={() => setShowImportModal(false)}
         team={currentProject?.team ?? []}
         onImport={handleImportActivities}
         onImportFile={importActivities}
         useBackendImport={!useMocks}
-      />
+      />}
     </div>
   );
 }

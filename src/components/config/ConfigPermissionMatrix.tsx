@@ -26,15 +26,12 @@ const PERMISSION_ROWS: PermissionRow[] = [
 
 export default function ConfigPermissionMatrix() {
   return (
-    <div className="panel">
+    <section className="config-permission-section">
       <div className="panel-head">
         <div className="panel-title">Matriz de Permissões por Papel</div>
       </div>
-      <div className="page-desc" style={{ marginBottom: 16 }}>
-        Referência das permissões atuais. A edição desta matriz será definida depois com o time.
-      </div>
-      <div className="table-wrap">
-        <table>
+      <div className="table-wrap config-permission-table">
+        <table aria-label="Matriz de permissões por papel">
           <thead>
             <tr>
               <th>Ação</th>
@@ -79,6 +76,6 @@ export default function ConfigPermissionMatrix() {
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
   );
 }

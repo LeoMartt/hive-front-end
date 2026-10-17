@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import ActivityStatusBadge from "./ActivityStatusBadge";
-import { formatActivityDate, isBulkSelectable, isOverdue, retestPillClass } from "../../utils/activityIndicators";
+import { formatActivityDate, isOverdue, retestPillClass } from "../../utils/activityIndicators";
 import Avatar from "../common/Avatar";
 import { shortName } from "../../utils/shortName";
 import type { Activity } from "../../types/activity";
@@ -12,6 +12,7 @@ interface ActivityRowProps {
   showBreadcrumb?: boolean;
   checked: boolean;
   onToggleSelect: (id: string) => void;
+  canSelect: boolean;
 }
 
 export default function ActivityRow({
@@ -21,6 +22,7 @@ export default function ActivityRow({
   showBreadcrumb = false,
   checked,
   onToggleSelect,
+  canSelect,
 }: ActivityRowProps) {
   const navigate = useNavigate();
   const overdue = isOverdue(activity);
@@ -33,7 +35,7 @@ export default function ActivityRow({
     <tr
       role="button"
       tabIndex={0}
-      className={overdue ? "activity-row-overdue" : undefined}
+      className={`activity-row${overdue ? " activity-row-overdue" : ""}`}
       onClick={goToDetail}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
@@ -43,7 +45,7 @@ export default function ActivityRow({
       }}
     >
       <td className="activity-select-cell">
-        {isBulkSelectable(activity) && (
+        {canSelect && (
           <input
             type="checkbox"
             aria-label={`Selecionar ${activity.name}`}
@@ -55,10 +57,9 @@ export default function ActivityRow({
         )}
       </td>
       <td className="activity-toggle-cell"></td>
-      <td className="activity-name-cell">
+      <td className="activity-name-cell" data-label="Nome">
         <div
-          className={showBreadcrumb ? "cell-name cell-name-stacked" : "cell-name"}
-          style={indent ? { paddingLeft: 34 } : showBreadcrumb ? { paddingLeft: 10 } : undefined}
+          className={`cell-name${showBreadcrumb ? " cell-name-stacked cell-name-breadcrumb" : ""}${indent ? " cell-name-indented" : ""}`}
         >
           <span className="cell-name-text" title={activity.name}>
             {activity.name}
@@ -70,36 +71,36 @@ export default function ActivityRow({
           )}
         </div>
       </td>
-      <td className="mono activity-id-cell">{activity.id}</td>
-      <td className="activity-status-cell">
+      <td className="mono activity-id-cell" data-label="ID">{activity.id}</td>
+      <td className="activity-status-cell" data-label="Status">
         <ActivityStatusBadge status={activity.status} />
       </td>
-      <td className="activity-person-cell">
+      <td className="activity-person-cell" data-label="Tester">
         <div className="cell-person" title={activity.tester}>
           <Avatar name={activity.tester} className="avatar-mini" alt="" />
           <span className="cell-person-name">{shortName(activity.tester)}</span>
         </div>
       </td>
-      <td className="activity-person-cell">
+      <td className="activity-person-cell" data-label="Dev">
         <div className="cell-person" title={activity.dev}>
           <Avatar name={activity.dev} className="avatar-mini" alt="" />
           <span className="cell-person-name">{shortName(activity.dev)}</span>
         </div>
       </td>
-      <td className="mono activity-date-cell">{formatActivityDate(activity.plannedStart)}</td>
-      <td className={`mono activity-date-cell${overdue ? " date-overdue" : ""}`}>
+      <td className="mono activity-date-cell" data-label="Início plan.">{formatActivityDate(activity.plannedStart)}</td>
+      <td data-label="Conclusão plan." className={`mono activity-date-cell${overdue ? " date-overdue" : ""}`}>
         {formatActivityDate(activity.plannedEnd)}
         {overdue && <span className="overdue-tag">Atrasado</span>}
       </td>
-      <td className="mono activity-date-cell">{formatActivityDate(activity.actualStart)}</td>
-      <td className="mono activity-date-cell">{formatActivityDate(activity.actualEnd)}</td>
-      <td className="mono activity-predecessors-cell">
+      <td className="mono activity-date-cell" data-label="Início real">{formatActivityDate(activity.actualStart)}</td>
+      <td className="mono activity-date-cell" data-label="Conclusão real">{formatActivityDate(activity.actualEnd)}</td>
+      <td className="mono activity-predecessors-cell" data-label="Predecessoras">
         {activity.predecessors.length === 0 ? "—" : activity.predecessors.join(", ")}
       </td>
-      <td className="text-center activity-count-cell">
+      <td className="text-center activity-count-cell" data-label="Reteste">
         <span className={retestPillClass(activity.retestCount)}>{activity.retestCount}×</span>
       </td>
-      <td className="text-center activity-count-cell">{activity.issueCount}</td>
+      <td className="text-center activity-count-cell" data-label="Issues">{activity.issueCount}</td>
     </tr>
   );
 }

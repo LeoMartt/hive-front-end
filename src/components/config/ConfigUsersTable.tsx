@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useProjects } from "../../hooks/useProjects";
+import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { getCurrentUserMemberships, membershipsAllowProjectManagement } from "../../utils/projectAccess";
 import { groupTeamMembersByName, type GroupedTeamMember } from "../../utils/teamMembers";
 import InviteUserModal from "./InviteUserModal";
 import EditUserRolesModal from "./EditUserRolesModal";
@@ -8,6 +10,7 @@ import type { UserRole } from "../../types/project";
 
 interface ConfigUsersTableProps {
   projectId: string;
+  onSaved: () => void;
 }
 
 // Gestor usa azul para se diferenciar visualmente; Tester e Dev reaproveitam o
@@ -18,25 +21,29 @@ const ROLE_BADGE_CLASS: Record<UserRole, string> = {
   Desenvolvedor: "activity-badge-liberado",
 };
 
-export default function ConfigUsersTable({ projectId }: ConfigUsersTableProps) {
-  const { projects, addTeamMember, replaceTeamMemberRoles } = useProjects();
+export default function ConfigUsersTable({ projectId, onSaved }: ConfigUsersTableProps) {
+  const { projects, error, addTeamMember, replaceTeamMemberRoles } = useProjects();
+  const currentUser = useCurrentUser();
   const project = projects.find((item) => item.id === projectId);
   const [showInvite, setShowInvite] = useState(false);
   const [editingMember, setEditingMember] = useState<GroupedTeamMember | null>(null);
 
   if (!project) return null;
 
+  const canManage = membershipsAllowProjectManagement(getCurrentUserMemberships(project.team, currentUser));
+
   const groupedMembers = groupTeamMembersByName(project.team);
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+      {error && <div className="error-banner" role="alert">{error.message}</div>}
+      {canManage && <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
         <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowInvite(true)}>
           + Convidar usuário
         </button>
-      </div>
-      <div className="table-wrap">
-        <table>
+      </div>}
+      <div className="table-wrap config-people-table">
+        <table aria-label="Pessoas do projeto">
           <thead>
             <tr>
               <th>Usuário</th>
@@ -67,7 +74,7 @@ export default function ConfigUsersTable({ projectId }: ConfigUsersTableProps) {
                   </div>
                 </td>
                 <td style={{ textAlign: "right" }}>
-                  <button
+                  {canManage && <button
                     type="button"
                     className="attach-dl"
                     title="Editar papéis"
@@ -77,7 +84,7 @@ export default function ConfigUsersTable({ projectId }: ConfigUsersTableProps) {
                       <path d="M12 20h9" />
                       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
                     </svg>
-                  </button>
+                  </button>}
                 </td>
               </tr>
             ))}
@@ -85,19 +92,22 @@ export default function ConfigUsersTable({ projectId }: ConfigUsersTableProps) {
         </table>
       </div>
 
-      <InviteUserModal
+      {canManage && <InviteUserModal
         show={showInvite}
         onHide={() => setShowInvite(false)}
         currentTeam={project.team}
         onInvite={(member) => addTeamMember(projectId, member)}
-      />
+      />}
 
-      {editingMember && (
+      {canManage && editingMember && (
         <EditUserRolesModal
           show
           onHide={() => setEditingMember(null)}
           member={editingMember}
-          onSave={(roles) => replaceTeamMemberRoles(projectId, editingMember.name, roles)}
+          onSave={async (roles) => {
+            await replaceTeamMemberRoles(projectId, editingMember.name, roles);
+            onSaved();
+          }}
         />
       )}
     </div>

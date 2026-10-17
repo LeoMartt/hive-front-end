@@ -1,5 +1,51 @@
 @use "colors" as c;
 
+.form-combobox {
+  display: block;
+  width: 100%;
+  min-width: 0;
+
+  .form-combobox-control {
+    position: relative;
+    > svg {
+      position: absolute;
+      right: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: c.$text-dim;
+    }
+    .form-input { padding-right: 32px; }
+  }
+
+  .form-combobox-menu {
+    width: 100%;
+    min-width: 0;
+    max-height: 200px;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .form-combobox-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    > svg { flex-shrink: 0; }
+    &.active { background-color: c.$bg-alt; }
+  }
+
+  .form-combobox-empty {
+    padding: 9px 10px;
+    color: c.$text-dim;
+    font-size: 12px;
+  }
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

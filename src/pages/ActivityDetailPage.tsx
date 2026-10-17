@@ -18,7 +18,7 @@ import { useMocks } from "../config/env";
 import { useGoBack } from "../hooks/useGoBack";
 import { retestPillClass } from "../utils/activityIndicators";
 import { deriveActivityAuditTrail } from "../utils/activityAuditTrail";
-import { canConcludeActivity, getCurrentUserMemberships, membershipsAllowIssueCreation } from "../utils/projectAccess";
+import { canConcludeActivity, getCurrentUserMemberships } from "../utils/projectAccess";
 
 export default function ActivityDetailPage() {
   const { id, activityId } = useParams();
@@ -34,7 +34,9 @@ export default function ActivityDetailPage() {
     email: currentUserEmail,
     name: currentUserName,
   });
-  const canCreateIssue = membershipsAllowIssueCreation(currentMemberships);
+  const canCreateIssue = Boolean(activity && canConcludeActivity(currentMemberships, activity, {
+    id: currentUserId, email: currentUserEmail, name: currentUserName,
+  }));
   const goBack = useGoBack(`/projetos/${projectId}/atividades`);
   const [showRegisterIssueModal, setShowRegisterIssueModal] = useState(false);
   const [registerIssueMode, setRegisterIssueMode] = useState<"register" | "reject">("register");
@@ -101,7 +103,7 @@ export default function ActivityDetailPage() {
 
           {showPredecessorPanel && predecessorActivity && (
             <div className="info-banner">
-              <Clock3 className="inline-status-icon" size={16} aria-hidden="true" /> Aguardando conclusão do predecessor <b>{predecessorActivity.id}</b> para liberar o início desta
+              <Clock3 className="inline-status-icon" size={16} aria-hidden="true" /> Aguardando conclusão ou cancelamento das predecessoras (incluindo <b>{predecessorActivity.id}</b>) para liberar o início desta
               atividade.
             </div>
           )}
