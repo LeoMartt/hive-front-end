@@ -17,7 +17,8 @@ export const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
 
 export interface ProjectConfigContextValue {
   config: ProjectConfig;
-  setConfig: (config: ProjectConfig) => void;
+  canManage: boolean;
+  setConfig: (config: ProjectConfig) => Promise<void>;
 }
 
 // Objeto de Context em arquivo próprio (sem JSX) — ProjectConfigProvider.tsx só exporta o

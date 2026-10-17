@@ -13,6 +13,7 @@ import { useProjects } from "../hooks/useProjects";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useGoBack } from "../hooks/useGoBack";
 import { deriveIssueAuditTrail } from "../utils/issueAuditTrail";
+import { getCurrentUserMemberships } from "../utils/projectAccess";
 
 export default function IssueDetailPage() {
   const { id, issueId } = useParams();
@@ -42,20 +43,23 @@ export default function IssueDetailPage() {
 
   const relatedActivity = activities.find((item) => item.id === issue.relatedActivityId) ?? null;
   const auditEntries = deriveIssueAuditTrail(issue);
-  const currentMember = currentProject?.team.find(
-    (member) =>
-      member.id === currentUserId ||
-      (currentUserEmail !== undefined && member.email?.toLowerCase() === currentUserEmail.toLowerCase()) ||
-      member.name === currentUserName,
-  );
-  const isGestor = currentMember?.role === "Gestor de Projetos";
-  const isIssueDev =
-    issue.developerId === currentUserId ||
-    issue.developerId === currentMember?.id ||
-    issue.dev === currentUserName ||
-    issue.dev === currentUserEmail;
-  const canStartAnalysis = issue.status === "aberta" && isIssueDev;
-  const canProposeSolution = issue.status === "em_analise" && isIssueDev;
+  const memberships = getCurrentUserMemberships(currentProject?.team ?? [], {
+    id: currentUserId, email: currentUserEmail, name: currentUserName,
+  });
+  const isGestor = memberships.some((member) => member.role === "Gestor de Projetos");
+  const devMemberships = memberships.filter((member) => member.role === "Desenvolvedor");
+  const isIssueDev = devMemberships.some((member) => {
+    if (issue.developerId) {
+      return [currentUserId, currentUserEmail, member.id, member.email].some(
+        (identity) => Boolean(identity) && identity?.toLowerCase() === issue.developerId?.toLowerCase(),
+      );
+    }
+    return [member.name, member.email].some(
+      (identity) => Boolean(identity) && identity?.toLowerCase() === issue.dev.toLowerCase(),
+    );
+  });
+  const canStartAnalysis = issue.status === "aberta" && (isIssueDev || isGestor);
+  const canProposeSolution = issue.status === "em_analise" && (isIssueDev || isGestor);
   const canCancelIssue = issue.status === "em_analise" && (isIssueDev || isGestor);
 
   return (

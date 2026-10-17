@@ -3,6 +3,9 @@ import { useParams } from "react-router";
 import { DEFAULT_PROJECT_CONFIG, ProjectConfigContext } from "./ProjectConfigContext";
 import { useMocks } from "../config/env";
 import { projectsApi } from "../api/resources/projects";
+import { useProjects } from "../hooks/useProjects";
+import { useCurrentUser } from "../hooks/useCurrentUser";
+import { getCurrentUserMemberships, membershipsAllowProjectManagement } from "../utils/projectAccess";
 import type { Project } from "../types/project";
 import type { ProjectConfig } from "../types/projectConfig";
 
@@ -26,6 +29,10 @@ function mergeProjectConfig(project: Project, previous: ProjectConfig): ProjectC
 
 export function ProjectConfigProvider({ children }: { children: ReactNode }) {
   const { id: projectId } = useParams();
+  const { projects } = useProjects();
+  const currentUser = useCurrentUser();
+  const currentProject = projects.find((project) => project.id === projectId);
+  const canManage = membershipsAllowProjectManagement(getCurrentUserMemberships(currentProject?.team ?? [], currentUser));
   const [config, setConfig] = useState<ProjectConfig>(DEFAULT_PROJECT_CONFIG);
   const [projectMode, setProjectMode] = useState<Project["mode"]>("uat");
 
@@ -45,13 +52,15 @@ export function ProjectConfigProvider({ children }: { children: ReactNode }) {
     };
   }, [projectId]);
 
-  function saveConfig(nextConfig: ProjectConfig) {
-    setConfig(nextConfig);
-    if (useMocks || !projectId) return;
+  async function saveConfig(nextConfig: ProjectConfig) {
+    if (!canManage || !projectId) throw new Error("Apenas gestores do projeto podem alterar configurações.");
+    if (useMocks) {
+      setConfig(nextConfig);
+      return;
+    }
 
     const aging = projectMode === "cutover" ? nextConfig.agingCutover : nextConfig.agingUat;
-    void projectsApi
-      .update(projectId, {
+    const project = await projectsApi.update(projectId, {
         spiSaudavel: nextConfig.spiSaudavel,
         spiCritico: nextConfig.spiCritico,
         agingAlertaDias: aging.alerta,
@@ -59,13 +68,10 @@ export function ProjectConfigProvider({ children }: { children: ReactNode }) {
         anexoMaxMb: nextConfig.anexoMaxMb,
         exigirEvidenciaAtividade: nextConfig.evidenciaObrigatoriaAtividade,
         exigirEvidenciaIssue: nextConfig.evidenciaObrigatoriaIssue,
-      })
-      .then((project) => {
-        setProjectMode(project.mode);
-        setConfig((previous) => mergeProjectConfig(project, previous));
-      })
-      .catch(() => undefined);
+      });
+    setProjectMode(project.mode);
+    setConfig((previous) => mergeProjectConfig(project, previous));
   }
 
-  return <ProjectConfigContext.Provider value={{ config, setConfig: saveConfig }}>{children}</ProjectConfigContext.Provider>;
+  return <ProjectConfigContext.Provider value={{ config, canManage, setConfig: saveConfig }}>{children}</ProjectConfigContext.Provider>;
 }

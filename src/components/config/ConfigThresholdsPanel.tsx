@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
 import { useProjects } from "../../hooks/useProjects";
 import type { AgingThresholds, ProjectConfig } from "../../types/projectConfig";
 
 interface ConfigThresholdsPanelProps {
   projectId: string;
+  onSaved: () => void;
 }
 
 function isValidAging(aging: AgingThresholds): boolean {
@@ -29,17 +29,17 @@ function isValidConfig(config: ProjectConfig): boolean {
   );
 }
 
-export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPanelProps) {
-  const { config, setConfig } = useProjectConfig();
+export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThresholdsPanelProps) {
+  const { config, canManage, setConfig } = useProjectConfig();
   const { projects } = useProjects();
   const currentProject = projects.find((item) => item.id === projectId);
   const [draft, setDraft] = useState<ProjectConfig>(config);
-  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDraft(config);
-    setSaved(false);
   }, [config]);
 
   const agingMode = currentProject?.mode === "cutover" ? "cutover" : "uat";
@@ -50,7 +50,6 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
 
   function updateDraft(partial: Partial<ProjectConfig>) {
     setDraft((prev) => ({ ...prev, ...partial }));
-    setSaved(false);
   }
 
   // Não usa uma chave computada (`{ [agingKey]: ... }`) para escrever — TypeScript não
@@ -70,16 +69,24 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
   // externas, então um setConfig(draft) bruto reverteria silenciosamente qualquer campo
   // salvo por outro painel montado ao lado (ex.: evidenciaObrigatoriaIssue em
   // ConfigAttachmentsPanel) enquanto este ainda estivesse aberto na mesma sessão.
-  function handleSave() {
-    if (!canSave) return;
-    setConfig({
-      ...config,
-      spiSaudavel: draft.spiSaudavel,
-      spiCritico: draft.spiCritico,
-      agingUat: draft.agingUat,
-      agingCutover: draft.agingCutover,
-    });
-    setSaved(true);
+  async function handleSave() {
+    if (!canManage || !canSave || saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await setConfig({
+        ...config,
+        spiSaudavel: draft.spiSaudavel,
+        spiCritico: draft.spiCritico,
+        agingUat: draft.agingUat,
+        agingCutover: draft.agingCutover,
+      });
+      onSaved();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Não foi possível salvar os limiares.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -93,12 +100,14 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
       </div>
 
       <div className="subhead">SPI do projeto</div>
+      <fieldset className="config-edit-fields" disabled={!canManage || saving}>
       <div className="field-row" style={{ marginBottom: 16 }}>
         <div className="field">
           <div className="field-label">SPI saudável a partir de</div>
           <div className="field-value">
             <input
               type="number"
+              aria-label="SPI saudável a partir de"
               step="0.01"
               min="0"
               max="1"
@@ -113,6 +122,7 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
           <div className="field-value">
             <input
               type="number"
+              aria-label="SPI crítico abaixo de"
               step="0.01"
               min="0"
               max="1"
@@ -125,27 +135,24 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
       </div>
 
       <div className="subhead">Transições automáticas</div>
-      <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontSize: 11.5, fontWeight: 600 }}>Issue: Aberta → Em análise</span>
+      <div className="config-transition-row">
         <label className="toggle-pill">
           <span className="switch">
             <input type="checkbox" checked={false} disabled readOnly />
             <span className="track" />
           </span>
-          Manual — o Dev aciona "Iniciar análise"
+          {"Issue - 'aberta' -> 'em análise' automaticamente"}
         </label>
       </div>
 
       <div className="subhead">Aging de issues abertas</div>
-      <div className="filters" style={{ marginBottom: 12 }}>
-        <span className="filter-pill active">{agingMode === "uat" ? "UAT" : "Cutover"}</span>
-      </div>
       <div className="field-row" style={{ marginBottom: 10 }}>
         <div className="field">
           <div className="field-label">Em alerta a partir de</div>
           <div className="field-value">
             <input
               type="number"
+              aria-label="Em alerta a partir de"
               min="0"
               value={editingAging.alerta}
               onChange={(event) => updateAging({ alerta: Number(event.target.value) })}
@@ -158,6 +165,7 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
           <div className="field-value">
             <input
               type="number"
+              aria-label="Em risco a partir de"
               min="0"
               value={editingAging.risco}
               onChange={(event) => updateAging({ risco: Number(event.target.value) })}
@@ -176,10 +184,11 @@ export default function ConfigThresholdsPanel({ projectId }: ConfigThresholdsPan
           e "em risco" não pode ser menor que "em alerta".
         </div>
       )}
-      <button type="button" className="btn btn-primary btn-sm" disabled={!canSave} onClick={handleSave}>
-        Salvar limiares
-      </button>
-      {saved && <span className="saved-msg"><Check className="inline-status-icon" size={14} aria-hidden="true" />Limiares atualizados</span>}
+      </fieldset>
+      {saveError && <div className="error-banner" role="alert">{saveError}</div>}
+      {canManage && <button type="button" className="btn btn-primary btn-sm" disabled={!canSave || saving} onClick={handleSave}>
+        {saving ? "Salvando..." : "Salvar limiares"}
+      </button>}
     </div>
   );
 }

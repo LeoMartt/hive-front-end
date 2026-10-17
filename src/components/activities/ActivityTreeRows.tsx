@@ -14,6 +14,7 @@ interface ActivityTreeRowsProps {
   onToggleProcess: (processKey: string) => void;
   selectedIds: Set<string>;
   onToggleSelect: (id: string) => void;
+  canSelectActivity: (activity: Activity) => boolean;
 }
 
 function GroupSummary({ activities }: { activities: Activity[] }) {
@@ -55,6 +56,7 @@ export default function ActivityTreeRows({
   onToggleProcess,
   selectedIds,
   onToggleSelect,
+  canSelectActivity,
 }: ActivityTreeRowsProps) {
   return (
     <>
@@ -135,6 +137,7 @@ export default function ActivityTreeRows({
                         <ActivityRow
                           key={activity.id}
                           activity={activity}
+                          canSelect={canSelectActivity(activity)}
                           projectId={projectId}
                           indent
                           checked={selectedIds.has(activity.id)}

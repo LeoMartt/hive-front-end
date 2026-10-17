@@ -1,35 +1,31 @@
 import StatCard from "../common/StatCard";
-import { computeIssueAgingDays, computeIssueRisk } from "../../utils/issueIndicators";
-import { useProjectAgingThresholds } from "../../hooks/useProjectAgingThresholds";
 import type { Issue } from "../../types/issue";
 
 interface IssuesKpiCardsProps {
   issues: Issue[];
-  projectId: string;
 }
 
-export default function IssuesKpiCards({ issues, projectId }: IssuesKpiCardsProps) {
-  const agingThresholds = useProjectAgingThresholds(projectId);
-  const abertas = issues.filter((issue) => issue.status !== "concluida" && issue.status !== "cancelada");
-  const impeditivasAbertas = abertas.filter((issue) => issue.impeditiva);
-  const emRisco = abertas.filter((issue) => computeIssueRisk(issue, agingThresholds) === "risco");
-  const somaAging = abertas.reduce((sum, issue) => sum + computeIssueAgingDays(issue), 0);
-  const tempoMedio = abertas.length === 0 ? null : somaAging / abertas.length;
+export default function IssuesKpiCards({ issues }: IssuesKpiCardsProps) {
+  const abertas = issues.filter((issue) => issue.status === "aberta");
+  const propostas = issues.filter((issue) => issue.status === "solucao_proposta");
+  const concluidas = issues.filter((issue) => issue.status === "concluida");
+  const duracoes = concluidas.flatMap((issue) => {
+    if (!issue.resolvedAt) return [];
+    const dias = (Date.parse(issue.resolvedAt) - Date.parse(issue.openedAt)) / 86400000;
+    return Number.isFinite(dias) && dias >= 0 ? [dias] : [];
+  });
+  const tempoMedio = duracoes.length ? duracoes.reduce((sum, dias) => sum + dias, 0) / duracoes.length : null;
 
   return (
-    <div className="stat-grid-issues" style={{ marginBottom: 16 }}>
-      <StatCard label="Issues no filtro" value={String(issues.length)} sub="nesta visualização" />
+    <div className="stat-grid-issues stat-grid-issues-5" style={{ marginBottom: 16 }}>
+      <StatCard label="Total de issues" value={String(issues.length)} sub="nesta visualização" />
+      <StatCard label="Total issues abertas" value={String(abertas.length)} sub="status Aberta" tone="r" />
+      <StatCard label="Total issues solução proposta" value={String(propostas.length)} sub="aguardando reteste" tone="y" />
+      <StatCard label="Total issues concluídas" value={String(concluidas.length)} sub="encerradas com aprovação" tone="g" />
       <StatCard
-        label="Impeditivas abertas"
-        value={String(impeditivasAbertas.length)}
-        sub="bloqueando atividade agora"
-        tone="r"
-      />
-      <StatCard label="Em risco (aging)" value={String(emRisco.length)} sub="acima do limiar configurado" tone="r" />
-      <StatCard
-        label="Tempo médio aberta"
+        label="Tempo médio resolução"
         value={tempoMedio === null ? "—" : `${tempoMedio.toFixed(1).replace(".", ",")}d`}
-        sub="dias, entre as ainda abertas"
+        sub="dias, entre as concluídas"
       />
     </div>
   );

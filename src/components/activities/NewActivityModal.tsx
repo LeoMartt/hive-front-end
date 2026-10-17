@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Modal from "../common/Modal";
+import FormCombobox from "../common/FormCombobox";
 import { toLocalIsoString } from "../../utils/activityIndicators";
 import type { NewActivityInput } from "../../types/activity";
 import type { HierarchyNode, ProjectMode, TeamMember } from "../../types/project";
@@ -148,9 +149,6 @@ export default function NewActivityModal({
       <div className="modal-title" id="new-activity-modal-title">
         Nova atividade
       </div>
-      <div className="modal-subtitle">
-        Preencha os dados abaixo para incluir uma atividade em um módulo e processo existentes.
-      </div>
 
       {state.errorMsg && <div className="error-banner">{state.errorMsg}</div>}
 
@@ -173,14 +171,13 @@ export default function NewActivityModal({
           <label className="form-label" htmlFor="new-activity-module">
             Módulo
           </label>
-          <input
-            className="form-input"
+          <FormCombobox
             id="new-activity-module"
-            list="new-activity-module-options"
-            placeholder="Selecione ou digite um novo módulo"
+            allowCustom
+            options={modules.map((node) => ({ value: node.name, label: node.name }))}
+            placeholder="Selecione ou digite"
             value={state.moduleName}
-            onChange={(event) => {
-              const value = event.target.value;
+            onChange={(value) => {
               const match = modules.find((node) => node.name.toLowerCase() === value.trim().toLowerCase());
               updateField("moduleName", value);
               updateField("moduleNodeId", match?.id ?? "");
@@ -188,35 +185,24 @@ export default function NewActivityModal({
               updateField("processName", "");
             }}
           />
-          <datalist id="new-activity-module-options">
-            {modules.map((node) => (
-              <option key={node.id} value={node.name} />
-            ))}
-          </datalist>
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="new-activity-process">
             Processo
           </label>
-          <input
-            className="form-input"
+          <FormCombobox
             id="new-activity-process"
-            list="new-activity-process-options"
-            placeholder={projectMode === "cutover" ? "Cutover usa apenas módulo" : "Selecione ou digite um novo processo"}
+            allowCustom
+            options={processes.map((node) => ({ value: node.name, label: node.name }))}
+            placeholder={projectMode === "cutover" ? "Não se aplica" : "Selecione ou digite"}
             value={projectMode === "cutover" ? "" : state.processName}
-            onChange={(event) => {
-              const value = event.target.value;
+            onChange={(value) => {
               const match = processes.find((node) => node.name.toLowerCase() === value.trim().toLowerCase());
               updateField("processName", value);
               updateField("processNodeId", match?.id ?? "");
             }}
             disabled={projectMode === "cutover" || !state.moduleName.trim()}
           />
-          <datalist id="new-activity-process-options">
-            {processes.map((node) => (
-              <option key={node.id} value={node.name} />
-            ))}
-          </datalist>
         </div>
       </div>
 
@@ -225,55 +211,27 @@ export default function NewActivityModal({
           <label className="form-label" htmlFor="new-activity-tester">
             Tester
           </label>
-          <select
-            className="form-input"
+          <FormCombobox
             id="new-activity-tester"
-            aria-label="Tester"
             value={state.testerId}
-            onChange={(event) => updateField("testerId", event.target.value)}
-          >
-            {testers.length === 0 ? (
-              <option value="" disabled>
-                Nenhum tester cadastrado no projeto
-              </option>
-            ) : (
-              <>
-                <option value="">Selecione…</option>
-                {testers.map((member) => (
-                  <option key={`${member.id ?? member.name}-tester`} value={member.id ?? ""}>
-                    {member.name}
-                  </option>
-                ))}
-              </>
-            )}
-          </select>
+            onChange={(value) => updateField("testerId", value)}
+            options={testers.filter((member) => member.id).map((member) => ({ value: member.id!, label: member.name }))}
+            placeholder={testers.length ? "Selecione…" : "Nenhum tester cadastrado"}
+            disabled={!testers.length}
+          />
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="new-activity-dev">
             Desenvolvedor
           </label>
-          <select
-            className="form-input"
+          <FormCombobox
             id="new-activity-dev"
-            aria-label="Desenvolvedor"
             value={state.developerId}
-            onChange={(event) => updateField("developerId", event.target.value)}
-          >
-            {devs.length === 0 ? (
-              <option value="" disabled>
-                Nenhum dev cadastrado no projeto
-              </option>
-            ) : (
-              <>
-                <option value="">Selecione…</option>
-                {devs.map((member) => (
-                  <option key={`${member.id ?? member.name}-dev`} value={member.id ?? ""}>
-                    {member.name}
-                  </option>
-                ))}
-              </>
-            )}
-          </select>
+            onChange={(value) => updateField("developerId", value)}
+            options={devs.filter((member) => member.id).map((member) => ({ value: member.id!, label: member.name }))}
+            placeholder={devs.length ? "Selecione…" : "Nenhum desenvolvedor cadastrado"}
+            disabled={!devs.length}
+          />
         </div>
       </div>
 

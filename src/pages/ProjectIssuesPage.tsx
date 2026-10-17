@@ -14,7 +14,7 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { sortIssuesByPriority } from "../utils/issueIndicators";
 import { buildIssueExportRows, ISSUE_EXPORT_COLUMN_WIDTHS } from "../utils/issueExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
-import { getCurrentUserMemberships, membershipsAllowAssignedIssues, membershipsAllowIssueCreation, namesMatch } from "../utils/projectAccess";
+import { canConcludeActivity, getCurrentUserMemberships, membershipsAllowAssignedIssues, membershipsAllowIssueCreation, namesMatch } from "../utils/projectAccess";
 
 interface CurrentIssueUser {
   name: string;
@@ -50,6 +50,10 @@ export default function ProjectIssuesPage() {
   const currentMember = currentMemberships[0];
   const canCreateIssue = membershipsAllowIssueCreation(currentMemberships);
   const canViewAssignedIssues = membershipsAllowAssignedIssues(currentMemberships);
+  const eligibleIssueActivities = activities.filter((activity) =>
+    activity.status !== "concluido" && activity.status !== "cancelado" &&
+    canConcludeActivity(currentMemberships, activity, { id: currentUserId, email: currentUserEmail, name: currentUserName }),
+  );
 
   const [statusFilter, setStatusFilter] = useState<IssueStatusFilter>("todas");
   const [openedByMe, setOpenedByMe] = useState(false);
@@ -143,7 +147,7 @@ export default function ProjectIssuesPage() {
         </div>
       </div>
 
-      <IssuesKpiCards issues={filteredIssues} projectId={projectId} />
+      <IssuesKpiCards issues={filteredIssues} />
 
       <div className="activities-toolbar">
         <IssueStatusPills counts={statusCounts} active={statusFilter} onSelect={setStatusFilter} />
@@ -190,9 +194,12 @@ export default function ProjectIssuesPage() {
           show={showRegisterIssueModal}
           onHide={() => setShowRegisterIssueModal(false)}
           team={currentProject?.team ?? []}
-          activities={activities}
+          activities={eligibleIssueActivities}
           currentUserName={currentUserName}
           onCreate={async (input) => {
+            if (!eligibleIssueActivities.some((activity) => activity.id === input.relatedActivityId)) {
+              throw new Error("Você não tem permissão para registrar issue nesta atividade.");
+            }
             await createIssue(input);
             await refreshActivity(input.relatedActivityId);
           }}

@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
-import { Check } from "lucide-react";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
 
-export default function ConfigAttachmentsPanel() {
-  const { config, setConfig } = useProjectConfig();
+export default function ConfigAttachmentsPanel({ onSaved }: { onSaved: () => void }) {
+  const { config, canManage, setConfig } = useProjectConfig();
   const [draft, setDraft] = useState({
     anexoMaxMb: config.anexoMaxMb,
     evidenciaObrigatoriaAtividade: config.evidenciaObrigatoriaAtividade,
     evidenciaObrigatoriaIssue: config.evidenciaObrigatoriaIssue,
   });
-  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -18,12 +18,20 @@ export default function ConfigAttachmentsPanel() {
       evidenciaObrigatoriaAtividade: config.evidenciaObrigatoriaAtividade,
       evidenciaObrigatoriaIssue: config.evidenciaObrigatoriaIssue,
     });
-    setSaved(false);
   }, [config]);
 
-  function handleSave() {
-    setConfig({ ...config, ...draft });
-    setSaved(true);
+  async function handleSave() {
+    if (!canManage || saving) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      await setConfig({ ...config, ...draft });
+      onSaved();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Não foi possível salvar as regras.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -36,6 +44,7 @@ export default function ConfigAttachmentsPanel() {
       </div>
 
       <div className="subhead">Tamanho máximo por arquivo</div>
+      <fieldset className="config-edit-fields" disabled={!canManage || saving}>
       <div className="field-value" style={{ width: "fit-content", marginBottom: 16 }}>
         <input
           type="number"
@@ -44,7 +53,6 @@ export default function ConfigAttachmentsPanel() {
           aria-label="Tamanho máximo por arquivo, em megabytes"
           onChange={(event) => {
             setDraft((prev) => ({ ...prev, anexoMaxMb: Number(event.target.value) }));
-            setSaved(false);
           }}
         />{" "}
         MB
@@ -59,7 +67,6 @@ export default function ConfigAttachmentsPanel() {
               checked={draft.evidenciaObrigatoriaAtividade}
               onChange={(event) => {
                 setDraft((prev) => ({ ...prev, evidenciaObrigatoriaAtividade: event.target.checked }));
-                setSaved(false);
               }}
             />
             <span className="track" />
@@ -73,7 +80,6 @@ export default function ConfigAttachmentsPanel() {
               checked={draft.evidenciaObrigatoriaIssue}
               onChange={(event) => {
                 setDraft((prev) => ({ ...prev, evidenciaObrigatoriaIssue: event.target.checked }));
-                setSaved(false);
               }}
             />
             <span className="track" />
@@ -82,10 +88,11 @@ export default function ConfigAttachmentsPanel() {
         </label>
       </div>
 
-      <button type="button" className="btn btn-primary btn-sm" onClick={handleSave}>
-        Salvar limite
-      </button>
-      {saved && <span className="saved-msg"><Check className="inline-status-icon" size={14} aria-hidden="true" />Limite atualizado</span>}
+      </fieldset>
+      {saveError && <div className="error-banner" role="alert">{saveError}</div>}
+      {canManage && <button type="button" className="btn btn-primary btn-sm" disabled={saving} onClick={handleSave}>
+        {saving ? "Salvando..." : "Salvar limite"}
+      </button>}
     </div>
   );
 }

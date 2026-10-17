@@ -6,6 +6,7 @@ import FooterWidgetContent from "../common/FooterWidgetContent";
 import NavIcon from "../common/NavIcon";
 import { useProjects } from "../../hooks/useProjects";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
+import { getCurrentUserMemberships } from "../../utils/projectAccess";
 
 const WORKSPACE_ITEMS = [
   {
@@ -27,18 +28,6 @@ const WORKSPACE_ITEMS = [
       <>
         <path d="M9 6h11M9 12h11M9 18h11" />
         <path d="M4 6h.01M4 12h.01M4 18h.01" />
-      </>
-    ),
-  },
-  {
-    to: "estrutura",
-    label: "Estrutura",
-    icon: (
-      <>
-        <rect x="9" y="3" width="6" height="4" rx="1" />
-        <rect x="3" y="17" width="6" height="4" rx="1" />
-        <rect x="15" y="17" width="6" height="4" rx="1" />
-        <path d="M12 7v4M12 11H6v6M12 11h6v6" />
       </>
     ),
   },
@@ -82,11 +71,12 @@ export default function ProjectNavDock() {
   const { id } = useParams();
   const { projects } = useProjects();
   const { instance } = useMsal();
-  const { name: currentUserName, role: currentUserRole, email: currentUserEmail } = useCurrentUser();
+  const { name: currentUserName, role: currentUserRole, email: currentUserEmail, id: currentUserId } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === id);
-  const currentMembership = currentProject?.team.find(
-    (member) => member.email === currentUserEmail || member.name === currentUserName,
-  );
+  const memberships = getCurrentUserMemberships(currentProject?.team ?? [], {
+    id: currentUserId, email: currentUserEmail, name: currentUserName,
+  });
+  const currentMembership = memberships.find((member) => member.role === "Gestor de Projetos") ?? memberships[0];
   const displayedUserRole = currentMembership?.role ?? currentUserRole;
   const projectLabel = currentProject?.name ?? id ?? "";
   const [open, setOpen] = useState(false);

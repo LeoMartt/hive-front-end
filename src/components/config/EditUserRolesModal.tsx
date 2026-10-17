@@ -7,7 +7,7 @@ interface EditUserRolesModalProps {
   show: boolean;
   onHide: () => void;
   member: GroupedTeamMember;
-  onSave: (roles: UserRole[]) => void;
+  onSave: (roles: UserRole[]) => Promise<void>;
 }
 
 const ROLE_OPTIONS: UserRole[] = ["Gestor de Projetos", "Tester", "Desenvolvedor"];
@@ -15,19 +15,29 @@ const ROLE_OPTIONS: UserRole[] = ["Gestor de Projetos", "Tester", "Desenvolvedor
 export default function EditUserRolesModal({ show, onHide, member, onSave }: EditUserRolesModalProps) {
   const [selectedRoles, setSelectedRoles] = useState<UserRole[]>(member.roles);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
 
   function toggleRole(role: UserRole) {
     setSelectedRoles((prev) => (prev.includes(role) ? prev.filter((item) => item !== role) : [...prev, role]));
     setErrorMsg(null);
   }
 
-  function handleSave() {
+  async function handleSave() {
+    if (saving) return;
     if (selectedRoles.length === 0) {
       setErrorMsg("Selecione ao menos um papel.");
       return;
     }
-    onSave(selectedRoles);
-    onHide();
+    setSaving(true);
+    setErrorMsg(null);
+    try {
+      await onSave(selectedRoles);
+      onHide();
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : "Não foi possível salvar os papéis.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -43,7 +53,7 @@ export default function EditUserRolesModal({ show, onHide, member, onSave }: Edi
         <div className="role-checkbox-row">
           {ROLE_OPTIONS.map((role) => (
             <label key={role} className="role-checkbox">
-              <input type="checkbox" checked={selectedRoles.includes(role)} onChange={() => toggleRole(role)} />
+              <input type="checkbox" disabled={saving} checked={selectedRoles.includes(role)} onChange={() => toggleRole(role)} />
               {role}
             </label>
           ))}
@@ -54,8 +64,8 @@ export default function EditUserRolesModal({ show, onHide, member, onSave }: Edi
         <button type="button" className="btn" onClick={onHide}>
           Cancelar
         </button>
-        <button type="button" className="btn btn-primary" onClick={handleSave}>
-          Salvar
+        <button type="button" className="btn btn-primary" disabled={saving} onClick={handleSave}>
+          {saving ? "Salvando..." : "Salvar"}
         </button>
       </div>
     </Modal>

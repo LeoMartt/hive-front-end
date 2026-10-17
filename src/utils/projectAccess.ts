@@ -57,6 +57,10 @@ export function membershipsAllowIssueCreation(memberships: TeamMember[]): boolea
   return memberships.some((member) => member.role === "Gestor de Projetos" || member.role === "Tester");
 }
 
+export function membershipsAllowProjectManagement(memberships: TeamMember[]): boolean {
+  return memberships.some((member) => member.role === "Gestor de Projetos");
+}
+
 export function membershipsAllowAssignedIssues(memberships: TeamMember[]): boolean {
   return memberships.some((member) => member.role === "Gestor de Projetos" || member.role === "Desenvolvedor");
 }

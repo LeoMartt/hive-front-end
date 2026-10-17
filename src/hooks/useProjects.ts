@@ -4,6 +4,8 @@ import { getInitials } from "../utils/initials";
 import { useMocks } from "../config/env";
 import { projectsApi } from "../api/resources/projects";
 import { ApiError, normalizeError } from "../api/apiError";
+import { useCurrentUser } from "./useCurrentUser";
+import { getCurrentUserMemberships, membershipsAllowProjectManagement } from "../utils/projectAccess";
 
 function minutesAgo(minutes: number): string {
   return new Date(Date.now() - minutes * 60000).toISOString();
@@ -116,10 +118,11 @@ interface UseProjectsResult {
   error: ApiError | null;
   createProject: (input: NewProjectInput) => void;
   addTeamMember: (projectId: string, member: TeamMember) => void;
-  replaceTeamMemberRoles: (projectId: string, memberName: string, roles: UserRole[]) => void;
+  replaceTeamMemberRoles: (projectId: string, memberName: string, roles: UserRole[]) => Promise<void>;
 }
 
 export function useProjects(): UseProjectsResult {
+  const currentUser = useCurrentUser();
   // useMocks === true: seed local, síncrono. useMocks === false: busca na API.
   const [projects, setProjects] = useState<Project[]>(useMocks ? INITIAL_PROJECTS : []);
   const [loading, setLoading] = useState<boolean>(!useMocks);
@@ -189,6 +192,7 @@ export function useProjects(): UseProjectsResult {
   // checagem de duplicidade vive na camada de UI (InviteUserModal), que já tem o
   // project.team completo para comparar contra.
   function addTeamMember(projectId: string, member: TeamMember): void {
+    if (!canManage(projectId)) return;
     if (!useMocks) {
       void projectsApi.addMembership(projectId, member).then(
         (createdMember) =>
@@ -214,23 +218,24 @@ export function useProjects(): UseProjectsResult {
   // deriva initials via getInitials. As novas entradas entram na posição da primeira
   // ocorrência do nome (não são anexadas ao final) — senão editar os papéis de alguém
   // jogaria a linha dele pro fim da tabela de usuários.
-  function replaceTeamMemberRoles(projectId: string, memberName: string, roles: UserRole[]): void {
+  async function replaceTeamMemberRoles(projectId: string, memberName: string, roles: UserRole[]): Promise<void> {
+    if (!canManage(projectId)) throw new Error("Apenas gestores do projeto podem alterar a equipe.");
     if (!useMocks) {
       const project = projects.find((item) => item.id === projectId);
-      if (!project) return;
+      if (!project) throw new Error("Projeto não encontrado.");
 
       const existingEntries = project.team.filter((member) => member.name === memberName);
       const existingRoles = new Set(existingEntries.map((member) => member.role));
       const desiredRoles = new Set(roles);
       const baseMember = existingEntries[0];
-      if (!baseMember) return;
+      if (!baseMember) throw new Error("Usuário não encontrado no projeto.");
 
       const membershipsToRemove = existingEntries.filter(
         (member) => !desiredRoles.has(member.role) && member.membershipId,
       );
       const rolesToAdd = roles.filter((role) => !existingRoles.has(role));
 
-      void Promise.all([
+      await Promise.all([
         ...membershipsToRemove.map((member) => projectsApi.removeMembership(projectId, member.membershipId as string)),
         ...rolesToAdd.map((role) =>
           projectsApi.addMembership(projectId, {
@@ -256,7 +261,11 @@ export function useProjects(): UseProjectsResult {
             }),
           );
         },
-        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
+        (err) => {
+          const apiError = err instanceof ApiError ? err : normalizeError(err);
+          setError(apiError);
+          throw apiError;
+        },
       );
       return;
     }
@@ -290,6 +299,13 @@ export function useProjects(): UseProjectsResult {
         return { ...project, team };
       })
     );
+  }
+
+  function canManage(projectId: string): boolean {
+    const project = projects.find((item) => item.id === projectId);
+    const allowed = membershipsAllowProjectManagement(getCurrentUserMemberships(project?.team ?? [], currentUser));
+    if (!allowed) setError(new ApiError({ status: 403, code: "FORBIDDEN", message: "Apenas gestores do projeto podem alterar a equipe." }));
+    return allowed;
   }
 
   return { projects, stats, loading, error, createProject, addTeamMember, replaceTeamMemberRoles };
