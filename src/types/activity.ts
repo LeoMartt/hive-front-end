@@ -69,7 +69,7 @@ export interface NewActivityInput {
 
 export interface ConcludeActivityInput {
   approvalNote: string | null;
-  approvalEvidence: ActivityAttachment;
+  approvalEvidence: ActivityAttachment | null;
 }
 
 export interface RejectActivityInput {

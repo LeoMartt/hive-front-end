@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CircleCheck } from "lucide-react";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
 import { useProjects } from "../../hooks/useProjects";
 import type { AgingThresholds, ProjectConfig } from "../../types/projectConfig";
@@ -35,6 +36,7 @@ export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThre
   const currentProject = projects.find((item) => item.id === projectId);
   const [draft, setDraft] = useState<ProjectConfig>(config);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,6 +51,8 @@ export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThre
   const canSave = isValidConfig(draft);
 
   function updateDraft(partial: Partial<ProjectConfig>) {
+    setSaved(false);
+    setSaveError(null);
     setDraft((prev) => ({ ...prev, ...partial }));
   }
 
@@ -72,6 +76,7 @@ export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThre
   async function handleSave() {
     if (!canManage || !canSave || saving) return;
     setSaving(true);
+    setSaved(false);
     setSaveError(null);
     try {
       await setConfig({
@@ -81,6 +86,7 @@ export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThre
         agingUat: draft.agingUat,
         agingCutover: draft.agingCutover,
       });
+      setSaved(true);
       onSaved();
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Não foi possível salvar os limiares.");
@@ -186,9 +192,12 @@ export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThre
       )}
       </fieldset>
       {saveError && <div className="error-banner" role="alert">{saveError}</div>}
-      {canManage && <button type="button" className="btn btn-primary btn-sm" disabled={!canSave || saving} onClick={handleSave}>
-        {saving ? "Salvando..." : "Salvar limiares"}
-      </button>}
+      {canManage && <div className="config-save-actions">
+        <button type="button" className="btn btn-primary btn-sm" disabled={!canSave || saving} onClick={handleSave}>
+          {saving ? "Salvando..." : "Salvar limiares"}
+        </button>
+        {saved && <span className="config-save-success" role="status"><CircleCheck size={18} aria-hidden="true" />Edições Salvas</span>}
+      </div>}
     </div>
   );
 }

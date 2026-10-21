@@ -26,6 +26,10 @@ export type ProjectUpdateInput = Partial<{
 }>;
 
 export const projectsApi = {
+  async evidenceImpact(projectId: string): Promise<number> {
+    const { data } = await httpClient.get(`/projects/${projectId}/evidence-impact/`);
+    return z.object({ pendingActivities: z.number().int().nonnegative() }).parse(data).pendingActivities;
+  },
   async list(): Promise<Project[]> {
     const { data } = await httpClient.get("/projects/");
     return parseProjectList(data);

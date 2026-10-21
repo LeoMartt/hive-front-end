@@ -6,9 +6,12 @@ export function formatEvidenceFileSize(sizeBytes: number): string {
   return `${Math.ceil(sizeBytes / 1024)} KB`;
 }
 
-export function getEvidenceFileError(file: File): string | null {
+export function getEvidenceFileError(file: File, maxSizeMb: number): string | null {
   if (file.type.startsWith("audio/") || file.type.startsWith("video/") || FORBIDDEN_EXTENSIONS.test(file.name)) {
     return "Evidências em áudio ou vídeo não são permitidas.";
+  }
+  if (file.size > maxSizeMb * 1024 * 1024) {
+    return `O arquivo excede o limite de ${maxSizeMb} MB configurado no projeto.`;
   }
   return null;
 }

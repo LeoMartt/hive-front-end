@@ -1,11 +1,13 @@
 import { formatActivityDate } from "../../utils/activityIndicators";
 import type { Activity } from "../../types/activity";
+import { useProjectConfig } from "../../context/ProjectConfigContext";
 
 interface ActivityFieldGridProps {
   activity: Activity;
 }
 
 export default function ActivityFieldGrid({ activity }: ActivityFieldGridProps) {
+  const { config, ready } = useProjectConfig();
   return (
     <div className="field-row">
       <div className="field">
@@ -81,7 +83,11 @@ export default function ActivityFieldGrid({ activity }: ActivityFieldGridProps) 
             ) : activity.status === "concluido" ? (
               <div className="field-value">Nenhuma evidência anexada com a aprovação.</div>
             ) : (
-              <div className="field-value pending">— pendente</div>
+              <div className="field-value pending">
+                {!ready ? "Verificando configuração" : config.evidenciaObrigatoriaAtividade
+                  ? "Obrigatória na conclusão, conforme Papéis & Config."
+                  : "Opcional na conclusão, conforme Papéis & Config."}
+              </div>
             )}
           </div>
           <div className="field">

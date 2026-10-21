@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useProjectConfig } from "../../context/ProjectConfigContext";
 import Modal from "../common/Modal";
 import FormCombobox from "../common/FormCombobox";
 import { toLocalIsoString } from "../../utils/activityIndicators";
@@ -70,6 +71,7 @@ export default function NewActivityModal({
   projectMode,
   onCreate,
 }: NewActivityModalProps) {
+  const { config, ready } = useProjectConfig();
   const [state, setState] = useState<NewActivityFormState>(createEmptyState);
 
   function resetAndHide() {
@@ -150,6 +152,13 @@ export default function NewActivityModal({
         Nova atividade
       </div>
 
+      <div className="modal-subtitle">
+        {!ready
+          ? "Verificando a configuração de evidências do projeto."
+          : config.evidenciaObrigatoriaAtividade
+            ? "Não é necessário anexar evidência na criação. Neste projeto, ela será obrigatória na conclusão, conforme Papéis & Config."
+            : "Não é necessário anexar evidência na criação. Neste projeto, ela também é opcional na conclusão, conforme Papéis & Config."}
+      </div>
       {state.errorMsg && <div className="error-banner">{state.errorMsg}</div>}
 
       <div className="form-group">

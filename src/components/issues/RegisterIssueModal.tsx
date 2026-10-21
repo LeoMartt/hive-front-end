@@ -70,12 +70,13 @@ export default function RegisterIssueModal({
   title,
   onCreate,
 }: RegisterIssueModalProps) {
-  const { config } = useProjectConfig();
+  const { config, ready } = useProjectConfig();
   const [state, setState] = useState<RegisterIssueFormState>(createEmptyState);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const evidenceRequired = state.impeditiva && config.evidenciaObrigatoriaIssue;
 
   function resetAndHide() {
     setState(createEmptyState());
@@ -89,7 +90,7 @@ export default function RegisterIssueModal({
   }
 
   function selectFile(file: File) {
-    const error = getEvidenceFileError(file);
+    const error = getEvidenceFileError(file, config.anexoMaxMb);
     if (error) {
       setSelectedFile(null);
       setState((prev) => ({ ...prev, errorMsg: error }));
@@ -100,14 +101,16 @@ export default function RegisterIssueModal({
   }
 
   async function handleConfirm() {
-    if (submitting) return;
+    if (submitting || !ready) return;
+    const fileError = selectedFile ? getEvidenceFileError(selectedFile, config.anexoMaxMb) : null;
+    if (fileError) { updateField("errorMsg", fileError); return; }
     const missing: string[] = [];
     if (!state.title.trim()) missing.push("Título da issue");
     if (!state.description.trim()) missing.push("Descrição da issue");
     if (!currentActivity && !state.relatedActivityId) missing.push("Atividade vinculada");
     if (!state.dev) missing.push("Desenvolvedor responsável");
     const impeditiva = state.impeditiva;
-    if (impeditiva && config.evidenciaObrigatoriaIssue && !selectedFile) {
+    if (evidenceRequired && !selectedFile) {
       missing.push("Anexo (evidência obrigatória para issues impeditivas)");
     }
     if (missing.length > 0) {
@@ -269,8 +272,18 @@ export default function RegisterIssueModal({
 
       <div className="form-group">
         <label className="form-label" id="register-issue-file-label">
-          Anexo
+          Anexo <span className="optional">({!ready ? "verificando configuração" : evidenceRequired ? "obrigatório" : "opcional"})</span>
         </label>
+        <div className="modal-subtitle" aria-live="polite">
+          {!ready
+            ? "Verificando a configuração de anexos do projeto."
+            : !state.impeditiva
+              ? "Issues não impeditivas podem ser abertas sem anexo."
+              : evidenceRequired
+                ? "Neste projeto, issues impeditivas precisam de anexo na abertura, conforme Papéis & Config."
+                : "Neste projeto, issues impeditivas não precisam de anexo na abertura, conforme Papéis & Config."}
+          {ready && ` Limite por arquivo: ${config.anexoMaxMb} MB. Áudio e vídeo não são permitidos.`}
+        </div>
         <div
           className={`dropzone${dragOver ? " drag-over" : ""}${selectedFile ? " has-file" : ""}`}
           role="button"
@@ -350,7 +363,7 @@ export default function RegisterIssueModal({
         <button type="button" className="btn" onClick={resetAndHide} disabled={submitting}>
           Cancelar
         </button>
-        <button type="button" className="btn btn-primary" onClick={handleConfirm} disabled={submitting}>
+        <button type="button" className="btn btn-primary" onClick={handleConfirm} disabled={submitting || !ready}>
           {submitting ? "Criando..." : submitLabel ?? "Criar"}
         </button>
       </div>

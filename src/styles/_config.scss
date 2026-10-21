@@ -136,6 +136,35 @@
   margin-left: 6px;
 }
 
+.config-evidence-confirmation {
+  > p, > ul {
+    margin: 12px 0;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  > ul {
+    padding-left: 20px;
+    list-style: disc;
+  }
+  li + li { margin-top: 6px; }
+}
+
+.config-save-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.config-save-success {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: c.$green;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .save-notification {
   position: fixed;
   right: 24px;

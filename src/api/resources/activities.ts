@@ -62,10 +62,10 @@ export const activitiesApi = {
     if (input.approvalNote) {
       formData.append("approvalNote", input.approvalNote);
     }
-    const { file, ...approvalEvidence } = input.approvalEvidence;
-    formData.append("approvalEvidence", JSON.stringify(approvalEvidence));
-    if (file) {
-      formData.append("approvalFile", file);
+    if (input.approvalEvidence) {
+      const { file, ...approvalEvidence } = input.approvalEvidence;
+      formData.append("approvalEvidence", JSON.stringify(approvalEvidence));
+      if (file) formData.append("approvalFile", file);
     }
 
     const { data } = await httpClient.post(
