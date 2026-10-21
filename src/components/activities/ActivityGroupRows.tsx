@@ -2,7 +2,7 @@ import { Fragment } from "react";
 import ActivityRow from "./ActivityRow";
 import TreeToggleIcon from "../common/TreeToggleIcon";
 import { computeGroupRollup } from "../../utils/activityIndicators";
-import type { Activity, FlatActivityGroup } from "../../types/activity";
+import type { ActivitySummary as Activity, FlatActivityGroup } from "../../types/activity";
 
 interface ActivityGroupRowsProps {
   groups: FlatActivityGroup[];

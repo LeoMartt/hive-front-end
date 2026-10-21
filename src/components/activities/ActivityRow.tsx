@@ -3,7 +3,7 @@ import ActivityStatusBadge from "./ActivityStatusBadge";
 import { formatActivityDate, isOverdue, retestPillClass } from "../../utils/activityIndicators";
 import Avatar from "../common/Avatar";
 import { shortName } from "../../utils/shortName";
-import type { Activity } from "../../types/activity";
+import type { ActivitySummary as Activity } from "../../types/activity";
 
 interface ActivityRowProps {
   activity: Activity;

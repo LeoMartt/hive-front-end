@@ -1,4 +1,4 @@
-import type { Activity, FlatActivityGroup, ModuleGroup } from "../types/activity";
+import type { ActivitySummary as Activity, FlatActivityGroup, ModuleGroup } from "../types/activity";
 import { ACTIVITY_STATUS_LABELS } from "./activityIndicators";
 
 export function groupByModuleProcess(activities: Activity[]): ModuleGroup[] {

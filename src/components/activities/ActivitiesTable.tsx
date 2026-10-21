@@ -7,7 +7,7 @@ import EmptyState from "../common/EmptyState";
 import LoadingState from "../common/LoadingState";
 import { groupByModuleProcess, groupByStatus, groupByTester } from "../../utils/groupActivities";
 import { isBulkApprovable, isBulkSelectable } from "../../utils/activityIndicators";
-import type { Activity, ActivityGroupMode, ConcludeActivityInput } from "../../types/activity";
+import type { ActivitySummary as Activity, ActivityGroupMode, ConcludeActivityInput } from "../../types/activity";
 
 interface ActivitiesTableProps {
   activities: Activity[];

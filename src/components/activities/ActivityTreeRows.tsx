@@ -3,7 +3,7 @@ import ActivityRow from "./ActivityRow";
 import TreeToggleIcon from "../common/TreeToggleIcon";
 import TreeConnectorIcon from "../common/TreeConnectorIcon";
 import { computeGroupRollup } from "../../utils/activityIndicators";
-import type { Activity, ModuleGroup } from "../../types/activity";
+import type { ActivitySummary as Activity, ModuleGroup } from "../../types/activity";
 
 interface ActivityTreeRowsProps {
   groups: ModuleGroup[];

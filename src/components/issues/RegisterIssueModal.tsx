@@ -5,7 +5,7 @@ import { useProjectConfig } from "../../context/ProjectConfigContext";
 import { buildEvidenceMetadata, formatEvidenceFileSize, getEvidenceFileError } from "../../utils/evidenceFiles";
 import { ISSUE_TYPE_LABELS, ISSUE_IMPACT_LABELS } from "../../utils/issueIndicators";
 import type { IssueType, IssueImpact, NewIssueInput } from "../../types/issue";
-import type { Activity } from "../../types/activity";
+import type { ActivitySummary as Activity } from "../../types/activity";
 import type { TeamMember } from "../../types/project";
 import { normalizeError } from "../../api/apiError";
 

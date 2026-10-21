@@ -1,4 +1,4 @@
-import type { Activity, ActivityFiltersState } from "../types/activity";
+import type { ActivitySummary as Activity, ActivityFiltersState } from "../types/activity";
 import { isOverdue } from "./activityIndicators";
 
 export interface CurrentUserMatcher {

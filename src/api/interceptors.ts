@@ -3,10 +3,12 @@ import type { InternalAxiosRequestConfig } from "axios";
 import { httpClient } from "./httpClient";
 import { getApiToken } from "./authToken";
 import { normalizeError } from "./apiError";
+import { invalidateSharedReads } from "./sharedRead";
 
 type RetriableConfig = InternalAxiosRequestConfig & { __retried?: boolean };
 
 httpClient.interceptors.request.use(async (config) => {
+  if (config.method && !["get", "head", "options"].includes(config.method.toLowerCase())) invalidateSharedReads();
   if (config.data instanceof FormData) {
     delete config.headers["Content-Type"];
     delete config.headers["content-type"];

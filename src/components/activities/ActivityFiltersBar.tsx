@@ -3,7 +3,7 @@ import MultiSelectFilter, { type MultiSelectOption } from "./MultiSelectFilter";
 import ActivityModuleProcessFilter from "./ActivityModuleProcessFilter";
 import ActivityDateRangeFilter from "./ActivityDateRangeFilter";
 import { ACTIVITY_STATUS_LABELS } from "../../utils/activityIndicators";
-import type { Activity, ActivityFiltersState, ActivityStatus } from "../../types/activity";
+import type { ActivitySummary as Activity, ActivityFiltersState, ActivityStatus } from "../../types/activity";
 
 interface ActivityFiltersBarProps {
   activities: Activity[];

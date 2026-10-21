@@ -7,6 +7,9 @@ import IssuesTable from "../components/issues/IssuesTable";
 import RegisterIssueModal from "../components/issues/RegisterIssueModal";
 import NavIcon from "../components/common/NavIcon";
 import { useIssues } from "../hooks/useIssues";
+import { issuesApi } from "../api/resources/issues";
+import { useMocks } from "../config/env";
+import type { Issue } from "../types/issue";
 import { useActivities } from "../hooks/useActivities";
 import { useExportButton } from "../hooks/useExportButton";
 import { useProjects } from "../hooks/useProjects";
@@ -99,8 +102,8 @@ export default function ProjectIssuesPage() {
     label: exportIssuesLabel,
     isDefault: exportIssuesIsDefault,
     handleClick: handleExportIssues,
-  } = useExportButton("Exportar issues", filteredIssues.length === 0, "Nenhuma issue no filtro atual", () =>
-    downloadXlsx(buildIssueExportRows(filteredIssues), ISSUE_EXPORT_COLUMN_WIDTHS, "Issues", "hive_issues"),
+  } = useExportButton("Exportar issues", filteredIssues.length === 0, "Nenhuma issue no filtro atual", async () =>
+    downloadXlsx(buildIssueExportRows(useMocks ? filteredIssues as Issue[] : await issuesApi.exportDetails(projectId, filteredIssues.map(issue => issue.id))), ISSUE_EXPORT_COLUMN_WIDTHS, "Issues", "hive_issues"),
   );
 
   const statusCounts = useMemo(() => {

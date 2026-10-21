@@ -10,7 +10,7 @@ export function useExportButton(
   defaultLabel: string,
   isEmpty: boolean,
   emptyLabel: string,
-  runExport: () => void,
+  runExport: () => void | Promise<void>,
 ): UseExportButtonResult {
   const [label, setLabel] = useState(defaultLabel);
 
@@ -19,13 +19,16 @@ export function useExportButton(
     setTimeout(() => setLabel(defaultLabel), durationMs);
   }
 
-  function handleClick() {
+  async function handleClick() {
+    if (label === "Exportando...") return;
     if (isEmpty) {
       showTemporary(emptyLabel, 1600);
       return;
     }
     try {
-      runExport();
+      setLabel("Exportando...");
+      await runExport();
+      setLabel(defaultLabel);
     } catch {
       showTemporary("Erro ao exportar — tente novamente", 2000);
     }

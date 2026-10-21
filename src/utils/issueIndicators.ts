@@ -1,4 +1,4 @@
-import type { Issue, IssueImpact, IssueStatus, IssueType } from "../types/issue";
+import type { IssueSummary as Issue, IssueImpact, IssueStatus, IssueType } from "../types/issue";
 import type { AgingThresholds } from "../types/projectConfig";
 
 export const ISSUE_STATUS_LABELS: Record<IssueStatus, string> = {

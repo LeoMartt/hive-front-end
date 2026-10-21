@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { Activity } from "../types/activity";
+import type { ActivitySummary as Activity } from "../types/activity";
 import { parseLocalDate } from "../utils/activityIndicators";
 
 export interface CurvaSData {

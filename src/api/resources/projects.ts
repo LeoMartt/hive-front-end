@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { httpClient } from "../client";
+import { sharedRead } from "../sharedRead";
 import { projectSchema, teamMemberApiSchema } from "../schemas/project";
 import type { NewProjectInput, Project, TeamMember } from "../../types/project";
 import type { ProjectPermissionMatrix } from "../../types/projectPermissions";
@@ -34,13 +35,17 @@ export const projectsApi = {
     return z.object({ pendingActivities: z.number().int().nonnegative() }).parse(data).pendingActivities;
   },
   async list(): Promise<Project[]> {
-    const { data } = await httpClient.get("/projects/");
-    return parseProjectList(data);
+    return sharedRead("projects:list", async () => {
+      const { data } = await httpClient.get("/projects/");
+      return parseProjectList(data);
+    });
   },
 
   async detail(projectId: string): Promise<Project> {
-    const { data } = await httpClient.get(`/projects/${projectId}/`);
-    return projectSchema.parse(data);
+    return sharedRead(`projects:${projectId}`, async () => {
+      const { data } = await httpClient.get(`/projects/${projectId}/`);
+      return projectSchema.parse(data);
+    });
   },
 
   async create(input: NewProjectInput): Promise<Project> {

@@ -48,6 +48,8 @@ export interface Activity {
   auditTrail?: { at: string; text: string }[];
 }
 
+export type ActivitySummary = Omit<Activity, "expectedResult" | "notes" | "attachments" | "approvalEvidence" | "approvalNote" | "auditTrail">;
+
 export interface NewActivityInput {
   name: string;
   nodeId?: string;
@@ -105,7 +107,7 @@ export interface ActivityFiltersState {
 
 export interface ProcessGroup {
   process: string;
-  activities: Activity[];
+  activities: ActivitySummary[];
 }
 
 export interface ModuleGroup {
@@ -116,5 +118,5 @@ export interface ModuleGroup {
 export interface FlatActivityGroup {
   key: string;
   label: string;
-  activities: Activity[];
+  activities: ActivitySummary[];
 }

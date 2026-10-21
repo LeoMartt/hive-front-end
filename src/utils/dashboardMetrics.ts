@@ -1,4 +1,4 @@
-import type { Activity, ActivityStatus } from "../types/activity";
+import type { ActivitySummary as Activity, ActivityStatus } from "../types/activity";
 
 const SPI_WEIGHT: Record<ActivityStatus, number> = {
   concluido: 100,

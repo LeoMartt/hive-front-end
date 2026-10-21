@@ -4,7 +4,7 @@ import IssueImpactBadge from "./IssueImpactBadge";
 import { computeIssueAgingDays, computeIssueRisk, ISSUE_TYPE_LABELS } from "../../utils/issueIndicators";
 import Avatar from "../common/Avatar";
 import { shortName } from "../../utils/shortName";
-import type { Issue } from "../../types/issue";
+import type { IssueSummary as Issue } from "../../types/issue";
 import type { AgingThresholds } from "../../types/projectConfig";
 
 interface IssueRowProps {

@@ -41,6 +41,8 @@ export interface Issue {
   updatedAt?: string;
 }
 
+export type IssueSummary = Omit<Issue, "description" | "impactNote" | "proposedSolution" | "openingAttachment" | "solutionAttachment">;
+
 export interface NewIssueInput {
   title: string;
   description: string;

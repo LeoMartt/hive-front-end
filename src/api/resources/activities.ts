@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { httpClient } from "../client";
-import { activitySchema } from "../schemas/activity";
+import { activitySchema, activitySummarySchema } from "../schemas/activity";
+import { sharedRead } from "../sharedRead";
+import type { ActivitySummary } from "../../types/activity";
 import type { Activity, ConcludeActivityInput, NewActivityInput } from "../../types/activity";
 
 const activityImportResponseSchema = z.object({
@@ -26,6 +28,28 @@ export const activitiesApi = {
   async list(projectId: string): Promise<Activity[]> {
     const { data } = await httpClient.get(`/projects/${projectId}/activities/`);
     return z.array(activitySchema).parse(data);
+  },
+
+  async summaries(projectId: string): Promise<ActivitySummary[]> {
+    return sharedRead(`activities:${projectId}:summary`, async () => {
+      const { data } = await httpClient.get(`/projects/${projectId}/activities/`, { params: { view: "summary" } });
+      return z.array(activitySummarySchema).parse(data);
+    });
+  },
+
+  async exportDetails(projectId: string, ids?: string[]): Promise<Activity[]> {
+    if (ids?.length === 0) return [];
+    if (ids && ids.length > 200) {
+      const rows: Activity[] = [];
+      for (let index = 0; index < ids.length; index += 200) rows.push(...await activitiesApi.exportDetails(projectId, ids.slice(index, index + 200)));
+      return rows;
+    }
+    const { data } = await httpClient.get(`/projects/${projectId}/activities/`, {
+      params: ids ? { ids: ids.map(activityUrlId).join(",") } : undefined,
+    });
+    const rows = z.array(activitySchema).parse(data);
+    const order = new Map(ids?.map((id, index) => [id, index]));
+    return ids ? rows.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0)) : rows;
   },
 
   async create(projectId: string, input: NewActivityInput): Promise<Activity> {

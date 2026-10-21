@@ -1,5 +1,5 @@
 import StatCard from "../common/StatCard";
-import type { Issue } from "../../types/issue";
+import type { IssueSummary as Issue } from "../../types/issue";
 
 interface IssuesKpiCardsProps {
   issues: Issue[];

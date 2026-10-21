@@ -1,7 +1,7 @@
 import IssueRow from "./IssueRow";
 import EmptyState from "../common/EmptyState";
 import { useProjectAgingThresholds } from "../../hooks/useProjectAgingThresholds";
-import type { Issue } from "../../types/issue";
+import type { IssueSummary as Issue } from "../../types/issue";
 
 interface IssuesTableProps {
   issues: Issue[];

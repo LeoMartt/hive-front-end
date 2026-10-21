@@ -1,5 +1,5 @@
 import type { Activity } from "../types/activity";
-import type { Issue } from "../types/issue";
+import type { IssueSummary as Issue } from "../types/issue";
 
 export interface ActivityAuditEntry {
   at: string;

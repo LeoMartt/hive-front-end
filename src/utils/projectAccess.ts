@@ -1,5 +1,5 @@
 import type { TeamMember } from "../types/project";
-import type { Activity } from "../types/activity";
+import type { ActivitySummary as Activity } from "../types/activity";
 import { DEFAULT_PERMISSION_MATRIX, type ProjectAction, type ProjectPermissionMatrix, type ProjectPermissionRole } from "../types/projectPermissions";
 
 const ROLE_CODES = { "Gestor de Projetos": "GESTOR", Tester: "TESTER", Desenvolvedor: "DEV" } as const;

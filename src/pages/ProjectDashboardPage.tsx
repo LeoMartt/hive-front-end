@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import LoadingState from "../components/common/LoadingState";
 import { useParams } from "react-router";
 import DashboardActivitiesBlock from "../components/dashboard/DashboardActivitiesBlock";
@@ -8,12 +8,13 @@ import IndicatorDonuts from "../components/dashboard/IndicatorDonuts";
 import RecentActivityLog from "../components/dashboard/RecentActivityLog";
 import NavIcon from "../components/common/NavIcon";
 import { projectsApi } from "../api/resources/projects";
-import { useActivities } from "../hooks/useActivities";
-import { useIssues } from "../hooks/useIssues";
-import { useActivityLog } from "../hooks/useActivityLog";
-import { useCurvaSData } from "../hooks/useCurvaSData";
+import { useDashboard } from "../hooks/useDashboard";
+import { activitiesApi } from "../api/resources/activities";
+import { issuesApi } from "../api/resources/issues";
+import { useMocks } from "../config/env";
+import type { Activity } from "../types/activity";
+import type { Issue } from "../types/issue";
 import { useProjects } from "../hooks/useProjects";
-import { computeIndicators, computeSpi } from "../utils/dashboardMetrics";
 import { downloadBlob } from "../utils/downloadBlob";
 import { useProjectConfig } from "../context/ProjectConfigContext";
 
@@ -37,13 +38,7 @@ export default function ProjectDashboardPage() {
   const [auditLabel, setAuditLabel] = useState("Gerar auditoria");
   const [auditLoading, setAuditLoading] = useState(false);
 
-  const { activities, stats, loading: activitiesLoading, error: activitiesError } = useActivities(projectId);
-  const { issues, stats: issueStats, loading: issuesLoading, error: issuesError } = useIssues(projectId);
-  const logEntries = useActivityLog(activities, issues);
-  const curvaS = useCurvaSData(activities);
-
-  const spi = useMemo(() => computeSpi(activities), [activities]);
-  const indicators = useMemo(() => computeIndicators(activities), [activities]);
+  const { data, loading, error, mockActivities, mockIssues } = useDashboard(projectId);
 
   const modeLabel = currentProject?.mode === "cutover" ? "Cutover" : "UAT";
 
@@ -64,9 +59,9 @@ export default function ProjectDashboardPage() {
     }
   }
 
-  if (activitiesLoading || issuesLoading) return <LoadingState />;
-  const dataError = activitiesError ?? issuesError;
-  if (dataError) return <div className="error-banner" role="alert">{dataError.message}</div>;
+  if (loading) return <LoadingState />;
+  if (error) return <div className="error-banner" role="alert">{error.message}</div>;
+  if (!data) return null;
 
   return (
     <div>
@@ -94,8 +89,8 @@ export default function ProjectDashboardPage() {
         </div>
       </div>
 
-      <DashboardActivitiesBlock activities={activities} stats={stats} spi={spi} />
-      <DashboardIssuesBlock issues={issues} stats={issueStats} />
+      <DashboardActivitiesBlock loadActivities={async () => useMocks ? mockActivities as Activity[] : activitiesApi.exportDetails(projectId)} stats={data.activities} spi={data.spi} />
+      <DashboardIssuesBlock loadIssues={async () => useMocks ? mockIssues as Issue[] : issuesApi.exportDetails(projectId)} stats={data.issues} />
 
       <div className="grid-2">
         <div className="panel">
@@ -114,7 +109,7 @@ export default function ProjectDashboardPage() {
               </span>
             </div>
           </div>
-          <CurvaSChart data={curvaS} />
+          <CurvaSChart data={data.curve} />
         </div>
 
         <div className="panel">
@@ -123,11 +118,11 @@ export default function ProjectDashboardPage() {
               Distribuição <span>indicadores operacionais</span>
             </div>
           </div>
-          <IndicatorDonuts pace={indicators.pace} quality={indicators.quality} backlog={indicators.backlog} />
+          <IndicatorDonuts pace={data.indicators.pace} quality={data.indicators.quality} backlog={data.indicators.backlog} />
         </div>
       </div>
 
-      <RecentActivityLog entries={logEntries} />
+      <RecentActivityLog entries={data.recent} />
     </div>
   );
 }

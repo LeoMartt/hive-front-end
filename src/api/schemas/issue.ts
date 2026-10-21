@@ -38,3 +38,7 @@ export const issueSchema = z.object({
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 }) satisfies z.ZodType<Issue>;
+
+export const issueSummarySchema = issueSchema.omit({
+  description: true, impactNote: true, proposedSolution: true, openingAttachment: true, solutionAttachment: true,
+});

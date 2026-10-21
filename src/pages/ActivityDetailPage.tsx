@@ -25,8 +25,8 @@ export default function ActivityDetailPage() {
   const { id, activityId } = useParams();
   const { config, ready } = useProjectConfig();
   const projectId = id ?? "";
-  const { activities, loading, error, concludeActivity, rejectActivity, refreshActivity } = useActivities(projectId);
-  const { issues, createIssue, resolveIssuesForActivity } = useIssues(projectId);
+  const { activities, loading, error, concludeActivity, rejectActivity, refreshActivity } = useActivities(projectId, activityId ?? "");
+  const { issues, createIssue, resolveIssuesForActivity } = useIssues(projectId, { activityId });
   const { projects } = useProjects();
   const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
   const currentProject = projects.find((project) => project.id === projectId);
