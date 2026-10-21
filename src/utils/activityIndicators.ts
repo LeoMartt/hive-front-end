@@ -1,4 +1,4 @@
-import type { Activity, ActivityStatus } from "../types/activity";
+import type { ActivitySummary as Activity, ActivityStatus } from "../types/activity";
 
 export const ACTIVITY_STATUS_LABELS: Record<ActivityStatus, string> = {
   aguardando: "Aguardando",

@@ -3,7 +3,7 @@ import { ApiError, normalizeError } from "../api/apiError";
 import { issuesApi } from "../api/resources/issues";
 import { useProjectConfig } from "../context/ProjectConfigContext";
 import { useMocks } from "../config/env";
-import type { Issue, IssueStats, NewIssueInput, ProposeSolutionInput } from "../types/issue";
+import type { Issue, IssueSummary, IssueStats, NewIssueInput, ProposeSolutionInput } from "../types/issue";
 import { toLocalIsoString } from "../utils/activityIndicators";
 
 function isoDaysAgo(days: number): string {
@@ -14,7 +14,7 @@ function isoDaysAgo(days: number): string {
 
 // Próximo ISS-XXXX após o maior número já existente, preservando o zero-padding de 4
 // dígitos do seed (ISS-0290...ISS-0304) — mesmo padrão de nextActivityId em useActivities.ts.
-function nextIssueId(issues: Issue[]): string {
+function nextIssueId(issues: IssueSummary[]): string {
   const maxNum = issues.reduce((max, issue) => {
     const match = /^ISS-(\d+)$/.exec(issue.id);
     return match ? Math.max(max, Number(match[1])) : max;
@@ -378,8 +378,8 @@ const INITIAL_ISSUES: Issue[] = [
   },
 ];
 
-interface UseIssuesResult {
-  issues: Issue[];
+interface UseIssuesResult<T extends IssueSummary = IssueSummary> {
+  issues: T[];
   stats: IssueStats;
   loading: boolean;
   error: ApiError | null;
@@ -390,9 +390,13 @@ interface UseIssuesResult {
   resolveIssuesForActivity: (activityId: string) => Promise<void>;
 }
 
-export function useIssues(projectId: string): UseIssuesResult {
+export function useIssues(projectId: string, options: { issueId: string }): UseIssuesResult<Issue>;
+export function useIssues(projectId: string, options?: { activityId?: string }): UseIssuesResult;
+export function useIssues(projectId: string, options?: { issueId?: string; activityId?: string }): UseIssuesResult {
+  const issueId = options?.issueId;
+  const activityId = options?.activityId;
   const { config } = useProjectConfig();
-  const [issues, setIssues] = useState<Issue[]>(useMocks ? INITIAL_ISSUES : []);
+  const [issues, setIssues] = useState<IssueSummary[]>(useMocks ? INITIAL_ISSUES : []);
   const [loading, setLoading] = useState<boolean>(!useMocks);
   const [error, setError] = useState<ApiError | null>(null);
 
@@ -404,8 +408,8 @@ export function useIssues(projectId: string): UseIssuesResult {
     setLoading(true);
     setError(null);
 
-    issuesApi
-      .list(projectId)
+    const request = issueId ? issuesApi.get(projectId, issueId).then(issue => [issue]) : issuesApi.summaries(projectId, activityId);
+    request
       .then((data) => {
         if (!cancelled) setIssues(data);
       })
@@ -419,7 +423,7 @@ export function useIssues(projectId: string): UseIssuesResult {
     return () => {
       cancelled = true;
     };
-  }, [projectId]);
+  }, [projectId, issueId, activityId]);
 
   const stats = useMemo<IssueStats>(() => {
     const abertas = issues.filter((issue) => issue.status === "aberta").length;
@@ -563,7 +567,7 @@ export function useIssues(projectId: string): UseIssuesResult {
   // dois hooks não se conhecem entre si, a página que orquestra as duas chamadas.
   async function resolveIssuesForActivity(activityId: string): Promise<void> {
     if (!useMocks) {
-      setIssues(await issuesApi.list(projectId));
+      setIssues(await issuesApi.summaries(projectId, activityId));
       return;
     }
 

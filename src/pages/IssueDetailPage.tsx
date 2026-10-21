@@ -20,8 +20,8 @@ export default function IssueDetailPage() {
   const { config, ready } = useProjectConfig();
   const { id, issueId } = useParams();
   const projectId = id ?? "";
-  const { issues, loading, error, startAnalysis, proposeSolution, cancelIssue } = useIssues(projectId);
-  const { activities } = useActivities(projectId);
+  const { issues, loading, error, startAnalysis, proposeSolution, cancelIssue } = useIssues(projectId, { issueId: issueId ?? "" });
+  const { activities } = useActivities(projectId, issues[0]?.relatedActivityId ?? "");
   const { projects } = useProjects();
   const { name: currentUserName, email: currentUserEmail, id: currentUserId } = useCurrentUser();
   const issue = issues.find((item) => item.id === issueId);

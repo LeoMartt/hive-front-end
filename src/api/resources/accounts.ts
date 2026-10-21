@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { httpClient } from "../client";
+import { sharedRead } from "../sharedRead";
 
 const currentUserSchema = z.object({
   id: z.string(),
@@ -13,7 +14,9 @@ export type CurrentUserApi = z.infer<typeof currentUserSchema>;
 
 export const accountsApi = {
   async me(): Promise<CurrentUserApi> {
-    const { data } = await httpClient.get("/accounts/me/");
-    return currentUserSchema.parse(data);
+    return sharedRead("accounts:me", async () => {
+      const { data } = await httpClient.get("/accounts/me/");
+      return currentUserSchema.parse(data);
+    });
   },
 };

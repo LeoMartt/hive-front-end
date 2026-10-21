@@ -42,3 +42,7 @@ export const activitySchema = z.object({
   updatedAt: z.string().optional(),
   auditTrail: z.array(z.object({ at: z.string(), text: z.string() })).optional(),
 }) satisfies z.ZodType<Activity>;
+
+export const activitySummarySchema = activitySchema.omit({
+  expectedResult: true, notes: true, attachments: true, approvalEvidence: true, approvalNote: true, auditTrail: true,
+});

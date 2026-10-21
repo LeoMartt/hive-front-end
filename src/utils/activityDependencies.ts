@@ -1,4 +1,4 @@
-import type { Activity } from "../types/activity";
+import type { ActivitySummary as Activity } from "../types/activity";
 
 export function releaseReadyActivities(activities: Activity[]): Activity[] {
   const byId = new Map(activities.map((activity) => [activity.id, activity]));

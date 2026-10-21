@@ -7,11 +7,11 @@ import type { Issue, IssueStats } from "../../types/issue";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
 
 interface DashboardIssuesBlockProps {
-  issues: Issue[];
+  loadIssues: () => Promise<Issue[]>;
   stats: IssueStats;
 }
 
-export default function DashboardIssuesBlock({ issues, stats }: DashboardIssuesBlockProps) {
+export default function DashboardIssuesBlock({ loadIssues, stats }: DashboardIssuesBlockProps) {
   const { can } = useProjectConfig();
   const tempoMedioLabel =
     stats.tempoMedioResolucaoDias === null ? "—" : `${stats.tempoMedioResolucaoDias.toFixed(1).replace(".", ",")}d`;
@@ -20,8 +20,8 @@ export default function DashboardIssuesBlock({ issues, stats }: DashboardIssuesB
     label: exportLabel,
     isDefault: exportIsDefault,
     handleClick: handleExport,
-  } = useExportButton("Exportar issues", issues.length === 0, "Nenhuma issue no projeto", () =>
-    downloadXlsx(buildIssueExportRows(issues), ISSUE_EXPORT_COLUMN_WIDTHS, "Issues", "hive_issues"),
+  } = useExportButton("Exportar issues", stats.total === 0, "Nenhuma issue no projeto", async () =>
+    downloadXlsx(buildIssueExportRows(await loadIssues()), ISSUE_EXPORT_COLUMN_WIDTHS, "Issues", "hive_issues"),
   );
 
   return (

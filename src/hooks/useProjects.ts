@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router";
 import type { NewProjectInput, Project, ProjectStats, TeamMember, UserRole } from "../types/project";
 import { getInitials } from "../utils/initials";
 import { useMocks } from "../config/env";
@@ -122,6 +123,7 @@ interface UseProjectsResult {
 }
 
 export function useProjects(): UseProjectsResult {
+  const { id: projectId } = useParams();
   const currentUser = useCurrentUser();
   // useMocks === true: seed local, síncrono. useMocks === false: busca na API.
   const [projects, setProjects] = useState<Project[]>(useMocks ? INITIAL_PROJECTS : []);
@@ -133,8 +135,8 @@ export function useProjects(): UseProjectsResult {
     // loading já inicia em !useMocks (true aqui) e error em null; o efeito roda uma
     // única vez (deps []), então não é preciso resetar estado antes do fetch.
     let cancelled = false;
-    projectsApi
-      .list()
+    const request = projectId ? projectsApi.detail(projectId).then(project => [project]) : projectsApi.list();
+    request
       .then((data) => {
         if (!cancelled) setProjects(data);
       })
@@ -147,7 +149,7 @@ export function useProjects(): UseProjectsResult {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [projectId]);
 
   const stats = useMemo<ProjectStats>(() => {
     const total = projects.length;

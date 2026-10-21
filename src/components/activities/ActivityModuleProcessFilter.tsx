@@ -1,5 +1,5 @@
 import Dropdown from "../common/Dropdown";
-import type { Activity } from "../../types/activity";
+import type { ActivitySummary as Activity } from "../../types/activity";
 import { toSafeIdPart } from "../../utils/domId";
 import { groupByModuleProcess } from "../../utils/groupActivities";
 import NavIcon from "../common/NavIcon";

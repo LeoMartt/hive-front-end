@@ -8,6 +8,8 @@ import ImportActivitiesModal from "../components/activities/ImportActivitiesModa
 import NewActivityModal from "../components/activities/NewActivityModal";
 import NavIcon from "../components/common/NavIcon";
 import { useActivities } from "../hooks/useActivities";
+import { activitiesApi } from "../api/resources/activities";
+import type { Activity } from "../types/activity";
 import { useExportButton } from "../hooks/useExportButton";
 import { useProjects } from "../hooks/useProjects";
 import { useCurrentUser } from "../hooks/useCurrentUser";
@@ -134,9 +136,9 @@ export default function ProjectActivitiesPage() {
     "Exportar atividades",
     filteredActivities.length === 0,
     "Nenhuma atividade no filtro atual",
-    () =>
+    async () =>
       downloadXlsx(
-        buildActivityExportRows(filteredActivities),
+        buildActivityExportRows(useMocks ? filteredActivities as Activity[] : await activitiesApi.exportDetails(projectId, filteredActivities.map(activity => activity.id))),
         ACTIVITY_EXPORT_COLUMN_WIDTHS,
         "Atividades",
         "hive_atividades",

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Activity, ActivityStats, NewActivityInput, ConcludeActivityInput, RejectActivityInput } from "../types/activity";
+import type { Activity, ActivitySummary, ActivityStats, NewActivityInput, ConcludeActivityInput, RejectActivityInput } from "../types/activity";
 import { ApiError, normalizeError } from "../api/apiError";
 import { activitiesApi } from "../api/resources/activities";
 import { useMocks } from "../config/env";
@@ -14,7 +14,7 @@ function isoDaysFromNow(days: number): string {
 
 // Próximo ATV-XXXX após o maior número já existente — não um contador fixo, pra nunca
 // colidir se o seed crescer.
-function nextActivityId(activities: Activity[]): string {
+function nextActivityId(activities: ActivitySummary[]): string {
   const maxNum = activities.reduce((max, activity) => {
     const match = /^ATV-(\d+)$/.exec(activity.id);
     return match ? Math.max(max, Number(match[1])) : max;
@@ -541,8 +541,14 @@ const INITIAL_ACTIVITIES: Activity[] = [
   },
 ];
 
-interface UseActivitiesResult {
-  activities: Activity[];
+async function loadActivityDetail(projectId: string, activityId: string): Promise<Activity[]> {
+  const activity = await activitiesApi.get(projectId, activityId);
+  const predecessor = activity.predecessors[0];
+  return predecessor ? [activity, await activitiesApi.get(projectId, predecessor)] : [activity];
+}
+
+interface UseActivitiesResult<T extends ActivitySummary = ActivitySummary> {
+  activities: T[];
   stats: ActivityStats;
   loading: boolean;
   error: ApiError | null;
@@ -555,21 +561,23 @@ interface UseActivitiesResult {
   refreshActivity: (activityId: string) => Promise<void>;
 }
 
-export function useActivities(projectId: string): UseActivitiesResult {
-  const [activities, setActivities] = useState<Activity[]>(useMocks ? INITIAL_ACTIVITIES : []);
+export function useActivities(projectId: string, activityId: string): UseActivitiesResult<Activity>;
+export function useActivities(projectId: string): UseActivitiesResult;
+export function useActivities(projectId: string, activityId?: string): UseActivitiesResult {
+  const [activities, setActivities] = useState<ActivitySummary[]>(useMocks ? INITIAL_ACTIVITIES : []);
   const [loading, setLoading] = useState<boolean>(!useMocks);
   const [error, setError] = useState<ApiError | null>(null);
 
   useEffect(() => {
-    if (useMocks || !projectId) return;
+    if (useMocks || !projectId || activityId === "") return;
 
     let cancelled = false;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     setError(null);
 
-    activitiesApi
-      .list(projectId)
+    const request = activityId ? loadActivityDetail(projectId, activityId) : activitiesApi.summaries(projectId);
+    request
       .then((data) => {
         if (!cancelled) setActivities(data);
       })
@@ -583,7 +591,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
     return () => {
       cancelled = true;
     };
-  }, [projectId]);
+  }, [projectId, activityId]);
 
   const stats = useMemo<ActivityStats>(() => {
     let concluido = 0;
@@ -705,7 +713,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
               notes: input.reason,
               retestCount: activity.retestCount + 1,
               rejectedAt: toLocalIsoString(new Date()),
-              attachments: input.evidence ? [...activity.attachments, input.evidence] : activity.attachments,
+              attachments: input.evidence ? [...(activity as Activity).attachments, input.evidence] : (activity as Activity).attachments,
             }
           : activity
       )
@@ -762,7 +770,7 @@ export function useActivities(projectId: string): UseActivitiesResult {
 
   async function refreshActivities(): Promise<void> {
     try {
-      setActivities(await activitiesApi.list(projectId));
+      setActivities(activityId ? await loadActivityDetail(projectId, activityId) : await activitiesApi.summaries(projectId));
       setError(null);
     } catch (err) {
       setError(err instanceof ApiError ? err : normalizeError(err));

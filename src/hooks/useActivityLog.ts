@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { LogEntry } from "../types/activityLog";
-import type { Activity } from "../types/activity";
-import type { Issue } from "../types/issue";
+import type { ActivitySummary as Activity } from "../types/activity";
+import type { IssueSummary as Issue } from "../types/issue";
 import { ACTIVITY_STATUS_LABELS } from "../utils/activityIndicators";
 import { ISSUE_STATUS_LABELS } from "../utils/issueIndicators";
 

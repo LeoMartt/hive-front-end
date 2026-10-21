@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import IssueStatusBadge from "../issues/IssueStatusBadge";
 import { computeIssueAgingDays } from "../../utils/issueIndicators";
-import type { Issue } from "../../types/issue";
+import type { IssueSummary as Issue } from "../../types/issue";
 
 interface ActivityLinkedIssuesPanelProps {
   activityId: string;
