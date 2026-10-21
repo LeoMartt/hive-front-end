@@ -51,7 +51,7 @@ export default function ProjectConfigPage() {
 
       {tab === "usuarios" ? (
         <div className="config-users-grid" role="tabpanel" id="config-usuarios" aria-labelledby="config-tab-usuarios">
-          <ConfigPermissionMatrix />
+          <ConfigPermissionMatrix onSaved={notifySaved} />
           <ConfigUsersTable projectId={projectId} onSaved={notifySaved} />
         </div>
       ) : (

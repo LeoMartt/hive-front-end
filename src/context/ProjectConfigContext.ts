@@ -1,5 +1,6 @@
 import { createContext, useContext } from "react";
 import type { ProjectConfig } from "../types/projectConfig";
+import { DEFAULT_PERMISSION_MATRIX, type ProjectAction } from "../types/projectPermissions";
 
 // Mesmos valores hoje hardcoded em issueIndicators.ts (AGING_ALERTA_DAYS=2/AGING_RISCO_DAYS=6)
 // e no antigo getSpiVariant (0.90/0.70, ajustado aqui para o par saudável/crítico do
@@ -13,12 +14,15 @@ export const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
   anexoMaxMb: 10,
   evidenciaObrigatoriaAtividade: true,
   evidenciaObrigatoriaIssue: true,
+  issueAutoAnalysis: false,
+  permissionMatrix: DEFAULT_PERMISSION_MATRIX,
 };
 
 export interface ProjectConfigContextValue {
   config: ProjectConfig;
   canManage: boolean;
   ready: boolean;
+  can: (action: ProjectAction) => boolean;
   setConfig: (config: ProjectConfig) => Promise<void>;
 }
 

@@ -2,6 +2,7 @@ import { z } from "zod";
 import { httpClient } from "../client";
 import { projectSchema, teamMemberApiSchema } from "../schemas/project";
 import type { NewProjectInput, Project, TeamMember } from "../../types/project";
+import type { ProjectPermissionMatrix } from "../../types/projectPermissions";
 
 const paginatedProjectsSchema = z.object({
   results: z.array(projectSchema),
@@ -23,6 +24,8 @@ export type ProjectUpdateInput = Partial<{
   anexoMaxMb: number;
   exigirEvidenciaAtividade: boolean;
   exigirEvidenciaIssue: boolean;
+  issueAutoAnalysis: boolean;
+  permissionMatrix: ProjectPermissionMatrix;
 }>;
 
 export const projectsApi = {

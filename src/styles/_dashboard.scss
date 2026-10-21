@@ -101,6 +101,9 @@
   &.stat-grid-issues-5 {
     grid-template-columns: repeat(5, 1fr);
   }
+  &.stat-grid-issues-complete {
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  }
 }
 
 // Curva S + Distribuição, lado a lado

@@ -4,6 +4,7 @@ import { useExportButton } from "../../hooks/useExportButton";
 import { buildIssueExportRows, ISSUE_EXPORT_COLUMN_WIDTHS } from "../../utils/issueExport";
 import { downloadXlsx } from "../../utils/downloadXlsx";
 import type { Issue, IssueStats } from "../../types/issue";
+import { useProjectConfig } from "../../context/ProjectConfigContext";
 
 interface DashboardIssuesBlockProps {
   issues: Issue[];
@@ -11,6 +12,7 @@ interface DashboardIssuesBlockProps {
 }
 
 export default function DashboardIssuesBlock({ issues, stats }: DashboardIssuesBlockProps) {
+  const { can } = useProjectConfig();
   const tempoMedioLabel =
     stats.tempoMedioResolucaoDias === null ? "—" : `${stats.tempoMedioResolucaoDias.toFixed(1).replace(".", ",")}d`;
 
@@ -26,7 +28,7 @@ export default function DashboardIssuesBlock({ issues, stats }: DashboardIssuesB
     <div className="metric-block issues">
       <div className="section-head">
         <div className="section-label">Issues</div>
-        <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleExport}>
+        {can("data_export") && <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleExport}>
           {exportIsDefault ? (
             <>
               <NavIcon>
@@ -38,16 +40,12 @@ export default function DashboardIssuesBlock({ issues, stats }: DashboardIssuesB
           ) : (
             exportLabel
           )}
-        </button>
+        </button>}
       </div>
-      <div className="stat-grid-issues stat-grid-issues-5">
-        <StatCard label="Abertas" value={String(stats.abertas)} sub={`${stats.total} no total`} />
-        <StatCard
-          label="Impeditivas abertas"
-          value={String(stats.impeditivasAbertas)}
-          sub="bloqueando atividades"
-          tone="r"
-        />
+      <div className="stat-grid-issues stat-grid-issues-complete">
+        <StatCard label="Total de issues" value={String(stats.total)} sub="todos os estados" />
+        <StatCard label="Abertas" value={String(stats.abertas)} sub="análise não iniciada" />
+        <StatCard label="Em análise" value={String(stats.emAnalise)} sub="análise iniciada" />
         <StatCard
           label="Em solução proposta"
           value={String(stats.solucaoProposta)}
@@ -55,6 +53,7 @@ export default function DashboardIssuesBlock({ issues, stats }: DashboardIssuesB
           tone="y"
         />
         <StatCard label="Concluídas" value={String(stats.concluidas)} sub={`${stats.total} no total`} tone="g" />
+        <StatCard label="Canceladas" value={String(stats.canceladas)} sub={`${stats.total} no total`} />
         <StatCard label="Tempo médio resolução" value={tempoMedioLabel} sub="últimas concluídas" />
       </div>
     </div>

@@ -224,7 +224,7 @@ export default function NewActivityModal({
             id="new-activity-tester"
             value={state.testerId}
             onChange={(value) => updateField("testerId", value)}
-            options={testers.filter((member) => member.id).map((member) => ({ value: member.id!, label: member.name }))}
+            options={testers.filter((member) => member.id).map((member) => ({ value: member.id!, label: member.name, email: member.email }))}
             placeholder={testers.length ? "Selecione…" : "Nenhum tester cadastrado"}
             disabled={!testers.length}
           />
@@ -237,7 +237,7 @@ export default function NewActivityModal({
             id="new-activity-dev"
             value={state.developerId}
             onChange={(value) => updateField("developerId", value)}
-            options={devs.filter((member) => member.id).map((member) => ({ value: member.id!, label: member.name }))}
+            options={devs.filter((member) => member.id).map((member) => ({ value: member.id!, label: member.name, email: member.email }))}
             placeholder={devs.length ? "Selecione…" : "Nenhum desenvolvedor cadastrado"}
             disabled={!devs.length}
           />

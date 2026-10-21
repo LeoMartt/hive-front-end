@@ -8,7 +8,8 @@ import { useParams } from "react-router";
 import { useActivities } from "../../hooks/useActivities";
 
 export default function ConfigAttachmentsPanel({ onSaved }: { onSaved: () => void }) {
-  const { config, canManage, setConfig } = useProjectConfig();
+  const { config, can, setConfig } = useProjectConfig();
+  const canManage = can("config_evidence");
   const { id: projectId = "" } = useParams();
   // Em modo real, o impacto vem de uma contagem no servidor, sem carregar a lista inteira.
   const { activities: mockActivities } = useActivities(useMocks ? projectId : "");

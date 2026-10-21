@@ -1,5 +1,7 @@
 export type ProjectMode = "uat" | "cutover";
 export type UserRole = "Gestor de Projetos" | "Tester" | "Desenvolvedor";
+import type { ProjectPermissionMatrix } from "./projectPermissions";
+
 export interface TeamMember {
   membershipId?: string;
   id?: string;
@@ -27,6 +29,8 @@ export interface Project {
   anexoMaxMb?: number;
   exigirEvidenciaAtividade?: boolean;
   exigirEvidenciaIssue?: boolean;
+  issueAutoAnalysis?: boolean;
+  permissionMatrix?: ProjectPermissionMatrix;
 }
 export interface ProjectStats {
   total: number;

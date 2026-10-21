@@ -13,9 +13,11 @@ import { useProjects } from "../hooks/useProjects";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useGoBack } from "../hooks/useGoBack";
 import { deriveIssueAuditTrail } from "../utils/issueAuditTrail";
-import { getCurrentUserMemberships } from "../utils/projectAccess";
+import { canConcludeActivity, getCurrentUserMemberships } from "../utils/projectAccess";
+import { useProjectConfig } from "../context/ProjectConfigContext";
 
 export default function IssueDetailPage() {
+  const { config, ready } = useProjectConfig();
   const { id, issueId } = useParams();
   const projectId = id ?? "";
   const { issues, loading, error, startAnalysis, proposeSolution, cancelIssue } = useIssues(projectId);
@@ -46,21 +48,11 @@ export default function IssueDetailPage() {
   const memberships = getCurrentUserMemberships(currentProject?.team ?? [], {
     id: currentUserId, email: currentUserEmail, name: currentUserName,
   });
-  const isGestor = memberships.some((member) => member.role === "Gestor de Projetos");
-  const devMemberships = memberships.filter((member) => member.role === "Desenvolvedor");
-  const isIssueDev = devMemberships.some((member) => {
-    if (issue.developerId) {
-      return [currentUserId, currentUserEmail, member.id, member.email].some(
-        (identity) => Boolean(identity) && identity?.toLowerCase() === issue.developerId?.toLowerCase(),
-      );
-    }
-    return [member.name, member.email].some(
-      (identity) => Boolean(identity) && identity?.toLowerCase() === issue.dev.toLowerCase(),
-    );
-  });
-  const canStartAnalysis = issue.status === "aberta" && (isIssueDev || isGestor);
-  const canProposeSolution = issue.status === "em_analise" && (isIssueDev || isGestor);
-  const canCancelIssue = issue.status === "em_analise" && (isIssueDev || isGestor);
+  const scope = relatedActivity ? { ...relatedActivity, developerId: issue.developerId, dev: issue.dev } : null;
+  const allowed = (action: "issues_analyze" | "issues_cancel") => ready && (memberships.some(m => m.role === "Gestor de Projetos") || Boolean(scope && canConcludeActivity(memberships, scope, { id: currentUserId, email: currentUserEmail, name: currentUserName }, config.permissionMatrix, action)));
+  const canStartAnalysis = issue.status === "aberta" && allowed("issues_analyze");
+  const canProposeSolution = issue.status === "em_analise" && allowed("issues_analyze");
+  const canCancelIssue = issue.status === "em_analise" && allowed("issues_cancel");
 
   return (
     <div>

@@ -31,6 +31,8 @@ export const projectSchema = z.object({
   anexoMaxMb: z.coerce.number().optional(),
   exigirEvidenciaAtividade: z.boolean().optional(),
   exigirEvidenciaIssue: z.boolean().optional(),
+  issueAutoAnalysis: z.boolean().optional(),
+  permissionMatrix: z.record(z.string(), z.object({ GESTOR: z.boolean(), TESTER: z.boolean(), DEV: z.boolean() })).optional(),
 }) satisfies z.ZodType<Project>;
 
 export const teamMemberApiSchema = teamMemberSchema;

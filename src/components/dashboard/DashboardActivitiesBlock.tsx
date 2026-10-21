@@ -21,7 +21,7 @@ function percentOf(part: number, total: number): number {
 const SPI_VARIANT_TONE = { good: "g", warn: "y", bad: "r" } as const;
 
 export default function DashboardActivitiesBlock({ activities, stats, spi }: DashboardActivitiesBlockProps) {
-  const { config } = useProjectConfig();
+  const { config, can } = useProjectConfig();
   const spiVariant = getSpiVariantWithThresholds(spi, config);
   const spiToneClass = spiVariant === null ? "" : ` ${SPI_VARIANT_TONE[spiVariant]}`;
 
@@ -37,7 +37,7 @@ export default function DashboardActivitiesBlock({ activities, stats, spi }: Das
     <div className="metric-block">
       <div className="section-head">
         <div className="section-label">Atividades</div>
-        <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleExport}>
+        {can("data_export") && <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleExport}>
           {exportIsDefault ? (
             <>
               <NavIcon>
@@ -49,7 +49,7 @@ export default function DashboardActivitiesBlock({ activities, stats, spi }: Das
           ) : (
             exportLabel
           )}
-        </button>
+        </button>}
       </div>
       <div className="stat-hero-row">
         <div className="spi-hero">
