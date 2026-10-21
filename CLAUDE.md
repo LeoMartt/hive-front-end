@@ -51,6 +51,8 @@ Este projeto usa o plugin **superpowers** do Claude Code. Cada feature nova pass
 Para usar esse fluxo, seu Claude Code precisa ter o plugin `superpowers` instalado (skills aparecem como `superpowers:*` na lista de skills disponíveis).
 
 ## Estado atual do produto
+
+Decisao de alteracao de evidencias (2026-10-20): Salvar regras em Papeis & Config pede confirmacao e consulta impacto antes de persistir. A regra vigente vale na proxima conclusao de atividade/abertura de issue impeditiva; registros anteriores nao sao invalidados. Ver `docs/regras_alteracao_evidencias.md` para as regras acordadas e a referencia do historico no backend.
 Correcoes de integracao (2026-10-14): permissao de registrar issue e filtro "Abertas por mim" usam memberships Gestor/Tester; "Issues comigo" usa Gestor/Desenvolvedor. Papeis multiplos acumulam permissoes. Quando existe id/email da identidade, nomes nao concedem permissoes. A identidade acompanha trocas da conta MSAL. A trilha da atividade consome `auditTrail` persistido pelo backend; registros antigos podem reconstruir liberacao pelas datas das issues. No export, "Encerrada em" usa `solutionProposedAt` para Solucao proposta e `resolvedAt` para conclusao/cancelamento.
 
 **Construído** (com spec + plano + revisão registrados em `docs/superpowers/`):

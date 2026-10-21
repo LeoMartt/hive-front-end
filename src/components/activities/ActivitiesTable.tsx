@@ -20,7 +20,7 @@ interface ActivitiesTableProps {
   expandedGroups: Set<string>;
   onToggleGroup: (groupKey: string) => void;
   currentUserName: string;
-  onBulkApprove: (activityIds: string[], input: ConcludeActivityInput) => void;
+  onBulkApprove: (activityIds: string[], input: ConcludeActivityInput) => Promise<void>;
   onBulkCancel: (activityIds: string[]) => void;
   canApproveActivity: (activity: Activity) => boolean;
   canCancelActivities: boolean;
@@ -239,9 +239,8 @@ export default function ActivitiesTable({
         onHide={() => setShowBulkApproveModal(false)}
         currentUserName={currentUserName}
         title={`Aprovar ${selectedActivities.length} atividade(s) selecionada(s)`}
-        subtitle="Uma única evidência será aplicada a todas as atividades selecionadas do lote."
-        onSubmit={(input) => {
-          onBulkApprove(selectedActivities.map((activity) => activity.id), input);
+        onSubmit={async (input) => {
+          await onBulkApprove(selectedActivities.map((activity) => activity.id), input);
           clearSelection();
         }}
       />}

@@ -547,9 +547,9 @@ interface UseActivitiesResult {
   loading: boolean;
   error: ApiError | null;
   createActivity: (input: NewActivityInput) => void;
-  concludeActivity: (activityId: string, input: ConcludeActivityInput) => void;
+  concludeActivity: (activityId: string, input: ConcludeActivityInput) => Promise<void>;
   rejectActivity: (activityId: string, input: RejectActivityInput) => void;
-  bulkConcludeActivities: (activityIds: string[], input: ConcludeActivityInput) => void;
+  bulkConcludeActivities: (activityIds: string[], input: ConcludeActivityInput) => Promise<void>;
   cancelActivities: (activityIds: string[]) => void;
   importActivities: (file: File) => Promise<number>;
   refreshActivity: (activityId: string) => Promise<void>;
@@ -656,12 +656,16 @@ export function useActivities(projectId: string): UseActivitiesResult {
   // Segundo par de mutators de ATUALIZAÇÃO do hook (depois de createActivity) — mesma
   // convenção de startAnalysis/proposeSolution em useIssues.ts: .map(), sem validação
   // própria (isso vive na UI).
-  function concludeActivity(activityId: string, input: ConcludeActivityInput): void {
+  async function concludeActivity(activityId: string, input: ConcludeActivityInput): Promise<void> {
     if (!useMocks) {
-      void activitiesApi.complete(projectId, activityId, input).then(
-        () => refreshActivities(),
-        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
-      );
+      try {
+        await activitiesApi.complete(projectId, activityId, input);
+        await refreshActivities();
+      } catch (error) {
+        const apiError = normalizeError(error);
+        setError(apiError);
+        throw apiError;
+      }
       return;
     }
 
@@ -712,12 +716,16 @@ export function useActivities(projectId: string): UseActivitiesResult {
   // num único setActivities (evita um re-render por atividade). A validação de quais
   // atividades podem ser selecionadas (status liberado) vive na UI
   // (ActivitiesTable), não aqui — mesma convenção dos outros mutators deste hook.
-  function bulkConcludeActivities(activityIds: string[], input: ConcludeActivityInput): void {
+  async function bulkConcludeActivities(activityIds: string[], input: ConcludeActivityInput): Promise<void> {
     if (!useMocks) {
-      void Promise.all(activityIds.map((activityId) => activitiesApi.complete(projectId, activityId, input))).then(
-        () => refreshActivities(),
-        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
-      );
+      try {
+        await Promise.all(activityIds.map((activityId) => activitiesApi.complete(projectId, activityId, input)));
+        await refreshActivities();
+      } catch (error) {
+        const apiError = normalizeError(error);
+        setError(apiError);
+        throw apiError;
+      }
       return;
     }
 

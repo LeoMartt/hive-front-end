@@ -3,12 +3,14 @@ import Modal from "../common/Modal";
 import NavIcon from "../common/NavIcon";
 import { buildEvidenceMetadata, formatEvidenceFileSize, getEvidenceFileError } from "../../utils/evidenceFiles";
 import type { ConcludeActivityInput } from "../../types/activity";
+import { useProjectConfig } from "../../context/ProjectConfigContext";
+import { normalizeError } from "../../api/apiError";
 
 interface ConcludeActivityModalProps {
   show: boolean;
   onHide: () => void;
   currentUserName: string;
-  onSubmit: (input: ConcludeActivityInput) => void;
+  onSubmit: (input: ConcludeActivityInput) => void | Promise<void>;
   title?: string;
   subtitle?: string;
 }
@@ -19,8 +21,11 @@ export default function ConcludeActivityModal({
   currentUserName,
   onSubmit,
   title = "Concluir atividade",
-  subtitle = "Anexe a evidência de aprovação. A observação é opcional.",
+  subtitle,
 }: ConcludeActivityModalProps) {
+  const { config, ready } = useProjectConfig();
+  const evidenceRequired = config.evidenciaObrigatoriaAtividade;
+  const [submitting, setSubmitting] = useState(false);
   const [text, setText] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -36,7 +41,7 @@ export default function ConcludeActivityModal({
   }
 
   function selectFile(file: File) {
-    const error = getEvidenceFileError(file);
+    const error = getEvidenceFileError(file, config.anexoMaxMb);
     if (error) {
       setSelectedFile(null);
       setErrorMsg(error);
@@ -46,25 +51,36 @@ export default function ConcludeActivityModal({
     setErrorMsg(null);
   }
 
-  function handleConfirm() {
-    if (!selectedFile) {
+  async function handleConfirm() {
+    if (submitting || !ready) return;
+    if (evidenceRequired && !selectedFile) {
       setErrorMsg("Anexe a evidência antes de confirmar.");
       return;
     }
 
-    onSubmit({
-      approvalNote: text.trim() ? text.trim() : null,
-      approvalEvidence: buildEvidenceMetadata(selectedFile, currentUserName),
-    });
-    resetAndHide();
+    const fileError = selectedFile ? getEvidenceFileError(selectedFile, config.anexoMaxMb) : null;
+    if (fileError) { setErrorMsg(fileError); return; }
+    setSubmitting(true);
+    setErrorMsg(null);
+    try {
+      await onSubmit({
+        approvalNote: text.trim() ? text.trim() : null,
+        approvalEvidence: selectedFile ? buildEvidenceMetadata(selectedFile, currentUserName) : null,
+      });
+      resetAndHide();
+    } catch (error) {
+      setErrorMsg(normalizeError(error).message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
-    <Modal open={show} onClose={resetAndHide} labelledBy="conclude-activity-modal-title">
+    <Modal open={show} onClose={() => { if (!submitting) resetAndHide(); }} labelledBy="conclude-activity-modal-title">
       <div className="modal-title" id="conclude-activity-modal-title">
         {title}
       </div>
-      <div className="modal-subtitle">{subtitle}</div>
+      {subtitle && <div className="modal-subtitle">{subtitle}</div>}
 
       {errorMsg && <div className="error-banner">{errorMsg}</div>}
 
@@ -83,8 +99,15 @@ export default function ConcludeActivityModal({
 
       <div className="form-group">
         <label className="form-label" id="conclude-activity-file-label">
-          Evidência
+          Evidência <span className="optional">({!ready ? "verificando configuração" : evidenceRequired ? "obrigatória" : "opcional"})</span>
         </label>
+        <div className="modal-subtitle" aria-live="polite">
+          {!ready
+            ? "Verificando a configuração de evidências do projeto."
+            : evidenceRequired
+              ? "Neste projeto, é obrigatório anexar evidência para concluir atividades conforme Papéis & Config."
+              : "Neste projeto, é possível concluir atividades sem evidência conforme Papéis & Config."}
+        </div>
         <div
           className={`dropzone${dragOver ? " drag-over" : ""}${selectedFile ? " has-file" : ""}`}
           role="button"
@@ -118,7 +141,7 @@ export default function ConcludeActivityModal({
           <span>
             {selectedFile
               ? `${selectedFile.name} (${formatEvidenceFileSize(selectedFile.size)})`
-              : "Clique ou arraste o arquivo de evidência"}
+              : `Clique ou arraste o arquivo de evidência${ready ? ` (máx. ${config.anexoMaxMb} MB)` : ""}`}
           </span>
         </div>
         <input
@@ -137,11 +160,11 @@ export default function ConcludeActivityModal({
       </div>
 
       <div className="modal-actions">
-        <button type="button" className="btn" onClick={resetAndHide}>
+        <button type="button" className="btn" disabled={submitting} onClick={resetAndHide}>
           Cancelar
         </button>
-        <button type="button" className="btn btn-primary" onClick={handleConfirm}>
-          Concluir atividade
+        <button type="button" className="btn btn-primary" disabled={submitting || !ready} onClick={handleConfirm}>
+          {submitting ? "Concluindo..." : "Concluir atividade"}
         </button>
       </div>
     </Modal>

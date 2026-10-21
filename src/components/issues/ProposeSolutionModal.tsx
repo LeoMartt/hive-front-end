@@ -3,6 +3,7 @@ import Modal from "../common/Modal";
 import NavIcon from "../common/NavIcon";
 import { buildEvidenceMetadata, formatEvidenceFileSize, getEvidenceFileError } from "../../utils/evidenceFiles";
 import type { ProposeSolutionInput } from "../../types/issue";
+import { useProjectConfig } from "../../context/ProjectConfigContext";
 
 interface ProposeSolutionModalProps {
   show: boolean;
@@ -12,6 +13,7 @@ interface ProposeSolutionModalProps {
 }
 
 export default function ProposeSolutionModal({ show, onHide, currentUserName, onSubmit }: ProposeSolutionModalProps) {
+  const { config, ready } = useProjectConfig();
   const [text, setText] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -27,7 +29,7 @@ export default function ProposeSolutionModal({ show, onHide, currentUserName, on
   }
 
   function selectFile(file: File) {
-    const error = getEvidenceFileError(file);
+    const error = getEvidenceFileError(file, config.anexoMaxMb);
     if (error) {
       setSelectedFile(null);
       setErrorMsg(error);
@@ -38,6 +40,9 @@ export default function ProposeSolutionModal({ show, onHide, currentUserName, on
   }
 
   function handleConfirm() {
+    if (!ready) return;
+    const fileError = selectedFile ? getEvidenceFileError(selectedFile, config.anexoMaxMb) : null;
+    if (fileError) { setErrorMsg(fileError); return; }
     if (!text.trim()) {
       setErrorMsg("Preencha a solução proposta antes de continuar.");
       return;
@@ -56,7 +61,8 @@ export default function ProposeSolutionModal({ show, onHide, currentUserName, on
         Propor solução
       </div>
       <div className="modal-subtitle">
-        Descreva o que foi feito para resolver o problema, ou a orientação a seguir. A evidência é opcional.
+        Descreva o que foi feito para resolver o problema, ou a orientação a seguir. O anexo da solução é opcional;
+        a exigência em Papéis & Config se aplica somente à abertura de issues impeditivas.
       </div>
 
       {errorMsg && <div className="error-banner">{errorMsg}</div>}
@@ -132,7 +138,7 @@ export default function ProposeSolutionModal({ show, onHide, currentUserName, on
         <button type="button" className="btn" onClick={resetAndHide}>
           Cancelar
         </button>
-        <button type="button" className="btn btn-primary" onClick={handleConfirm}>
+        <button type="button" className="btn btn-primary" disabled={!ready} onClick={handleConfirm}>
           Propor solução
         </button>
       </div>

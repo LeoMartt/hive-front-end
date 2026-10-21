@@ -8,6 +8,7 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { getCurrentUserMemberships, membershipsAllowProjectManagement } from "../utils/projectAccess";
 import type { Project } from "../types/project";
 import type { ProjectConfig } from "../types/projectConfig";
+import { normalizeError } from "../api/apiError";
 
 function mergeProjectConfig(project: Project, previous: ProjectConfig): ProjectConfig {
   const aging = {
@@ -35,6 +36,9 @@ export function ProjectConfigProvider({ children }: { children: ReactNode }) {
   const canManage = membershipsAllowProjectManagement(getCurrentUserMemberships(currentProject?.team ?? [], currentUser));
   const [config, setConfig] = useState<ProjectConfig>(DEFAULT_PROJECT_CONFIG);
   const [projectMode, setProjectMode] = useState<Project["mode"]>("uat");
+  const [loading, setLoading] = useState(!useMocks);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     if (useMocks || !projectId) return;
@@ -44,16 +48,18 @@ export function ProjectConfigProvider({ children }: { children: ReactNode }) {
       .then((project) => {
         if (cancelled) return;
         setProjectMode(project.mode);
-        setConfig((previous) => mergeProjectConfig(project, previous));
+        setConfig(mergeProjectConfig(project, DEFAULT_PROJECT_CONFIG));
       })
-      .catch(() => undefined);
+      .catch((error) => { if (!cancelled) setLoadError(normalizeError(error).message); })
+      .finally(() => { if (!cancelled) setLoading(false); });
     return () => {
       cancelled = true;
     };
-  }, [projectId]);
+  }, [projectId, loadAttempt]);
 
   async function saveConfig(nextConfig: ProjectConfig) {
     if (!canManage || !projectId) throw new Error("Apenas gestores do projeto podem alterar configurações.");
+    if (loading || loadError) throw new Error("Aguarde o carregamento das configurações do projeto.");
     if (useMocks) {
       setConfig(nextConfig);
       return;
@@ -73,5 +79,19 @@ export function ProjectConfigProvider({ children }: { children: ReactNode }) {
     setConfig((previous) => mergeProjectConfig(project, previous));
   }
 
-  return <ProjectConfigContext.Provider value={{ config, canManage, setConfig: saveConfig }}>{children}</ProjectConfigContext.Provider>;
+  return (
+    <ProjectConfigContext.Provider value={{ config, canManage: canManage && !loading && !loadError, ready: !loading && !loadError, setConfig: saveConfig }}>
+      {loadError && (
+        <div className="error-banner" role="alert">
+          {loadError}
+          <button type="button" className="btn btn-sm" onClick={() => {
+            setLoadError(null);
+            setLoading(true);
+            setLoadAttempt((attempt) => attempt + 1);
+          }}>Tentar novamente</button>
+        </div>
+      )}
+      {children}
+    </ProjectConfigContext.Provider>
+  );
 }

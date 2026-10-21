@@ -190,8 +190,8 @@ export default function ActivityDetailPage() {
         show={showConcludeModal}
         onHide={() => setShowConcludeModal(false)}
         currentUserName={currentUserName}
-        onSubmit={(input) => {
-          concludeActivity(activity.id, input);
+        onSubmit={async (input) => {
+          await concludeActivity(activity.id, input);
           resolveIssuesForActivity(activity.id);
         }}
       />}

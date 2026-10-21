@@ -1,4 +1,5 @@
 import type { Issue, IssueAttachment } from "../../types/issue";
+import { useProjectConfig } from "../../context/ProjectConfigContext";
 import { downloadEvidenceAttachment } from "../../utils/evidenceDownload";
 
 function attachIconLabel(fileName: string): string {
@@ -42,6 +43,14 @@ interface IssueAttachmentsPanelProps {
 }
 
 export default function IssueAttachmentsPanel({ issue }: IssueAttachmentsPanelProps) {
+  const { config, ready } = useProjectConfig();
+  const openingRequirement = !ready
+    ? "Verificando a configuração de anexos do projeto."
+    : !issue.impeditiva
+      ? "Nesta issue não impeditiva, o anexo de abertura é opcional."
+      : config.evidenciaObrigatoriaIssue
+        ? "A configuração atual do projeto exige anexo na abertura de issues impeditivas."
+        : "Neste projeto, issues impeditivas não precisam de anexo na abertura, conforme Papéis & Config.";
   return (
     <>
       <div className="panel" style={{ marginBottom: 14 }}>
@@ -53,7 +62,7 @@ export default function IssueAttachmentsPanel({ issue }: IssueAttachmentsPanelPr
         {issue.openingAttachment ? (
           <AttachmentRow attachment={issue.openingAttachment} role="Tester" />
         ) : (
-          <div className="empty-note">Nenhum anexo — opcional para issues não impeditivas.</div>
+          <div className="empty-note">Nenhum anexo enviado na abertura. {openingRequirement}</div>
         )}
       </div>
 

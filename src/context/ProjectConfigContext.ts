@@ -18,6 +18,7 @@ export const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
 export interface ProjectConfigContextValue {
   config: ProjectConfig;
   canManage: boolean;
+  ready: boolean;
   setConfig: (config: ProjectConfig) => Promise<void>;
 }
 
