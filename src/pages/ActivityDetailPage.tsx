@@ -19,9 +19,11 @@ import { useGoBack } from "../hooks/useGoBack";
 import { retestPillClass } from "../utils/activityIndicators";
 import { deriveActivityAuditTrail } from "../utils/activityAuditTrail";
 import { canConcludeActivity, getCurrentUserMemberships } from "../utils/projectAccess";
+import { useProjectConfig } from "../context/ProjectConfigContext";
 
 export default function ActivityDetailPage() {
   const { id, activityId } = useParams();
+  const { config, ready } = useProjectConfig();
   const projectId = id ?? "";
   const { activities, loading, error, concludeActivity, rejectActivity, refreshActivity } = useActivities(projectId);
   const { issues, createIssue, resolveIssuesForActivity } = useIssues(projectId);
@@ -34,9 +36,9 @@ export default function ActivityDetailPage() {
     email: currentUserEmail,
     name: currentUserName,
   });
-  const canCreateIssue = Boolean(activity && canConcludeActivity(currentMemberships, activity, {
+  const canCreateIssue = ready && Boolean(activity && canConcludeActivity(currentMemberships, activity, {
     id: currentUserId, email: currentUserEmail, name: currentUserName,
-  }));
+  }, config.permissionMatrix, "issues_create"));
   const goBack = useGoBack(`/projetos/${projectId}/atividades`);
   const [showRegisterIssueModal, setShowRegisterIssueModal] = useState(false);
   const [registerIssueMode, setRegisterIssueMode] = useState<"register" | "reject">("register");
@@ -67,11 +69,11 @@ export default function ActivityDetailPage() {
   }
 
   const auditEntries = deriveActivityAuditTrail(activity, issues);
-  const canCompleteActivity = canConcludeActivity(currentMemberships, activity, {
+  const canCompleteActivity = ready && canConcludeActivity(currentMemberships, activity, {
     id: currentUserId,
     email: currentUserEmail,
     name: currentUserName,
-  });
+  }, config.permissionMatrix);
 
   // Calculado independente do status — usado tanto pro painel "Predecessor" (só quando
   // aguardando) quanto pelos anexos herdados (só quando bloqueado, ver
@@ -192,7 +194,7 @@ export default function ActivityDetailPage() {
         currentUserName={currentUserName}
         onSubmit={async (input) => {
           await concludeActivity(activity.id, input);
-          resolveIssuesForActivity(activity.id);
+          await resolveIssuesForActivity(activity.id);
         }}
       />}
     </div>

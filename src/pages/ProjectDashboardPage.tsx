@@ -15,6 +15,7 @@ import { useCurvaSData } from "../hooks/useCurvaSData";
 import { useProjects } from "../hooks/useProjects";
 import { computeIndicators, computeSpi } from "../utils/dashboardMetrics";
 import { downloadBlob } from "../utils/downloadBlob";
+import { useProjectConfig } from "../context/ProjectConfigContext";
 
 function auditFilename(projectName: string | undefined): string {
   const base = (projectName ?? "projeto")
@@ -28,6 +29,7 @@ function auditFilename(projectName: string | undefined): string {
 }
 
 export default function ProjectDashboardPage() {
+  const { can } = useProjectConfig();
   const { id } = useParams();
   const projectId = id ?? "";
   const { projects } = useProjects();
@@ -74,7 +76,7 @@ export default function ProjectDashboardPage() {
           <div className="page-desc compact">{modeLabel} · atualizado em tempo real via trilha de auditoria</div>
         </div>
         <div className="head-actions">
-          <button
+          {can("data_export") && <button
             type="button"
             className="btn btn-primary btn-sm"
             onClick={handleAuditExport}
@@ -88,7 +90,7 @@ export default function ProjectDashboardPage() {
               <path d="M9 18h4" />
             </NavIcon>
             {auditLabel}
-          </button>
+          </button>}
         </div>
       </div>
 

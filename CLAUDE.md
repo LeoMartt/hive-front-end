@@ -52,6 +52,8 @@ Para usar esse fluxo, seu Claude Code precisa ter o plugin `superpowers` instala
 
 ## Estado atual do produto
 
+Em 21/10/2026: matriz de permissoes editavel por Gestor e persistida por projeto; acoes e paginas consomem a matriz efetiva. Gestor conserva controle da matriz/equipe; Tester/Dev mantem escopo de responsavel nas acoes por registro. Controle de analise automatica funciona, exige confirmacao ao salvar e afeta so novas issues. Conclusao de atividade/issue e atomica no backend, e a tela recarrega issues depois. Dropdowns de responsaveis reutilizam nome/e-mail/avatar. Dashboard separa todos os estados, incluindo canceladas. Regras completas em hive-back/docs/matriz_dinamica_e_analise_automatica.md.
+
 Decisao de alteracao de evidencias (2026-10-20): Salvar regras em Papeis & Config pede confirmacao e consulta impacto antes de persistir. A regra vigente vale na proxima conclusao de atividade/abertura de issue impeditiva; registros anteriores nao sao invalidados. Ver `docs/regras_alteracao_evidencias.md` para as regras acordadas e a referencia do historico no backend.
 Correcoes de integracao (2026-10-14): permissao de registrar issue e filtro "Abertas por mim" usam memberships Gestor/Tester; "Issues comigo" usa Gestor/Desenvolvedor. Papeis multiplos acumulam permissoes. Quando existe id/email da identidade, nomes nao concedem permissoes. A identidade acompanha trocas da conta MSAL. A trilha da atividade consome `auditTrail` persistido pelo backend; registros antigos podem reconstruir liberacao pelas datas das issues. No export, "Encerrada em" usa `solutionProposedAt` para Solucao proposta e `resolvedAt` para conclusao/cancelamento.
 

@@ -3,6 +3,7 @@ import { CircleCheck } from "lucide-react";
 import { useProjectConfig } from "../../context/ProjectConfigContext";
 import { useProjects } from "../../hooks/useProjects";
 import type { AgingThresholds, ProjectConfig } from "../../types/projectConfig";
+import Modal from "../common/Modal";
 
 interface ConfigThresholdsPanelProps {
   projectId: string;
@@ -31,13 +32,15 @@ function isValidConfig(config: ProjectConfig): boolean {
 }
 
 export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThresholdsPanelProps) {
-  const { config, canManage, setConfig } = useProjectConfig();
+  const { config, can, setConfig } = useProjectConfig();
+  const canManage = can("config_thresholds");
   const { projects } = useProjects();
   const currentProject = projects.find((item) => item.id === projectId);
   const [draft, setDraft] = useState<ProjectConfig>(config);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -85,8 +88,10 @@ export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThre
         spiCritico: draft.spiCritico,
         agingUat: draft.agingUat,
         agingCutover: draft.agingCutover,
+        issueAutoAnalysis: draft.issueAutoAnalysis,
       });
       setSaved(true);
+      setConfirming(false);
       onSaved();
     } catch (error) {
       setSaveError(error instanceof Error ? error.message : "Não foi possível salvar os limiares.");
@@ -102,11 +107,11 @@ export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThre
       </div>
       <div className="page-desc" style={{ marginBottom: 16 }}>
         Definem a partir de quando o SPI e as issues em aberto passam a ser sinalizados visualmente como risco.
-        Editável pelo Gestor de Projetos.
+        Permissão definida na matriz deste projeto.
       </div>
 
       <div className="subhead">SPI do projeto</div>
-      <fieldset className="config-edit-fields" disabled={!canManage || saving}>
+      <fieldset className="config-edit-fields" disabled={!canManage || saving || confirming}>
       <div className="field-row" style={{ marginBottom: 16 }}>
         <div className="field">
           <div className="field-label">SPI saudável a partir de</div>
@@ -144,12 +149,15 @@ export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThre
       <div className="config-transition-row">
         <label className="toggle-pill">
           <span className="switch">
-            <input type="checkbox" checked={false} disabled readOnly />
+            <input type="checkbox" role="switch" checked={draft.issueAutoAnalysis}
+              onChange={event => updateDraft({ issueAutoAnalysis: event.target.checked })} />
             <span className="track" />
           </span>
           {"Issue - 'aberta' -> 'em análise' automaticamente"}
         </label>
+        <span>{draft.issueAutoAnalysis ? "Ativado" : "Desativado"}</span>
       </div>
+      {draft.issueAutoAnalysis !== config.issueAutoAnalysis && <div role="status">Alterações não salvas</div>}
 
       <div className="subhead">Aging de issues abertas</div>
       <div className="field-row" style={{ marginBottom: 10 }}>
@@ -193,11 +201,23 @@ export default function ConfigThresholdsPanel({ projectId, onSaved }: ConfigThre
       </fieldset>
       {saveError && <div className="error-banner" role="alert">{saveError}</div>}
       {canManage && <div className="config-save-actions">
-        <button type="button" className="btn btn-primary btn-sm" disabled={!canSave || saving} onClick={handleSave}>
+        <button type="button" className="btn btn-primary btn-sm" disabled={!canSave || saving} onClick={() => {
+          if (draft.issueAutoAnalysis !== config.issueAutoAnalysis) setConfirming(true);
+          else void handleSave();
+        }}>
           {saving ? "Salvando..." : "Salvar limiares"}
         </button>
         {saved && <span className="config-save-success" role="status"><CircleCheck size={18} aria-hidden="true" />Edições Salvas</span>}
       </div>}
+      <Modal open={confirming} onClose={() => { if (!saving) setConfirming(false); }} labelledBy="confirm-auto-analysis-title">
+        <div className="config-evidence-confirmation">
+          <div className="modal-title" id="confirm-auto-analysis-title">{draft.issueAutoAnalysis ? "Ativar" : "Desativar"} análise automática?</div>
+          <p>{draft.issueAutoAnalysis ? "Novas issues deste projeto serão criadas Em análise, sem precisar clicar em Iniciar análise." : "Novas issues deste projeto serão criadas Abertas. A análise deverá ser iniciada manualmente por um usuário autorizado."}</p>
+          <p>Issues existentes não serão alteradas. A alteração será registrada no histórico do projeto.</p>
+          {saveError && <div className="error-banner" role="alert">{saveError}</div>}
+          <div className="modal-actions"><button type="button" className="btn" disabled={saving} onClick={() => setConfirming(false)}>Voltar</button><button type="button" className="btn btn-primary" disabled={saving} onClick={handleSave}>{saving ? "Salvando..." : "Confirmar alteração"}</button></div>
+        </div>
+      </Modal>
     </div>
   );
 }

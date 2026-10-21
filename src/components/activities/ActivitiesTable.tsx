@@ -24,6 +24,7 @@ interface ActivitiesTableProps {
   onBulkCancel: (activityIds: string[]) => void;
   canApproveActivity: (activity: Activity) => boolean;
   canCancelActivities: boolean;
+  canCancelActivity: (activity: Activity) => boolean;
   loading?: boolean;
 }
 
@@ -42,6 +43,7 @@ export default function ActivitiesTable({
   onBulkCancel,
   canApproveActivity,
   canCancelActivities,
+  canCancelActivity,
   loading = false,
 }: ActivitiesTableProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -52,7 +54,7 @@ export default function ActivitiesTable({
   // Só atividades elegíveis (nem concluído, nem cancelado) entram na seleção via
   // "selecionar tudo" — elas nem têm checkbox próprio na linha (ver ActivityRow).
   function canSelectActivity(activity: Activity) {
-    return isBulkSelectable(activity) && (canCancelActivities || canApproveActivity(activity));
+    return isBulkSelectable(activity) && (canCancelActivity(activity) || canApproveActivity(activity));
   }
   const selectableIds = activities.filter(canSelectActivity).map((activity) => activity.id);
   const selectableKey = selectableIds.join(";");
@@ -136,7 +138,7 @@ export default function ActivitiesTable({
                 Aprovação em Massa
               </button>
             )}
-            {canCancelActivities && <button type="button" className="btn btn-danger btn-sm" onClick={() => setShowCancelModal(true)}>
+            {canCancelActivities && selectedActivities.every(canCancelActivity) && <button type="button" className="btn btn-danger btn-sm" onClick={() => setShowCancelModal(true)}>
               Cancelar selecionadas
             </button>}
             <button type="button" className="btn btn-sm btn-ghost" onClick={clearSelection}>

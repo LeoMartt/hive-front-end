@@ -7,6 +7,7 @@ import NavIcon from "../common/NavIcon";
 import { useProjects } from "../../hooks/useProjects";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { getCurrentUserMemberships } from "../../utils/projectAccess";
+import { useProjectConfig } from "../../context/ProjectConfigContext";
 
 const WORKSPACE_ITEMS = [
   {
@@ -68,6 +69,7 @@ const LOGOUT_ICON = (
 const SCROLL_THRESHOLD = 8;
 
 export default function ProjectNavDock() {
+  const { can, ready } = useProjectConfig();
   const { id } = useParams();
   const { projects } = useProjects();
   const { instance } = useMsal();
@@ -138,7 +140,7 @@ export default function ProjectNavDock() {
       >
         <div className="nav-dock-group-label">Workspace</div>
         <nav className="nav-dock-items">
-          {WORKSPACE_ITEMS.map((item) => (
+          {WORKSPACE_ITEMS.filter(item => !ready || can(item.to === "dashboard" ? "dashboard_view" : "data_view")).map((item) => (
             <NavLink
               key={item.to}
               to={`/projetos/${id}/${item.to}`}

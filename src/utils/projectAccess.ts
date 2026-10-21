@@ -1,5 +1,15 @@
 import type { TeamMember } from "../types/project";
 import type { Activity } from "../types/activity";
+import { DEFAULT_PERMISSION_MATRIX, type ProjectAction, type ProjectPermissionMatrix, type ProjectPermissionRole } from "../types/projectPermissions";
+
+const ROLE_CODES = { "Gestor de Projetos": "GESTOR", Tester: "TESTER", Desenvolvedor: "DEV" } as const;
+
+export function projectAllows(memberships: TeamMember[], action: ProjectAction, matrix: ProjectPermissionMatrix = {}): boolean {
+  return memberships.some(member => {
+    const role = ROLE_CODES[member.role];
+    return role === "GESTOR" || (matrix[action]?.[role] ?? DEFAULT_PERMISSION_MATRIX[action]?.[role] ?? false);
+  });
+}
 
 export interface CurrentUserAccess {
   id?: string;
@@ -53,25 +63,26 @@ export function getCurrentUserMemberships(team: TeamMember[], currentUser: Curre
   });
 }
 
-export function membershipsAllowIssueCreation(memberships: TeamMember[]): boolean {
-  return memberships.some((member) => member.role === "Gestor de Projetos" || member.role === "Tester");
+export function membershipsAllowIssueCreation(memberships: TeamMember[], matrix: ProjectPermissionMatrix = {}): boolean {
+  return projectAllows(memberships, "issues_create", matrix);
 }
 
 export function membershipsAllowProjectManagement(memberships: TeamMember[]): boolean {
   return memberships.some((member) => member.role === "Gestor de Projetos");
 }
 
-export function membershipsAllowAssignedIssues(memberships: TeamMember[]): boolean {
-  return memberships.some((member) => member.role === "Gestor de Projetos" || member.role === "Desenvolvedor");
+export function membershipsAllowAssignedIssues(memberships: TeamMember[], matrix: ProjectPermissionMatrix = {}): boolean {
+  return projectAllows(memberships, "issues_analyze", matrix);
 }
 
-export function canConcludeActivity(memberships: TeamMember[], activity: Activity, currentUser: CurrentUserAccess): boolean {
+export function canConcludeActivity(memberships: TeamMember[], activity: Activity, currentUser: CurrentUserAccess, matrix: ProjectPermissionMatrix = {}, action: ProjectAction = "activities_complete"): boolean {
   if (memberships.some((member) => member.role === "Gestor de Projetos")) return true;
-  const testerMemberships = memberships.filter((member) => member.role === "Tester");
-  if (testerMemberships.length === 0) return false;
-  if (activity.testerId) {
-    const identities = [currentUser.id, currentUser.email, ...testerMemberships.flatMap((member) => [member.id, member.email])];
-    return identities.some((id) => Boolean(id) && id?.toLowerCase() === activity.testerId?.toLowerCase());
-  }
-  return testerMemberships.some((member) => namesMatch(activity.tester, member.name));
+  return memberships.some(member => {
+    if (!projectAllows([member], action, matrix)) return false;
+    const role: ProjectPermissionRole = ROLE_CODES[member.role];
+    const assignedId = role === "TESTER" ? activity.testerId : activity.developerId;
+    const assignedName = role === "TESTER" ? activity.tester : activity.dev;
+    if (assignedId) return [currentUser.id, currentUser.email, member.id, member.email].some(id => Boolean(id) && id?.toLowerCase() === assignedId.toLowerCase());
+    return namesMatch(assignedName, member.name);
+  });
 }

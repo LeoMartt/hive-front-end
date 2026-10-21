@@ -14,7 +14,8 @@ import { useCurrentUser } from "../hooks/useCurrentUser";
 import { sortIssuesByPriority } from "../utils/issueIndicators";
 import { buildIssueExportRows, ISSUE_EXPORT_COLUMN_WIDTHS } from "../utils/issueExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
-import { canConcludeActivity, getCurrentUserMemberships, membershipsAllowAssignedIssues, membershipsAllowIssueCreation, namesMatch } from "../utils/projectAccess";
+import { canConcludeActivity, getCurrentUserMemberships, namesMatch } from "../utils/projectAccess";
+import { useProjectConfig } from "../context/ProjectConfigContext";
 
 interface CurrentIssueUser {
   name: string;
@@ -35,6 +36,7 @@ function personMatchesCurrentUser(personName: string, personId: string | undefin
 }
 
 export default function ProjectIssuesPage() {
+  const { config, can } = useProjectConfig();
   const { id } = useParams();
   const projectId = id ?? "";
   const { issues, loading, error, createIssue } = useIssues(projectId);
@@ -48,11 +50,11 @@ export default function ProjectIssuesPage() {
     name: currentUserName,
   });
   const currentMember = currentMemberships[0];
-  const canCreateIssue = membershipsAllowIssueCreation(currentMemberships);
-  const canViewAssignedIssues = membershipsAllowAssignedIssues(currentMemberships);
+  const canCreateIssue = can("issues_create");
+  const canViewAssignedIssues = can("issues_analyze");
   const eligibleIssueActivities = activities.filter((activity) =>
     activity.status !== "concluido" && activity.status !== "cancelado" &&
-    canConcludeActivity(currentMemberships, activity, { id: currentUserId, email: currentUserEmail, name: currentUserName }),
+    canConcludeActivity(currentMemberships, activity, { id: currentUserId, email: currentUserEmail, name: currentUserName }, config.permissionMatrix, "issues_create"),
   );
 
   const [statusFilter, setStatusFilter] = useState<IssueStatusFilter>("todas");
@@ -122,11 +124,11 @@ export default function ProjectIssuesPage() {
         <div>
           <div className="page-title compact">Issues</div>
           <div className="page-desc compact">
-            Impeditivas bloqueiam a atividade vinculada até solução aprovada em reteste
+            Issues impeditivas abertas ou em análise bloqueiam somente a atividade vinculada
           </div>
         </div>
         <div className="head-actions">
-          <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleExportIssues}>
+          {can("data_export") && <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleExportIssues}>
             {exportIssuesIsDefault ? (
               <>
                 <NavIcon>
@@ -138,7 +140,7 @@ export default function ProjectIssuesPage() {
             ) : (
               exportIssuesLabel
             )}
-          </button>
+          </button>}
           {canCreateIssue && (
             <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowRegisterIssueModal(true)}>
               + Registrar issue

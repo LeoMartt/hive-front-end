@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import Dropdown from "./Dropdown";
+import Avatar from "./Avatar";
 
 interface FormComboboxProps {
   id: string;
   value: string;
-  options: { value: string; label: string }[];
+  options: { value: string; label: string; email?: string }[];
   onChange: (value: string) => void;
   placeholder: string;
   allowCustom?: boolean;
@@ -19,8 +20,9 @@ export default function FormCombobox({
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(-1);
   const listRef = useRef<HTMLDivElement>(null);
-  const selectedLabel = options.find((option) => option.value === value)?.label ?? "";
-  const visible = options.filter((option) => option.label.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
+  const selected = options.find((option) => option.value === value);
+  const selectedLabel = selected ? `${selected.label}${selected.email ? ` (${selected.email})` : ""}` : "";
+  const visible = options.filter((option) => `${option.label} ${option.email ?? ""}`.toLocaleLowerCase().includes(query.toLocaleLowerCase()));
 
   useEffect(() => {
     if (open && active >= 0) {
@@ -98,7 +100,10 @@ export default function FormCombobox({
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => select(option.value)}
           >
-            <span>{option.label}</span>
+            {option.email ? <>
+              <Avatar name={option.label} personKey={option.email} className="team-member-av" alt="" />
+              <span className="user-dropdown-item-text"><span className="user-dropdown-item-name">{option.label}</span><span className="user-dropdown-item-email">{option.email}</span></span>
+            </> : <span>{option.label}</span>}
             {value === option.value && <Check size={14} aria-hidden="true" />}
           </button>
         ))}

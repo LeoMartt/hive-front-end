@@ -1,3 +1,5 @@
+import type { ProjectPermissionMatrix } from "./projectPermissions";
+
 export interface AgingThresholds {
   alerta: number;
   risco: number;
@@ -11,4 +13,6 @@ export interface ProjectConfig {
   anexoMaxMb: number;
   evidenciaObrigatoriaAtividade: boolean;
   evidenciaObrigatoriaIssue: boolean;
+  issueAutoAnalysis: boolean;
+  permissionMatrix: ProjectPermissionMatrix;
 }

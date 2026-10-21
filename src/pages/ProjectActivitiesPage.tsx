@@ -18,7 +18,8 @@ import { filterActivities } from "../utils/filterActivities";
 import { groupByModuleProcess, groupByStatus, groupByTester } from "../utils/groupActivities";
 import { buildActivityExportRows, ACTIVITY_EXPORT_COLUMN_WIDTHS } from "../utils/activityExport";
 import { downloadXlsx } from "../utils/downloadXlsx";
-import { canConcludeActivity, getCurrentUserMemberships, membershipsAllowProjectManagement } from "../utils/projectAccess";
+import { canConcludeActivity, getCurrentUserMemberships } from "../utils/projectAccess";
+import { useProjectConfig } from "../context/ProjectConfigContext";
 import type { ActivityFiltersState, ActivityGroupMode, NewActivityInput } from "../types/activity";
 import type { HierarchyNode } from "../types/project";
 
@@ -40,6 +41,7 @@ function createEmptyFilters(): ActivityFiltersState {
 }
 
 export default function ProjectActivitiesPage() {
+  const { config, can } = useProjectConfig();
   const { id } = useParams();
   const projectId = id ?? "";
   const { activities, stats, loading, error, createActivity, bulkConcludeActivities, cancelActivities, importActivities } =
@@ -54,7 +56,8 @@ export default function ProjectActivitiesPage() {
   });
   const [hierarchyNodes, setHierarchyNodes] = useState<HierarchyNode[]>([]);
   const currentMember = currentMemberships[0];
-  const canManageProject = membershipsAllowProjectManagement(currentMemberships);
+  const canCreateActivity = can("activities_create");
+  const canImportActivity = can("activities_import");
   const canViewOwnActivities = currentMemberships.some((member) =>
     member.role === "Gestor de Projetos" || member.role === "Tester",
   );
@@ -217,7 +220,7 @@ export default function ProjectActivitiesPage() {
           </div>
         </div>
         <div className="head-actions">
-          <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleExportActivities}>
+          {can("data_export") && <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleExportActivities}>
             {exportActivitiesIsDefault ? (
               <>
                 <NavIcon>
@@ -229,19 +232,19 @@ export default function ProjectActivitiesPage() {
             ) : (
               exportActivitiesLabel
             )}
-          </button>
-          {canManageProject && (
+          </button>}
+          {(canCreateActivity || canImportActivity) && (
             <>
-              <button
+              {canImportActivity && <button
                 type="button"
                 className="btn btn-outline-secondary btn-sm"
                 onClick={() => setShowImportModal(true)}
               >
                 Importar em massa
-              </button>
-              <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowNewActivityModal(true)}>
+              </button>}
+              {canCreateActivity && <button type="button" className="btn btn-primary btn-sm" onClick={() => setShowNewActivityModal(true)}>
                 + Nova atividade
-              </button>
+              </button>}
             </>
           )}
         </div>
@@ -293,15 +296,16 @@ export default function ProjectActivitiesPage() {
         currentUserName={currentUserName}
         onBulkApprove={bulkConcludeActivities}
         onBulkCancel={cancelActivities}
-        canCancelActivities={canManageProject}
-        canApproveActivity={(activity) => canConcludeActivity(currentMemberships, activity, {
+        canCancelActivities={can("activities_cancel")}
+        canCancelActivity={(activity) => canConcludeActivity(currentMemberships, activity, { id: currentUserId, email: currentUserEmail, name: currentUserName }, config.permissionMatrix, "activities_cancel")}
+        canApproveActivity={(activity) => can("activities_complete") && canConcludeActivity(currentMemberships, activity, {
           id: currentUserId,
           email: currentUserEmail,
           name: currentUserName,
-        })}
+        }, config.permissionMatrix)}
       />
 
-      {canManageProject && <NewActivityModal
+      {canCreateActivity && <NewActivityModal
         show={showNewActivityModal}
         onHide={() => setShowNewActivityModal(false)}
         team={currentProject?.team ?? []}
@@ -310,7 +314,7 @@ export default function ProjectActivitiesPage() {
         onCreate={createActivity}
       />}
 
-      {canManageProject && <ImportActivitiesModal
+      {canImportActivity && <ImportActivitiesModal
         show={showImportModal}
         onHide={() => setShowImportModal(false)}
         team={currentProject?.team ?? []}

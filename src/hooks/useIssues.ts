@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ApiError, normalizeError } from "../api/apiError";
 import { issuesApi } from "../api/resources/issues";
+import { useProjectConfig } from "../context/ProjectConfigContext";
 import { useMocks } from "../config/env";
 import type { Issue, IssueStats, NewIssueInput, ProposeSolutionInput } from "../types/issue";
 import { toLocalIsoString } from "../utils/activityIndicators";
@@ -386,10 +387,11 @@ interface UseIssuesResult {
   startAnalysis: (issueId: string) => void;
   proposeSolution: (issueId: string, input: ProposeSolutionInput) => void;
   cancelIssue: (issueId: string) => void;
-  resolveIssuesForActivity: (activityId: string) => void;
+  resolveIssuesForActivity: (activityId: string) => Promise<void>;
 }
 
 export function useIssues(projectId: string): UseIssuesResult {
+  const { config } = useProjectConfig();
   const [issues, setIssues] = useState<Issue[]>(useMocks ? INITIAL_ISSUES : []);
   const [loading, setLoading] = useState<boolean>(!useMocks);
   const [error, setError] = useState<ApiError | null>(null);
@@ -426,14 +428,14 @@ export function useIssues(projectId: string): UseIssuesResult {
     const concluidas = issues.filter((issue) => issue.status === "concluida").length;
     const canceladas = issues.filter((issue) => issue.status === "cancelada").length;
     const impeditivasAbertas = issues.filter(
-      (issue) => issue.impeditiva && issue.status !== "concluida" && issue.status !== "cancelada"
+      (issue) => issue.impeditiva && (issue.status === "aberta" || issue.status === "em_analise")
     ).length;
 
     const resolvedDurations: number[] = [];
     for (const issue of issues) {
-      if (issue.resolvedAt !== null) {
+      if (issue.status === "concluida" && issue.resolvedAt !== null) {
         const days = (new Date(issue.resolvedAt).getTime() - new Date(issue.openedAt).getTime()) / 86400000;
-        resolvedDurations.push(days);
+        if (Number.isFinite(days) && days >= 0) resolvedDurations.push(days);
       }
     }
     const tempoMedioResolucaoDias =
@@ -473,7 +475,7 @@ export function useIssues(projectId: string): UseIssuesResult {
       const newIssue: Issue = {
         id: nextIssueId(prev),
         title: input.title,
-        status: "aberta",
+        status: config.issueAutoAnalysis ? "em_analise" : "aberta",
         impeditiva: input.impeditiva,
         type: input.type,
         impact: input.impact,
@@ -487,7 +489,7 @@ export function useIssues(projectId: string): UseIssuesResult {
         description: input.description,
         impactNote: input.impactNote,
         proposedSolution: null,
-        analysisStartedAt: null,
+        analysisStartedAt: config.issueAutoAnalysis ? toLocalIsoString(new Date()) : null,
         solutionProposedAt: null,
         openingAttachment: input.openingAttachment,
         solutionAttachment: null,
@@ -559,18 +561,9 @@ export function useIssues(projectId: string): UseIssuesResult {
 
   // Chamado pela página de Atividade logo após concludeActivity (useActivities.ts) — os
   // dois hooks não se conhecem entre si, a página que orquestra as duas chamadas.
-  function resolveIssuesForActivity(activityId: string): void {
+  async function resolveIssuesForActivity(activityId: string): Promise<void> {
     if (!useMocks) {
-      const issuesToResolve = issues.filter(
-        (issue) => issue.relatedActivityId === activityId && issue.status === "solucao_proposta",
-      );
-      void Promise.all(issuesToResolve.map((issue) => issuesApi.resolve(projectId, issue.id))).then(
-        (updatedIssues) => {
-          const byId = new Map(updatedIssues.map((issue) => [issue.id, issue]));
-          setIssues((prev) => prev.map((issue) => byId.get(issue.id) ?? issue));
-        },
-        (err) => setError(err instanceof ApiError ? err : normalizeError(err)),
-      );
+      setIssues(await issuesApi.list(projectId));
       return;
     }
 
