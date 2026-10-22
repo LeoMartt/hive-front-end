@@ -6,13 +6,14 @@ import { buildEvidenceMetadata, formatEvidenceFileSize, getEvidenceFileError } f
 import { ISSUE_TYPE_LABELS, ISSUE_IMPACT_LABELS } from "../../utils/issueIndicators";
 import type { IssueType, IssueImpact, NewIssueInput } from "../../types/issue";
 import type { ActivitySummary as Activity } from "../../types/activity";
-import type { TeamMember } from "../../types/project";
+import type { TeamMember, Project } from "../../types/project";
 import { normalizeError } from "../../api/apiError";
 
 interface RegisterIssueModalProps {
   show: boolean;
   onHide: () => void;
   team: TeamMember[];
+  mode: Project["mode"];
   activities: Activity[];
   currentActivity?: Activity;
   currentUserName: string;
@@ -63,6 +64,7 @@ export default function RegisterIssueModal({
   show,
   onHide,
   team,
+  mode,
   activities,
   currentActivity,
   currentUserName,
@@ -76,7 +78,9 @@ export default function RegisterIssueModal({
   const [dragOver, setDragOver] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const evidenceRequired = state.impeditiva && config.evidenciaObrigatoriaIssue;
+  const cutover = mode === "cutover";
+  const impeditiva = cutover || state.impeditiva;
+  const evidenceRequired = impeditiva && config.evidenciaObrigatoriaIssue;
 
   function resetAndHide() {
     setState(createEmptyState());
@@ -109,7 +113,6 @@ export default function RegisterIssueModal({
     if (!state.description.trim()) missing.push("Descrição da issue");
     if (!currentActivity && !state.relatedActivityId) missing.push("Atividade vinculada");
     if (!state.dev) missing.push("Desenvolvedor responsável");
-    const impeditiva = state.impeditiva;
     if (evidenceRequired && !selectedFile) {
       missing.push("Anexo (evidência obrigatória para issues impeditivas)");
     }
@@ -229,11 +232,13 @@ export default function RegisterIssueModal({
           <select
             className="form-input"
             id="register-issue-impeditivo"
-            value={state.impeditiva ? "sim" : "nao"}
+            value={impeditiva ? "sim" : "nao"}
+            disabled={cutover}
+            title={cutover ? "No Cutover, toda issue deve ser impeditiva." : undefined}
             onChange={(event) => updateField("impeditiva", event.target.value === "sim")}
           >
             <option value="sim">Sim</option>
-            <option value="nao">Não</option>
+            {!cutover && <option value="nao">Não</option>}
           </select>
         </div>
       </div>

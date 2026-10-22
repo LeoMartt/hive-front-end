@@ -45,7 +45,7 @@ export interface Activity {
   rejectedAt: string | null;
   createdAt?: string;
   updatedAt?: string;
-  auditTrail?: { at: string; text: string }[];
+  auditTrail?: { at: string; text: string; authorName?: string; authorId?: string | null; source?: string; reason?: string; fromStatus?: string; toStatus?: string }[];
 }
 
 export type ActivitySummary = Omit<Activity, "expectedResult" | "notes" | "attachments" | "approvalEvidence" | "approvalNote" | "auditTrail">;

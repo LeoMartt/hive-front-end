@@ -105,8 +105,8 @@ export default function ActivityDetailPage() {
 
           {showPredecessorPanel && predecessorActivity && (
             <div className="info-banner">
-              <Clock3 className="inline-status-icon" size={16} aria-hidden="true" /> Aguardando conclusão ou cancelamento das predecessoras (incluindo <b>{predecessorActivity.id}</b>) para liberar o início desta
-              atividade.
+              <Clock3 className="inline-status-icon" size={16} aria-hidden="true" />
+              <span>A atividade será liberada após a conclusão ou o cancelamento de todas as predecessoras, incluindo <b className="activity-code-inline">{predecessorActivity.id}</b>.</span>
             </div>
           )}
           {activity.status === "concluido" && (
@@ -173,6 +173,7 @@ export default function ActivityDetailPage() {
           show={showRegisterIssueModal}
           onHide={() => setShowRegisterIssueModal(false)}
           team={currentProject?.team ?? []}
+          mode={currentProject?.mode ?? "uat"}
           activities={activities}
           currentActivity={activity}
           currentUserName={currentUserName}

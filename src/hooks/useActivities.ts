@@ -711,7 +711,6 @@ export function useActivities(projectId: string, activityId?: string): UseActivi
               ...activity,
               status: "bloqueado",
               notes: input.reason,
-              retestCount: activity.retestCount + 1,
               rejectedAt: toLocalIsoString(new Date()),
               attachments: input.evidence ? [...(activity as Activity).attachments, input.evidence] : (activity as Activity).attachments,
             }

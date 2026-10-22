@@ -40,7 +40,7 @@ export const activitySchema = z.object({
   rejectedAt: z.string().nullable(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
-  auditTrail: z.array(z.object({ at: z.string(), text: z.string() })).optional(),
+  auditTrail: z.array(z.object({ at: z.string(), text: z.string(), authorName: z.string().optional(), authorId: z.string().nullable().optional(), source: z.string().optional(), reason: z.string().optional(), fromStatus: z.string().optional(), toStatus: z.string().optional() })).optional(),
 }) satisfies z.ZodType<Activity>;
 
 export const activitySummarySchema = activitySchema.omit({
