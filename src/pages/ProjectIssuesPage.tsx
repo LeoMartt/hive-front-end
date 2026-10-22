@@ -199,6 +199,7 @@ export default function ProjectIssuesPage() {
           show={showRegisterIssueModal}
           onHide={() => setShowRegisterIssueModal(false)}
           team={currentProject?.team ?? []}
+          mode={currentProject?.mode ?? "uat"}
           activities={eligibleIssueActivities}
           currentUserName={currentUserName}
           onCreate={async (input) => {

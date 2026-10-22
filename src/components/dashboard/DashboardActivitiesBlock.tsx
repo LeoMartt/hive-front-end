@@ -55,7 +55,7 @@ export default function DashboardActivitiesBlock({ loadActivities, stats, spi }:
         <div className="spi-hero">
           <div className="stat-label">SPI do projeto</div>
           <div className={`spi-big${spiToneClass}`}>{spi === null ? "—" : spi.toFixed(2)}</div>
-          <div className="stat-sub">Fixed Formula 0/100</div>
+          <div className="stat-sub" title="Valor realizado / valor planejado, com pesos 0%, 50% e 100%. Atividades canceladas são excluídas.">EV/PV · 0/50/100</div>
         </div>
         <div className="stat-grid-compact">
           <StatCard label="Total" value={String(stats.total)} sub="atividades" />

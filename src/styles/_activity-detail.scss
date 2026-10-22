@@ -79,6 +79,15 @@
 .info-banner b {
   color: c.$text;
 }
+.info-banner > svg {
+  flex-shrink: 0;
+}
+.info-banner > span {
+  min-width: 0;
+}
+.activity-code-inline {
+  white-space: nowrap;
+}
 
 // Evidência de aprovação exibida como um mini-anexo dentro do grid de campos
 .evidence-file {

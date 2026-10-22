@@ -1,19 +1,15 @@
-import type { ActivitySummary as Activity, ActivityStatus } from "../types/activity";
+import type { ActivitySummary as Activity } from "../types/activity";
+import { toLocalIsoString } from "./activityIndicators";
 
-const SPI_WEIGHT: Record<ActivityStatus, number> = {
-  concluido: 100,
-  aguardando: 0,
-  liberado: 0,
-  bloqueado: 0,
-  cancelado: 0,
-};
-
-// SPI = média dos pesos por status (0/100), atividades canceladas saem do denominador.
-export function computeSpi(activities: Activity[]): number | null {
+export function computeSpi(activities: Activity[], today = toLocalIsoString(new Date()).slice(0, 10)): number | null {
   const scored = activities.filter((activity) => activity.status !== "cancelado");
-  if (scored.length === 0) return null;
-  const sum = scored.reduce((total, activity) => total + SPI_WEIGHT[activity.status], 0);
-  return sum / scored.length / 100;
+  let ev = 0;
+  let pv = 0;
+  for (const activity of scored) {
+    ev += activity.status === "concluido" ? 1 : activity.actualStart && activity.actualStart.slice(0, 10) <= today ? 0.5 : 0;
+    pv += activity.plannedEnd.slice(0, 10) <= today ? 1 : activity.plannedStart.slice(0, 10) <= today ? 0.5 : 0;
+  }
+  return pv === 0 ? null : ev / pv;
 }
 
 export interface DashboardIndicators {

@@ -4,22 +4,13 @@ import type { IssueSummary as Issue } from "../types/issue";
 export interface ActivityAuditEntry {
   at: string;
   text: string;
+  authorName?: string;
+  reason?: string;
 }
 
 export function deriveActivityAuditTrail(activity: Activity, issues: Issue[] = []): ActivityAuditEntry[] {
-  if (activity.auditTrail?.length) {
-    const recordedEntries = [
-      ...activity.auditTrail,
-      { at: activity.createdAt ?? activity.plannedStart, text: "Atividade criada" },
-    ];
-    const firstTransition = [...activity.auditTrail].sort((a, b) => a.at.localeCompare(b.at))[0];
-    const previousBlock = issues
-      .filter((issue) => issue.relatedActivityId === activity.id && issue.impeditiva && issue.openedAt < firstTransition.at)
-      .sort((a, b) => b.openedAt.localeCompare(a.openedAt))[0];
-    if (previousBlock && !activity.auditTrail.some((entry) => entry.text.includes("→ Bloqueado"))) {
-      recordedEntries.push({ at: previousBlock.openedAt, text: "Bloqueio por issue (reconstruído pelas issues)" });
-    }
-    return recordedEntries.sort((a, b) => b.at.localeCompare(a.at));
+  if (activity.auditTrail !== undefined) {
+    return [...activity.auditTrail].sort((a, b) => b.at.localeCompare(a.at));
   }
   if (activity.status === "cancelado") {
     return [{ at: activity.plannedStart, text: "Atividade cancelada" }];
