@@ -81,6 +81,7 @@ export interface RejectActivityInput {
 
 export interface ActivityStats {
   total: number;
+  cancelado: number;
   concluido: number;
   liberado: number;
   bloqueado: number;

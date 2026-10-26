@@ -103,7 +103,7 @@ export default function ProjectIssuesPage() {
     isDefault: exportIssuesIsDefault,
     handleClick: handleExportIssues,
   } = useExportButton("Exportar issues", filteredIssues.length === 0, "Nenhuma issue no filtro atual", async () =>
-    downloadXlsx(buildIssueExportRows(useMocks ? filteredIssues as Issue[] : await issuesApi.exportDetails(projectId, filteredIssues.map(issue => issue.id))), ISSUE_EXPORT_COLUMN_WIDTHS, "Issues", "hive_issues"),
+    downloadXlsx(buildIssueExportRows(useMocks ? filteredIssues as Issue[] : await issuesApi.exportDetails(projectId, filteredIssues.map(issue => issue.id))), ISSUE_EXPORT_COLUMN_WIDTHS, "Issues", "Base ISS", currentProject?.name ?? "Projeto"),
   );
 
   const statusCounts = useMemo(() => {

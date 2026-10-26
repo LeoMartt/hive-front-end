@@ -89,8 +89,8 @@ export default function ProjectDashboardPage() {
         </div>
       </div>
 
-      <DashboardActivitiesBlock loadActivities={async () => useMocks ? mockActivities as Activity[] : activitiesApi.exportDetails(projectId)} stats={data.activities} spi={data.spi} />
-      <DashboardIssuesBlock loadIssues={async () => useMocks ? mockIssues as Issue[] : issuesApi.exportDetails(projectId)} stats={data.issues} />
+      <DashboardActivitiesBlock projectName={currentProject?.name ?? "Projeto"} loadActivities={async () => useMocks ? mockActivities as Activity[] : activitiesApi.exportDetails(projectId)} stats={data.activities} spi={data.spi} />
+      <DashboardIssuesBlock projectName={currentProject?.name ?? "Projeto"} loadIssues={async () => useMocks ? mockIssues as Issue[] : issuesApi.exportDetails(projectId)} stats={data.issues} />
 
       <div className="grid-2">
         <div className="panel">

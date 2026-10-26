@@ -594,19 +594,21 @@ export function useActivities(projectId: string, activityId?: string): UseActivi
   }, [projectId, activityId]);
 
   const stats = useMemo<ActivityStats>(() => {
+    let cancelado = 0;
     let concluido = 0;
     let liberado = 0;
     let bloqueado = 0;
     let aguardando = 0;
     let atrasado = 0;
     for (const activity of activities) {
+      if (activity.status === "cancelado") cancelado += 1;
       if (activity.status === "concluido") concluido += 1;
       if (activity.status === "liberado") liberado += 1;
       if (activity.status === "bloqueado") bloqueado += 1;
       if (activity.status === "aguardando") aguardando += 1;
       if (isOverdue(activity)) atrasado += 1;
     }
-    return { total: activities.length, concluido, liberado, bloqueado, aguardando, atrasado };
+    return { total: activities.length, concluido, liberado, bloqueado, aguardando, cancelado, atrasado };
   }, [activities]);
 
   // Append direto, sem validação própria — mesma simplicidade de useProjects.addTeamMember.
@@ -710,6 +712,7 @@ export function useActivities(projectId: string, activityId?: string): UseActivi
           ? {
               ...activity,
               status: "bloqueado",
+              actualStart: activity.actualStart ?? toLocalIsoString(new Date()),
               notes: input.reason,
               rejectedAt: toLocalIsoString(new Date()),
               attachments: input.evidence ? [...(activity as Activity).attachments, input.evidence] : (activity as Activity).attachments,
@@ -777,7 +780,10 @@ export function useActivities(projectId: string, activityId?: string): UseActivi
   }
 
   async function refreshActivity(activityId: string): Promise<void> {
-    if (useMocks) return;
+    if (useMocks) {
+      setActivities(prev => prev.map(activity => activity.id === activityId ? { ...activity, actualStart: activity.actualStart ?? toLocalIsoString(new Date()) } : activity));
+      return;
+    }
     try {
       const updatedActivity = await activitiesApi.get(projectId, activityId);
       setActivities((prev) => prev.map((activity) => activity.id === updatedActivity.id ? updatedActivity : activity));
