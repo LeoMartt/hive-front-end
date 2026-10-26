@@ -56,32 +56,46 @@ function buildCurvaSData(activities: Activity[]): CurvaSData {
     .filter((date): date is Date => date !== null);
   const lastPlannedEnd =
     plannedEndDates.length > 0 ? new Date(Math.max(...plannedEndDates.map((date) => date.getTime()))) : start;
-  const actualEndDates = relevantActivities
-    .map((activity) => parseDate(activity.actualEnd))
-    .filter((date): date is Date => date !== null);
-  const lastActualEnd =
-    actualEndDates.length > 0 ? new Date(Math.max(...actualEndDates.map((date) => date.getTime()))) : start;
-  const realizedEnd = new Date(Math.max(today.getTime(), lastActualEnd.getTime(), start.getTime()));
+  const realizedEnd = today;
   const end = new Date(Math.max(lastPlannedEnd.getTime(), realizedEnd.getTime(), start.getTime()));
   const dayCount = daysBetween(start, end) + 1;
   const days = Array.from({ length: dayCount }, (_, index) => addDays(start, index));
 
   const labels = days.map(formatDayLabel);
-  const plannedCounts = days.map((day) =>
-    relevantActivities.filter((activity) => {
-      const plannedEnd = parseDate(activity.plannedEnd);
-      return plannedEnd !== null && plannedEnd.getTime() <= day.getTime();
-    }).length,
-  );
+  const plannedDeltas = new Map<number, number>();
+  const realizedDeltas = new Map<number, number>();
+  const addDelta = (map: Map<number, number>, date: Date) => map.set(date.getTime(), (map.get(date.getTime()) ?? 0) + 0.5);
+  for (const activity of relevantActivities) {
+    const plannedStart = parseDate(activity.plannedStart);
+    const plannedEnd = parseDate(activity.plannedEnd);
+    if (plannedStart && plannedEnd) {
+      addDelta(plannedDeltas, new Date(Math.min(plannedStart.getTime(), plannedEnd.getTime())));
+      addDelta(plannedDeltas, plannedEnd);
+    }
+    const actualStart = parseDate(activity.actualStart);
+    const actualEnd = parseDate(activity.actualEnd);
+    if (activity.status === "concluido") {
+      const completedAt = new Date(Math.min(actualEnd?.getTime() ?? today.getTime(), today.getTime()));
+      addDelta(realizedDeltas, actualStart ? new Date(Math.min(actualStart.getTime(), completedAt.getTime())) : completedAt);
+      addDelta(realizedDeltas, completedAt);
+    } else if (actualStart) {
+      addDelta(realizedDeltas, actualStart);
+    }
+  }
+  const beforeStart = (map: Map<number, number>) => [...map].reduce((sum, [at, value]) => sum + (at < start.getTime() ? value : 0), 0);
+  let plannedValue = beforeStart(plannedDeltas);
+  let realizedValue = beforeStart(realizedDeltas);
+  const plannedCounts = days.map(day => {
+    plannedValue += plannedDeltas.get(day.getTime()) ?? 0;
+    return plannedValue;
+  });
   const planned = plannedCounts.map((plannedCount) => percent(plannedCount, relevantActivities.length));
   const realizedCounts = days.map((day) => {
+    realizedValue += realizedDeltas.get(day.getTime()) ?? 0;
     if (day.getTime() > realizedEnd.getTime()) {
       return null;
     }
-    return relevantActivities.filter((activity) => {
-      const actualEnd = parseDate(activity.actualEnd);
-      return actualEnd !== null && actualEnd.getTime() <= day.getTime();
-    }).length;
+    return realizedValue;
   });
   const realized = realizedCounts.map((realizedCount) =>
     realizedCount === null ? null : percent(realizedCount, relevantActivities.length),

@@ -8,6 +8,7 @@ import { downloadXlsx } from "../../utils/downloadXlsx";
 import type { Activity, ActivityStats } from "../../types/activity";
 
 interface DashboardActivitiesBlockProps {
+  projectName: string;
   loadActivities: () => Promise<Activity[]>;
   stats: ActivityStats;
   spi: number | null;
@@ -20,7 +21,7 @@ function percentOf(part: number, total: number): number {
 // Mesma convenção g/y/r de StatCard.tsx (bad->r, warn->y, good->g).
 const SPI_VARIANT_TONE = { good: "g", warn: "y", bad: "r" } as const;
 
-export default function DashboardActivitiesBlock({ loadActivities, stats, spi }: DashboardActivitiesBlockProps) {
+export default function DashboardActivitiesBlock({ projectName, loadActivities, stats, spi }: DashboardActivitiesBlockProps) {
   const { config, can } = useProjectConfig();
   const spiVariant = getSpiVariantWithThresholds(spi, config);
   const spiToneClass = spiVariant === null ? "" : ` ${SPI_VARIANT_TONE[spiVariant]}`;
@@ -30,7 +31,7 @@ export default function DashboardActivitiesBlock({ loadActivities, stats, spi }:
     isDefault: exportIsDefault,
     handleClick: handleExport,
   } = useExportButton("Exportar atividades", stats.total === 0, "Nenhuma atividade no projeto", async () =>
-    downloadXlsx(buildActivityExportRows(await loadActivities()), ACTIVITY_EXPORT_COLUMN_WIDTHS, "Atividades", "hive_atividades"),
+    downloadXlsx(buildActivityExportRows(await loadActivities()), ACTIVITY_EXPORT_COLUMN_WIDTHS, "Atividades", "Base ATV", projectName),
   );
 
   return (
@@ -68,6 +69,7 @@ export default function DashboardActivitiesBlock({ loadActivities, stats, spi }:
           <StatCard label="Liberadas" value={String(stats.liberado)} sub="prontas para execução" tone="y" />
           <StatCard label="Bloqueado" value={String(stats.bloqueado)} sub="aguardando reteste" tone="r" />
           <StatCard label="Aguardando" value={String(stats.aguardando)} sub="predecessor pendente" />
+          <StatCard label="Canceladas" value={String(stats.cancelado)} sub={`${percentOf(stats.cancelado, stats.total)}% do total`} />
           <StatCard label="Atrasado" value={String(stats.atrasado)} sub="vs. data planejada" tone="r" />
         </div>
       </div>

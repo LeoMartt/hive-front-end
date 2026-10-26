@@ -3,7 +3,7 @@ import { httpClient } from "../client";
 import { sharedRead } from "../sharedRead";
 
 const dashboardSchema = z.object({
-  activities: z.object({ total: z.number(), concluido: z.number(), liberado: z.number(), bloqueado: z.number(), aguardando: z.number(), atrasado: z.number() }),
+  activities: z.object({ total: z.number(), concluido: z.number(), liberado: z.number(), bloqueado: z.number(), aguardando: z.number(), cancelado: z.number(), atrasado: z.number() }),
   issues: z.object({ total: z.number(), abertas: z.number(), emAnalise: z.number(), solucaoProposta: z.number(), concluidas: z.number(), canceladas: z.number(), impeditivasAbertas: z.number(), tempoMedioResolucaoDias: z.number().nullable() }),
   spi: z.number().nullable(),
   indicators: z.object({ pace: z.number().nullable(), quality: z.number().nullable(), backlog: z.number().nullable() }),

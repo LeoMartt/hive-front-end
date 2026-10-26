@@ -141,7 +141,8 @@ export default function ProjectActivitiesPage() {
         buildActivityExportRows(useMocks ? filteredActivities as Activity[] : await activitiesApi.exportDetails(projectId, filteredActivities.map(activity => activity.id))),
         ACTIVITY_EXPORT_COLUMN_WIDTHS,
         "Atividades",
-        "hive_atividades",
+        "Base ATV",
+        currentProject?.name ?? "Projeto",
       ),
   );
 

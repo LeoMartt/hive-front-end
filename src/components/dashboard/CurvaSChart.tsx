@@ -68,7 +68,7 @@ export default function CurvaSChart({ data }: CurvaSChartProps) {
                   context.datasetIndex === 0
                     ? data.plannedCounts[context.dataIndex]
                     : data.realizedCounts[context.dataIndex];
-                const countLabel = count === null || count === undefined ? "sem dado" : `${count} atividades`;
+                const countLabel = count === null || count === undefined ? "sem dado" : `${count.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} pontos`;
                 return `${context.dataset.label}: ${context.parsed.y}% (${countLabel})`;
               },
             },
